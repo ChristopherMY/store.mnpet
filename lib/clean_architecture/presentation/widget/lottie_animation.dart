@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 
+
+
 class LottieAnimation extends StatefulWidget {
   const LottieAnimation({
     Key? key,
@@ -12,7 +14,7 @@ class LottieAnimation extends StatefulWidget {
   final String source;
 
   @override
-  _LottieAnimationState createState() => _LottieAnimationState();
+  State<LottieAnimation> createState() => _LottieAnimationState();
 }
 
 class _LottieAnimationState extends State<LottieAnimation>
@@ -41,7 +43,7 @@ class _LottieAnimationState extends State<LottieAnimation>
       child: Lottie.asset(
         widget.source,
         controller: _controller,
-        repeat: false,
+        repeat: true,
         reverse: true,
         height: SizeConfig.screenHeight,
         animate: true,

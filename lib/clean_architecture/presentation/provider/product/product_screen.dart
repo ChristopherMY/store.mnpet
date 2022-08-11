@@ -38,6 +38,16 @@ class ProductScreen extends StatelessWidget {
       final products = productBloc.productsList;
       return Scaffold(
         // key: _scaffoldKey,
+        appBar: AppBar(
+          // backgroundColor: kPrimaryColor,
+          // systemOverlayStyle: const SystemUiOverlayStyle(
+          //   statusBarColor: kPrimaryColor,
+          //   //statusBarIconBrightness: Brightness.light,
+          // ),
+          bottomOpacity: 0,
+          shadowColor: Colors.transparent,
+          toolbarHeight: 0,
+        ),
         backgroundColor: Colors.white,
         body: ValueListenableBuilder(
           valueListenable: productBloc.loadStatus,
@@ -697,44 +707,40 @@ class ProductScreen extends StatelessWidget {
       iconTheme: const IconThemeData(
         color: Colors.black,
       ),
-      centerTitle: true,
       backgroundColor: Colors.white,
-      expandedHeight: 400,
+      expandedHeight: 393,
       floating: false,
       pinned: true,
       snap: false,
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.pin,
-        background: Padding(
-          padding: const EdgeInsets.only(top: 35.0),
-          child: Swiper(
-            layout: SwiperLayout.DEFAULT,
-            controller: swiperController,
-            itemCount: headerContent.length,
-            itemBuilder: (_, index) => headerContent[index],
-            autoplay: false,
-            duration: 3,
-            onTap: (index) => onOpenGallery(
-              context: context,
-              index: index,
-              isAppBar: true,
-              managerTypePhotoViewer: ManagerTypePhotoViewer.navigation,
-            ),
-            onIndexChanged: (index) {
-              final productBloc =
-                  Provider.of<ProductBloc>(context, listen: false);
-              productBloc.onIndexChanged(index: index);
-            },
-            pagination: const SwiperPagination(
-              alignment: Alignment.bottomCenter,
-              builder: DotCustomSwiperPaginationBuilder(
-                color: Colors.grey,
-                activeColor: kPrimaryColor,
-              ),
-            ),
-            itemWidth: 300.0,
-            itemHeight: 300.0,
+        background: Swiper(
+          layout: SwiperLayout.DEFAULT,
+          controller: swiperController,
+          itemCount: headerContent.length,
+          itemBuilder: (_, index) => headerContent[index],
+          autoplay: false,
+          duration: 3,
+          onTap: (index) => onOpenGallery(
+            context: context,
+            index: index,
+            isAppBar: true,
+            managerTypePhotoViewer: ManagerTypePhotoViewer.navigation,
           ),
+          onIndexChanged: (index) {
+            final productBloc =
+                Provider.of<ProductBloc>(context, listen: false);
+            productBloc.onIndexChanged(index: index);
+          },
+          pagination: const SwiperPagination(
+            alignment: Alignment.bottomCenter,
+            builder: DotCustomSwiperPaginationBuilder(
+              color: Colors.grey,
+              activeColor: kPrimaryColor,
+            ),
+          ),
+          itemWidth: 300.0,
+          itemHeight: 300.0,
         ),
       ),
       toolbarTextStyle: const TextStyle(fontSize: 10),

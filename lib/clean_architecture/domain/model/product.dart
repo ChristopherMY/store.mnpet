@@ -124,7 +124,7 @@ class Product {
         showInStore:
             json["show_in_store"] == null ? null : json["show_in_store"],
         galleryVideo: json["gallery_video"] == null
-            ? null
+            ? []
             : List<GalleryVideo>.from(
                 json["gallery_video"].map((x) => GalleryVideo.fromMap(x))),
         galleryDescription: json["gallery_description"] == null
@@ -191,7 +191,7 @@ class Product {
         "is_free": isFree == null ? null : isFree,
         "show_in_store": showInStore == null ? null : showInStore,
         "gallery_video": galleryVideo == null
-            ? null
+            ? []
             : List<dynamic>.from(galleryVideo!.map((x) => x.toMap())),
         "price": price == null ? null : price!.toMap(),
         "brands": brands == null
@@ -344,7 +344,7 @@ class MainImage {
             ? null
             : Dimensions.fromMap(json["dimensions"]),
         aspectRatio: json["aspect_ratio"] == null
-            ? null
+            ? 1.38
             : json["aspect_ratio"].toDouble(),
         type: json["type"] == null ? null : json["type"],
         format: json["format"] == null ? null : json["format"],
@@ -415,6 +415,7 @@ class Brand {
 class GalleryVideo {
   GalleryVideo({
     this.src,
+    this.url,
     this.type,
     this.dimensions,
     this.aspectRatio,
@@ -426,6 +427,7 @@ class GalleryVideo {
   });
 
   final String? src;
+  final String? url;
   final String? type;
   final Dimensions? dimensions;
   final double? aspectRatio;
@@ -437,6 +439,7 @@ class GalleryVideo {
 
   factory GalleryVideo.fromMap(Map<String, dynamic> json) => GalleryVideo(
         src: json["src"] == null ? null : json["src"],
+    url: json["url"] == null ? null : json["url"],
         type: json["type"] == null ? null : json["type"],
         dimensions: json["dimensions"] == null
             ? null
@@ -453,6 +456,7 @@ class GalleryVideo {
 
   Map<String, dynamic> toMap() => {
         "src": src == null ? null : src,
+        "url": url == null ? null : url,
         "type": type == null ? null : type,
         "dimensions": dimensions == null ? null : dimensions!.toMap(),
         "aspect_ratio": aspectRatio == null ? null : aspectRatio,

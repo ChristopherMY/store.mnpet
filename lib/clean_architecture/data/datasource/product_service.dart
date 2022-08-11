@@ -143,4 +143,17 @@ class ProductService implements ProductRepositoryInterface {
       throw ("Cannot dial");
     }
   }
+
+  // VimeoVideoConfig
+  @override
+  Future<dynamic> vimeoVideoConfigFromUrl({required String vimeoVideoId}) async {
+    try {
+      return await http.get(
+        Uri.parse('https://player.vimeo.com/video/$vimeoVideoId/config'),
+      );
+
+    } on Exception catch (e) {
+      return e.toString();
+    }
+  }
 }

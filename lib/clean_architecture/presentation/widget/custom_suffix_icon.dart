@@ -15,15 +15,15 @@ class CustomSuffixIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        20.0,
+        getProportionateScreenHeight(10.0),
         getProportionateScreenHeight(10.0),
         getProportionateScreenWidth(10.0),
-        getProportionateScreenWidth(10.0),
+        getProportionateScreenWidth(5.0),
       ),
       child: SvgPicture.asset(
         svgIcon,
         color: kBlackColor,
-        height: getProportionateScreenHeight(25.0),
+        height: getProportionateScreenHeight(15.0),
       ),
     );
   }

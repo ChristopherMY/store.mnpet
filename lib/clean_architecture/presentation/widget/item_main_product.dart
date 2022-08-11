@@ -81,10 +81,15 @@ class TrendingItemMain extends StatelessWidget {
                   hiveRepositoryInterface:
                       context.read<HiveRepositoryInterface>(),
                 )
+                  ..isLoadingPage = true
+                  ..loadVimeoVideoConfig(galleryVideo: product.galleryVideo!)
                   ..initProduct(slug: product.slug!)
                   ..initRelatedProductsPagination(
-                      categories: product.categories!)
-                  ..refreshUbigeo(slug: product.slug!);
+                    categories: product.categories!,
+                  )
+                  ..refreshUbigeo(
+                    slug: product.slug!,
+                  );
               },
               // ..add(PDProvideEvent(
               //   slug: product.slug!,

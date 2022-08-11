@@ -32,10 +32,9 @@ class SignInScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: getProportionateScreenHeight(20.0),
+            horizontal: getProportionateScreenHeight(15.0),
           ),
           child: SingleChildScrollView(
-            padding: EdgeInsets.zero,
             child: Column(
               children: [
                 SizedBox(height: SizeConfig.screenHeight! * 0.03),

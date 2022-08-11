@@ -34,6 +34,7 @@ class MainBloc extends ChangeNotifier {
 
   int indexSelected = 0;
   bool isLogged = false;
+  ValueNotifier<bool> isLoadProfileScreen = ValueNotifier(false);
 
   List<Region> regions = <Region>[];
   List<Province> provinces = <Province>[];
@@ -67,27 +68,44 @@ class MainBloc extends ChangeNotifier {
     if (indexSelected != index) {
       indexSelected = index;
 
+      if (indexSelected == 0) {
+        notifyListeners();
+        return;
+      }
+
       if (indexSelected == 1) {
         if (credentials is! CredentialsAuth) {
           requestAccess(context);
         }
+
+        notifyListeners();
+        return;
       }
 
       if (indexSelected == 2) {
         if (credentials is! CredentialsAuth) {
           requestAccess(context);
+          isLoadProfileScreen.value = true;
+          notifyListeners();
+          return;
         } else {
           if (informationUser is! UserInformation) {
-            loadUserInformation();
+            loadUserInformationPromise().then((loadInformation) {
+              // TODO: No importa la respuesta solo importa que termine de cargar para despejar el placeholder de espera proveniente de la lectura de Hive Storage
+              if (loadInformation) {
+                isLoadProfileScreen.value = false;
+              }
+            });
           }
+
+          notifyListeners();
+          return;
         }
       }
-
-      notifyListeners();
     }
   }
 
-  void requestAccess(BuildContext context){
+  void requestAccess(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: ((context) => const LoginScreen()),
@@ -143,6 +161,7 @@ class MainBloc extends ChangeNotifier {
     final response = await regionRepositoryInterface.getProvinces(
       departmentId: departmentId,
     );
+
     if (response is http.Response) {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
@@ -315,6 +334,25 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
+  Future<bool> loadSessionPromise() async {
+    final responseCredentials = CredentialsAuth.fromMap(
+      await hiveRepositoryInterface.read(
+            containerName: "authentication",
+            key: "credentials",
+          ) ??
+          {"email": "", "email_confirmed": false, "token": ""},
+    );
+
+    if (responseCredentials.token.isNotEmpty) {
+      credentials = responseCredentials;
+      headers["Authorization"] = "Bearer ${responseCredentials.token}";
+      return true;
+    }
+
+    return false;
+  }
+
+// TODO: Solo se trabajara en el Main Screen
   void loadSession() async {
     final responseCredentials = CredentialsAuth.fromMap(
       await hiveRepositoryInterface.read(
@@ -332,7 +370,9 @@ class MainBloc extends ChangeNotifier {
 
   void signOut() async {
     await hiveRepositoryInterface.remove(
-        containerName: "authentication", key: "credentials");
+      containerName: "authentication",
+      key: "credentials",
+    );
     credentials = dynamic;
     informationUser = dynamic;
     headers["Authorization"] = '';
@@ -340,6 +380,31 @@ class MainBloc extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> loadUserInformationPromise() async {
+    final response = await userRepositoryInterface.getInformationUser(
+      headers: headers,
+    );
+
+    if (response is http.Response) {
+      if (response.statusCode == 200) {
+        final decodeResponse = json.decode(response.body);
+        if (kDebugMode) {
+          print(decodeResponse);
+        }
+
+        informationUser = UserInformation.fromMap(decodeResponse);
+        return true;
+      }
+    } else if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
+    return false;
+  }
+
+  // TODO: Solo se trabajara en el Main Screen
   void loadUserInformation() async {
     final response = await userRepositoryInterface.getInformationUser(
       headers: headers,
@@ -359,9 +424,11 @@ class MainBloc extends ChangeNotifier {
         print(response);
       }
     }
+
+    notifyListeners();
   }
 
-  void refreshMainBloc(){
+  void refreshMainBloc() {
     notifyListeners();
   }
 }

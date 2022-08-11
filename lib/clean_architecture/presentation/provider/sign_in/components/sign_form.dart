@@ -7,6 +7,7 @@ import 'package:store_mundo_pet/clean_architecture/helper/keyboard.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_in/sign_in_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/custom_suffix_icon.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
@@ -25,18 +26,27 @@ class _SignFormState extends State<SignForm> {
 
     if (signInBloc.formKey.currentState!.validate()) {
       signInBloc.formKey.currentState!.save();
+      signInBloc.isLoading.value = true;
+      KeyboardUtil.hideKeyboard(context);
 
       final response = await signInBloc.signIn();
 
       if (response is CredentialsAuth) {
-        if (!mounted) return;
-        KeyboardUtil.hideKeyboard(context);
-        mainBloc.loadSession();
-        mainBloc.loadUserInformation();
-        mainBloc.refreshMainBloc();
+        final responseSession = await mainBloc.loadSessionPromise();
+        if (responseSession) {
+          final responseUserInformation =
+              await mainBloc.loadUserInformationPromise();
 
-        int count = 0;
-        Navigator.of(context).popUntil((route) => count++ >= 2);
+          if (responseUserInformation) {
+            if (!mounted) return;
+            mainBloc.refreshMainBloc();
+            signInBloc.isLoading.value = false;
+            int count = 0;
+            Navigator.of(context).popUntil((route) => count++ >= 2);
+          }
+
+          return;
+        }
       } else if (response is bool && response == false) {
         if (!mounted) return;
         final snackBar = SnackBar(
@@ -56,67 +66,87 @@ class _SignFormState extends State<SignForm> {
       } else if (response is ResponseAuth) {
         if (!mounted) return;
 
-        final snackBar = SnackBar(
-          content: Text(
-            response.message,
-            style: const TextStyle(color: Colors.black),
-          ),
-          backgroundColor: kPrimaryBackgroundColor,
-          action: SnackBarAction(
-            label: 'Ok',
-            onPressed: () {},
-          ),
-        );
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
 
-        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        // final snackBar = SnackBar(
+        //   padding: const EdgeInsets.only(
+        //       top: 5.0, right: 5.0, bottom: 5.0, left: 10.0),
+        //   content: Row(
+        //     children: [
+        //       const Icon(Icons.warning_amber_rounded),
+        //       const SizedBox(width: 10.0),
+        //       Expanded(
+        //         child: Text(
+        //           response.message,
+        //           textAlign: TextAlign.justify,
+        //           style: const TextStyle(color: Colors.black),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        //   backgroundColor: kPrimaryBackgroundColor,
+        //   action: SnackBarAction(
+        //     label: 'OK',
+        //     onPressed: () {},
+        //   ),
+        // );
+        //
+        // ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }
+
+    signInBloc.isLoading.value = false;
   }
 
   @override
   Widget build(BuildContext context) {
     final signInBloc = context.watch<SignInBloc>();
-    return IgnorePointer(
-      ignoring: signInBloc.isLoad,
-      child: Form(
-        key: signInBloc.formKey,
-        child: Column(
-          children: [
-            buildEmailFormField(context: context),
-            SizedBox(height: getProportionateScreenHeight(30)),
-            buildPasswordFormField(context: context),
-            SizedBox(height: getProportionateScreenHeight(30)),
-            Row(
+    return ValueListenableBuilder(
+      valueListenable: signInBloc.isLoading,
+      builder: (context, bool value, child) {
+        return IgnorePointer(
+          ignoring: value,
+          child: Form(
+            key: signInBloc.formKey,
+            child: Column(
               children: [
-                Spacer(),
-                GestureDetector(
-                  // onTap: () => Navigator.pushNamed(
-                  //   context,
-                  //   ForgotPasswordScreen.routeName,
-                  // ),
-                  child: const Text(
-                    "Recuperar contraseña",
-                    style: TextStyle(decoration: TextDecoration.underline),
-                  ),
+                buildEmailFormField(context: context),
+                SizedBox(height: getProportionateScreenHeight(30)),
+                buildPasswordFormField(context: context),
+                SizedBox(height: getProportionateScreenHeight(25)),
+                Row(
+                  children: [
+                    const Spacer(),
+                    GestureDetector(
+                      // onTap: () => Navigator.pushNamed(
+                      //   context,
+                      //   ForgotPasswordScreen.routeName,
+                      // ),
+                      child: Text(
+                        "Recuperar contraseña",
+                        style: TextStyle(decoration: TextDecoration.underline, fontSize: getProportionateScreenWidth(14)),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: getProportionateScreenHeight(25)),
+                ValueListenableBuilder(
+                  valueListenable: signInBloc.errors,
+                  builder: (context, List<String> value, child) {
+                    return FormError(errors: value);
+                  },
+                ),
+                SizedBox(height: getProportionateScreenHeight(25)),
+                DefaultButton(
+                  text: "Continuar",
+                  press: validateSession,
                 ),
               ],
             ),
-            SizedBox(height: getProportionateScreenHeight(10)),
-            ValueListenableBuilder(
-              valueListenable: signInBloc.errors,
-              builder: (context, List<String> value, child) {
-                return FormError(errors: value);
-              },
-            ),
-            SizedBox(height: getProportionateScreenHeight(20)),
-            DefaultButton(
-              text: "Continuar",
-              press: validateSession,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -137,6 +167,7 @@ class _SignFormState extends State<SignForm> {
         hintStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
         suffixIcon: CustomSuffixIcon(svgIcon: "assets/icons/Lock.svg"),
         floatingLabelBehavior: FloatingLabelBehavior.always,
+        errorStyle: TextStyle(height: 0),
       ),
     );
   }
@@ -156,6 +187,7 @@ class _SignFormState extends State<SignForm> {
         hintStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
         suffixIcon: CustomSuffixIcon(svgIcon: "assets/icons/Mail.svg"),
         floatingLabelBehavior: FloatingLabelBehavior.always,
+        errorStyle: TextStyle(height: 0),
       ),
     );
   }

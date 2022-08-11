@@ -59,17 +59,16 @@ class _MainScreenState extends State<MainScreen> {
     final mainBloc = context.watch<MainBloc>();
     SizeConfig().init(context);
     return Scaffold(
-      appBar: AppBar(
-        // backgroundColor: kPrimaryColor,
-        // systemOverlayStyle: const SystemUiOverlayStyle(
-        //   statusBarColor: kPrimaryColor,
-        //   //statusBarIconBrightness: Brightness.light,
-        // ),
-        backgroundColor: kPrimaryColor,
-        bottomOpacity: 0,
-        shadowColor: Colors.transparent,
-        toolbarHeight: 0,
-      ),
+      // appBar: AppBar(
+      //   // backgroundColor: kPrimaryColor,
+      //   // systemOverlayStyle: const SystemUiOverlayStyle(
+      //   //   statusBarColor: kPrimaryColor,
+      //   //   //statusBarIconBrightness: Brightness.light,
+      //   // ),
+      //   bottomOpacity: 0,
+      //   shadowColor: Colors.transparent,
+      //   toolbarHeight: 0,
+      // ),
       backgroundColor: kBackGroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

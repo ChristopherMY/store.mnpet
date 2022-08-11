@@ -28,20 +28,6 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
       BetterVideoPlayerController();
   late BetterVideoPlayerConfiguration betterVideoPlayerConfiguration;
 
-  ValueNotifier<bool> isVimeoVideoLoaded = ValueNotifier(false);
-
-  bool get _isVimeoVideo {
-    var regExp = RegExp(
-      r"^((https?):\/\/)?(www.)?vimeo\.com\/([0-9]+).*$",
-      caseSensitive: false,
-      multiLine: false,
-    );
-    final match = regExp.firstMatch(widget.url);
-    if (match != null && match.groupCount >= 1) return true;
-    return false;
-  }
-
-  late String vimeoMp4Video;
 
   double videoContainerRatio = 0.5;
 
@@ -70,18 +56,14 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
     );
 
     /*
-    playerEventSubscription =
-        controllerBetterVideo.playerEventStream.listen((event) {
-      if (controllerBetterVideo.value.isVideoFinish) {
-        // swiperController.next(animation: true);
-      }
-    });
+      playerEventSubscription =
+          controllerBetterVideo.playerEventStream.listen((event) {
+        if (controllerBetterVideo.value.isVideoFinish) {
+          // swiperController.next(animation: true);
+        }
+      });
     */
 
-    /// checking that vimeo url is valid or not
-    if (_isVimeoVideo) {
-      _videoPlayer();
-    }
   }
 
   @override
@@ -107,106 +89,50 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
     super.didChangeDependencies();
   }
 
-  Future _videoPlayer() async {
-    if (_isVimeoVideo) {
-      /// getting the vimeo video configuration from api and setting managers
-      await _getVimeoVideoConfigFromUrl(widget.url).then((value) {
-        vimeoMp4Video = value?.request?.files?.progressive![0].url ?? '';
-        print("Este es el link: ${vimeoMp4Video}");
-        isVimeoVideoLoaded.value = !isVimeoVideoLoaded.value;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    return ValueListenableBuilder(
-      valueListenable: isVimeoVideoLoaded,
-      builder: (context, bool isVideo, child) => Container(
-        child: isVideo
-            ? BetterVideoPlayer(
-                controller: controllerBetterVideo,
-                configuration: BetterVideoPlayerConfiguration(
-                  autoPlay: true,
-                  allowedScreenSleep: false,
-                  // controls: _CustomControls(isFullScreen: false),
-                  // fullScreenControls: _CustomControls(isFullScreen: false),
-                  placeholder: Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: CachedNetworkImageProvider(
-                          widget.defaultImage,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                dataSource: BetterVideoPlayerDataSource(
-                  BetterVideoPlayerDataSourceType.network,
-                  vimeoMp4Video,
-                ),
-              )
-            : Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: CachedNetworkImageProvider(
-                      widget.defaultImage,
-                    ),
-                  ),
-                ),
+    return BetterVideoPlayer(
+      controller: controllerBetterVideo,
+      configuration: BetterVideoPlayerConfiguration(
+        autoPlay: true,
+        allowedScreenSleep: false,
+        // controls: _CustomControls(isFullScreen: false),
+        // fullScreenControls: _CustomControls(isFullScreen: false),
+        placeholder: CachedNetworkImage(
+          imageUrl: widget.defaultImage,
+          fit: BoxFit.cover,
+          imageBuilder: (context, imageProvider) => Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: imageProvider,
               ),
+            ),
+          ),
+          placeholder: (context, url) => Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+          ),
+          errorWidget: (context, url, error) => Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(5.0),
+              image: const DecorationImage(
+                image: AssetImage("assets/no-image.png"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+      ),
+      dataSource: BetterVideoPlayerDataSource(
+        BetterVideoPlayerDataSourceType.network,
+        widget.url,
       ),
     );
-  }
-
-  /// used to get valid vimeo video configuration
-  Future<VimeoVideoConfig?> _getVimeoVideoConfigFromUrl(
-    String url, {
-    bool trimWhitespaces = true,
-  }) async {
-    if (trimWhitespaces) url = url.trim();
-
-    /**
-        here i'm converting the vimeo video id only and calling config api for vimeo video .mp4
-        supports this types of urls
-        https://vimeo.com/70591644 => 70591644
-        www.vimeo.com/70591644 => 70591644
-        vimeo.com/70591644 => 70591644
-     */
-    var vimeoVideoId = '';
-    var videoIdGroup = 4;
-    for (var exp in [
-      RegExp(r"^((https?):\/\/)?(www.)?vimeo\.com\/([0-9]+).*$"),
-    ]) {
-      RegExpMatch? match = exp.firstMatch(url);
-      if (match != null && match.groupCount >= 1) {
-        vimeoVideoId = match.group(videoIdGroup) ?? '';
-      }
-    }
-
-    final response = await _getVimeoVideoConfig(vimeoVideoId: vimeoVideoId);
-    return (response != null) ? response : null;
-  }
-
-  /// give vimeo video configuration from api
-  Future<VimeoVideoConfig?> _getVimeoVideoConfig({
-    required String vimeoVideoId,
-  }) async {
-    try {
-      http.Response responseData = await http.get(
-        Uri.parse('https://player.vimeo.com/video/$vimeoVideoId/config'),
-      );
-
-      var vimeoVideo = VimeoVideoConfig.fromMap(jsonDecode(responseData.body));
-      return vimeoVideo;
-    } catch (e) {
-      log('Dio Error : ', name: e.toString());
-      return null;
-    }
   }
 
   @override

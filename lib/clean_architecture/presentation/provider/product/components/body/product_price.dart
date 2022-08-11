@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
 
@@ -27,7 +26,7 @@ class ProductPrice extends StatelessWidget {
           builder: (context, double value, widget) {
             return Text(
               "S/ ${parseDouble(value.toString())}",
-              style: GoogleFonts.openSans(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 11,
                 color: Colors.red,

@@ -26,12 +26,12 @@ class SignInBloc extends ChangeNotifier {
   TextEditingController passwordController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  bool isLoad = false;
+  ValueNotifier<bool> isLoading = ValueNotifier(false);
   bool loginState = false;
 
   void addError({required String error}) {
     List<String> values = List.from(errors.value);
-    if (!errors.value.contains(error)) {
+    if (!values.contains(error)) {
       values.add(error);
       errors.value = values;
     }
@@ -39,7 +39,7 @@ class SignInBloc extends ChangeNotifier {
 
   void removeError({required String error}) {
     List<String> values = List.from(errors.value);
-    if (errors.value.contains(error)) {
+    if (values.contains(error)) {
       values.remove(error);
       errors.value = values;
     }

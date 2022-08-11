@@ -26,4 +26,7 @@ abstract class ProductRepositoryInterface {
 
   // dynamic
   Future<dynamic> launchPhoneDialer({required String contactNumber});
+
+  // VimeoVideoConfig
+  Future<dynamic> vimeoVideoConfigFromUrl({required String vimeoVideoId});
 }

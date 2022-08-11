@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_in/sign_in_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -8,28 +9,30 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: Colors.transparent,
+        bottomOpacity: 0.0,
+        elevation: 0.0,
+        leading: GestureDetector(
+          onTap: (() => Navigator.of(context).pop()),
+          child: const Icon(
+            CupertinoIcons.clear,
+            color: Colors.black,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(15.0),
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                SizedBox(
-                  width: 25,
-                  child: RawMaterialButton(
-                    onPressed: (() => Navigator.of(context).pop()),
-                    child: const Icon(
-                      CupertinoIcons.clear,
-                      color: Colors.black38,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 35.0),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 45.0),
                   child: Column(
-                    mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       Container(
                         height: 100,
@@ -57,19 +60,18 @@ class LoginScreen extends StatelessWidget {
                         child: Container(
                           height: 50,
                           decoration: BoxDecoration(
-                            color: const Color.fromRGBO(23, 195, 178, 1),
+                            color: kPrimaryColor,
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           alignment: Alignment.center,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: const <Widget>[
                               Icon(
                                 size: 30,
                                 CupertinoIcons.mail,
                                 color: Colors.white,
                               ),
-                              SizedBox(width: 15),
                               Text(
                                 "Iniciar sesión con tu email",
                                 style: TextStyle(
@@ -89,7 +91,8 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      )
+      ,
     );
   }
 }

@@ -11,12 +11,14 @@ import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information_local.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/vimeo_video_config.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/vimeo_player.dart';
+
+import '../../widget/vimeo_player.dart';
 
 class ProductBloc extends ChangeNotifier {
   final ProductRepositoryInterface productRepositoryInterface;
@@ -82,10 +84,8 @@ class ProductBloc extends ChangeNotifier {
   }
 
   void initProduct({required String slug}) async {
-    isLoadingPage = true;
-    notifyListeners();
-
-    final response = await productRepositoryInterface.getProductSlug(slug: slug);
+    final response =
+        await productRepositoryInterface.getProductSlug(slug: slug);
     if (response is http.Response) {
       if (response.statusCode == 200) {
         product = productFromMap(response.body);
@@ -98,24 +98,18 @@ class ProductBloc extends ChangeNotifier {
           loadSimpleComponents(product: product!);
         }
 
-        if (product!.galleryVideo!.isEmpty) {
-          showSwiperPagination.value = true;
-        }
-
         buildHeaderContent(product: product!);
-        isLoadingPage = false;
-      } else {
-        isLoadingPage = false;
       }
     } else if (response is String) {
       if (kDebugMode) {
         print(response);
       }
-
-      isLoadingPage = false;
     }
 
-    notifyListeners();
+    if (product!.galleryVideo!.isEmpty) {
+      isLoadingPage = false;
+      notifyListeners();
+    }
   }
 
   void initRelatedProductsPagination({required List<Brand> categories}) async {
@@ -185,19 +179,6 @@ class ProductBloc extends ChangeNotifier {
 
   void buildHeaderContent({required Product product}) {
     const cloudFront = Environment.API_DAO;
-
-    if (product.galleryVideo!.isNotEmpty) {
-      headerContent.addAll(
-        product.galleryVideo!.map(
-          (e) => VimeoVideoPlayer(
-            url: e.src!,
-            defaultImage: e.thumb!,
-          ),
-        ),
-      );
-
-      showSwiperPagination.value = false;
-    }
 
     if (product.galleryHeader!.isNotEmpty) {
       headerContent.addAll(
@@ -493,9 +474,6 @@ class ProductBloc extends ChangeNotifier {
             stateOnlyCustomIndicatorText.value = ButtonState.idle;
             return true;
           }
-
-          stateOnlyCustomIndicatorText.value = ButtonState.idle;
-          return false;
         }
 
         stateOnlyCustomIndicatorText.value = ButtonState.idle;
@@ -505,16 +483,77 @@ class ProductBloc extends ChangeNotifier {
           print("Problem on decrement quantity of product");
           print(response);
         }
+      }
+    }
 
-        stateOnlyCustomIndicatorText.value = ButtonState.idle;
-        return false;
+    stateOnlyCustomIndicatorText.value = ButtonState.idle;
+    return "OutSession";
+  }
+
+  void loadVimeoVideoConfig({required List<GalleryVideo> galleryVideo}) async {
+    List<Widget> copyGalleryVideo = List.from(headerContent);
+
+    if (galleryVideo.isNotEmpty) {
+      await Future.forEach(galleryVideo, (GalleryVideo videoInformation) async {
+        if (videoInformation.src is String &&
+            videoInformation.src!.isNotEmpty) {
+          var regExp = RegExp(
+            r"^((https?):\/\/)?(www.)?vimeo\.com\/([0-9]+).*$",
+            caseSensitive: false,
+            multiLine: false,
+          );
+
+          final match = regExp.firstMatch(videoInformation.src!);
+          if (match != null && match.groupCount >= 1) {
+            final url = videoInformation.src!.trim();
+            var vimeoVideoId = '';
+            var videoIdGroup = 4;
+            var vimeoMp4Video = '';
+
+            for (var exp in [
+              RegExp(r"^((https?):\/\/)?(www.)?vimeo\.com\/([0-9]+).*$"),
+            ]) {
+              RegExpMatch? match = exp.firstMatch(url);
+              if (match != null && match.groupCount >= 1) {
+                vimeoVideoId = match.group(videoIdGroup) ?? '';
+              }
+            }
+
+            final response = await productRepositoryInterface
+                .vimeoVideoConfigFromUrl(vimeoVideoId: vimeoVideoId);
+
+            if (response is http.Response) {
+              if (response.statusCode == 200) {
+                final decodeResponse = jsonDecode(response.body);
+                final vimeoVideo = VimeoVideoConfig.fromMap(decodeResponse);
+                vimeoMp4Video =
+                    vimeoVideo.request?.files?.progressive![0].url ?? '';
+
+                copyGalleryVideo.add(
+                  VimeoVideoPlayer(
+                    url: vimeoMp4Video,
+                    defaultImage: videoInformation.thumb!,
+                  ),
+                );
+              }
+            } else if (response is String) {
+              if (kDebugMode) {
+                print(response);
+              }
+            }
+          }
+        }
+      });
+
+      if (headerContent.isNotEmpty && copyGalleryVideo.isNotEmpty) {
+        headerContent = [...copyGalleryVideo, ...headerContent];
+      } else {
+        headerContent.addAll(copyGalleryVideo);
       }
 
-      stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      return false;
-    } else {
-      stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      return "OutSession";
+      isLoadingPage = false;
+      showSwiperPagination.value = galleryVideo.isNotEmpty;
+      notifyListeners();
     }
   }
 }

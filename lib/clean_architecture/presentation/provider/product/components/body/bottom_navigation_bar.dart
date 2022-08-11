@@ -21,7 +21,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
           ),
           SizedBox(
             height: 45,
-            width: SizeConfig.screenWidth! * 0.55,
+            width: SizeConfig.screenWidth! * 0.515,
             child: const CustomProgressButton(),
           ),
 

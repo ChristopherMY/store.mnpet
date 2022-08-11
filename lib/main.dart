@@ -68,7 +68,9 @@ class MyApp extends StatelessWidget {
                 context.read<ProductRepositoryInterface>(),
             userRepositoryInterface: context.read<UserRepositoryInterface>(),
           )
+            ..isLoadProfileScreen.value = false
             ..loadSession()
+            ..loadUserInformation()
             ..initRegion(),
           builder: (context, child) => Consumer<MainBloc>(
             builder: (context, provider, child) {

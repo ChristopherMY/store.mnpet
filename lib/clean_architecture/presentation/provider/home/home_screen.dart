@@ -55,8 +55,9 @@ class HomeScreen extends StatelessWidget {
                       toolbarHeight: 56.0,
                       backgroundColor: kPrimaryColor,
                       systemOverlayStyle: const SystemUiOverlayStyle(
-                        statusBarColor: Colors.transparent,
-                        statusBarIconBrightness: Brightness.dark,
+                        statusBarColor: kPrimaryColor,
+                        statusBarIconBrightness: Brightness.light,
+
                       ),
                       expandedHeight: getProportionateScreenHeight(56.0),
                       titleSpacing: 0,
