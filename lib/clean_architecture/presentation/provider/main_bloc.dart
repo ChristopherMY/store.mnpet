@@ -92,8 +92,9 @@ class MainBloc extends ChangeNotifier {
           if (informationUser is! UserInformation) {
             loadUserInformationPromise().then((loadInformation) {
               // TODO: No importa la respuesta solo importa que termine de cargar para despejar el placeholder de espera proveniente de la lectura de Hive Storage
+
               if (loadInformation) {
-                isLoadProfileScreen.value = false;
+                isLoadProfileScreen.value = true;
               }
             });
           }
@@ -304,7 +305,7 @@ class MainBloc extends ChangeNotifier {
       ubigeo = "$departmentName - $provinceName - $districtName";
 
       hiveRepositoryInterface.save(
-        containerName: "shipment",
+        containerName: "profile",
         key: "residence",
         value: userInformationLocal.toMap(),
       );

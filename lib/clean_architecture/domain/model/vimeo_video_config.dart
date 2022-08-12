@@ -536,14 +536,14 @@ class Stream {
   final int? fps;
 
   factory Stream.fromMap(Map<String, dynamic> json) => Stream(
-    profile: json["profile"],
+    profile: json["account"],
     quality: json["quality"] == null ? null : json["quality"],
     id: json["id"] == null ? null : json["id"],
     fps: json["fps"] == null ? null : json["fps"],
   );
 
   Map<String, dynamic> toMap() => {
-    "profile": profile,
+    "account": profile,
     "quality": quality == null ? null : quality,
     "id": id == null ? null : id,
     "fps": fps == null ? null : fps,
@@ -600,7 +600,7 @@ class Progressive {
   final int? height;
 
   factory Progressive.fromMap(Map<String, dynamic> json) => Progressive(
-    profile: json["profile"] == null ? null : json["profile"],
+    profile: json["account"] == null ? null : json["account"],
     width: json["width"] == null ? null : json["width"],
     mime: json["mime"] == null ? null : json["mime"],
     fps: json["fps"] == null ? null : json["fps"],
@@ -613,7 +613,7 @@ class Progressive {
   );
 
   Map<String, dynamic> toMap() => {
-    "profile": profile == null ? null : profile,
+    "account": profile == null ? null : profile,
     "width": width == null ? null : width,
     "mime": mime == null ? null : mime,
     "fps": fps == null ? null : fps,

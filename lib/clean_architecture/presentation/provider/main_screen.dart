@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/account/account_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/cart_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/profile/profile_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -79,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
               children: <Widget>[
                 const HomeScreen(),
                 CartScreen.init(context),
-                ProfileScreen.init(context),
+                AccountScreen.init(context),
               ],
             ),
           )
@@ -102,7 +102,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
-            label: "Perfil",
+            label: "Mi cuenta",
           ),
         ],
       ),

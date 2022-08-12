@@ -378,7 +378,7 @@ class ProductBloc extends ChangeNotifier {
   void refreshUbigeo({required String slug}) async {
     informationLocal.value = UserInformationLocal.fromMap(
         await hiveRepositoryInterface.read(
-                containerName: "shipment", key: "residence") ??
+                containerName: "profile", key: "residence") ??
             {
               "department": "Lima",
               "province": "Lima",
