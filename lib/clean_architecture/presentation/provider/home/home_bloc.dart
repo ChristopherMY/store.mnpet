@@ -12,7 +12,6 @@ class HomeBloc extends ChangeNotifier {
 
   HomeBloc({required this.homeRepositoryInterface});
 
-
   List<MasterCategory> categoriesList = <MasterCategory>[];
 
   int initialRange = 1;

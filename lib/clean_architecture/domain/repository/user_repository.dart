@@ -33,6 +33,4 @@ abstract class UserRepositoryInterface {
   // List<Order>
   Future<dynamic> getOrderDetailById({required int paymentId});
 
-  // http.response
-  Future<dynamic> getSizeAddresses({required Map<String, String> headers});
 }

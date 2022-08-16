@@ -91,7 +91,7 @@ class ProductService implements ProductRepositoryInterface {
       final encodeBody = json.encode(body);
 
       return await http.post(
-        Uri.parse("$_url/api/v1/profile/calculate_product"),
+        Uri.parse("$_url/api/v1/shipment/calculate_product"),
         headers: headers,
         body: encodeBody,
       );

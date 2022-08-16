@@ -307,12 +307,11 @@ class InfoAttributes extends StatelessWidget {
                                       _dialogHelper.showDialogShipping(
                                         context: context,
                                         onSaveShippingAddress:
-                                            (_, stateAlertMain) async {
+                                            (_) async {
                                           final mainBloc =
                                               context.read<MainBloc>();
                                           final shippingPrice = await mainBloc
                                               .onSaveShippingAddress(
-                                            stateAlertMain: stateAlertMain,
                                             slug: productBloc.product!.slug!,
                                             quantity:
                                                 productBloc.quantity.value,

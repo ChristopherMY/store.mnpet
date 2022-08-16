@@ -26,49 +26,50 @@ class TrendingItemMain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Column(
-            children: <Widget>[
-              SizedBox(
-                child: AspectRatio(
-                  aspectRatio: product.mainImage!.aspectRatio!,
-                  child: CachedNetworkImage(
-                    fit: BoxFit.cover,
-                    imageUrl: "$_cloudFront/${product.mainImage!.src!}",
-                    imageBuilder: (context, imageProvider) => Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        image: DecorationImage(
-                          image: imageProvider,
-                        ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              child: AspectRatio(
+                aspectRatio: product.mainImage!.aspectRatio!,
+                child: CachedNetworkImage(
+                  fit: BoxFit.cover,
+                  imageUrl: "$_cloudFront/${product.mainImage!.src!}",
+                  imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      image: DecorationImage(
+                        image: imageProvider,
                       ),
                     ),
-                    placeholder: (context, url) => Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                  ),
+                  placeholder: (context, url) => Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
-                    errorWidget: (context, url, error) => Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Image.asset("assets/no-image.png"),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
+                    child: Image.asset("assets/no-image.png"),
                   ),
                 ),
               ),
-              _productDetails(context)
-            ],
-          ),
+            ),
+            _productDetails(context)
+          ],
         ),
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
+      ),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
             builder: (context) => ChangeNotifierProvider(
               create: (context) {
                 return ProductBloc(
@@ -97,14 +98,12 @@ class TrendingItemMain extends StatelessWidget {
               //   categories: product.categories!,
               // ))
               // ..isLoadMore = false,
-              builder: (context, child) {
-                return Consumer<ProductBloc>(
-                  builder: (context, provider, child) => ProductScreen(),
-                );
-              },
+              builder: (context, child) => ProductScreen(),
             ),
-          ));
-        });
+          ),
+        );
+      },
+    );
   }
 
 /*

@@ -199,21 +199,4 @@ class UserService implements UserRepositoryInterface {
     }
   }
 
-  // http.Response
-  @override
-  Future<dynamic> getSizeAddresses({
-    required Map<String, String> headers,
-  }) async {
-    try {
-      final response = await http.get(
-        Uri.parse(
-          "$_url/api/v1/ecommerce_users/addresses/size",
-        ),
-        headers: headers,
-      );
-      return response;
-    } on Exception catch (e) {
-      return e.toString();
-    }
-  }
 }

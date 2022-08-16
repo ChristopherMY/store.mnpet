@@ -42,13 +42,15 @@ class MainBloc extends ChangeNotifier {
 
   List<String> errors = [];
 
-  String departmentName = "Seleccione un departamento";
+  ValueNotifier<String> departmentName =
+      ValueNotifier("Seleccione un departamento");
   String departmentId = "";
 
-  String provinceName = "Seleccione una provincia";
+  ValueNotifier<String> provinceName =
+      ValueNotifier("Seleccione una provincia");
   String provinceId = "";
 
-  String districtName = "Seleccione un distrito";
+  ValueNotifier<String> districtName = ValueNotifier("Seleccione un distrito");
   String districtId = "";
 
   String ubigeo = "";
@@ -141,7 +143,6 @@ class MainBloc extends ChangeNotifier {
 
   void onChangeRegion({
     required int index,
-    required StateSetter stateAlertMain,
     required StateSetter stateAlertRegion,
   }) async {
     provinces.clear();
@@ -168,7 +169,8 @@ class MainBloc extends ChangeNotifier {
         final data = json.decode(response.body) as List;
 
         provinces.addAll(
-            data.map((element) => Province.fromMap(element)).toList().cast());
+          data.map((element) => Province.fromMap(element)).toList().cast(),
+        );
       } else {
         provinces = [];
       }
@@ -180,18 +182,13 @@ class MainBloc extends ChangeNotifier {
       provinces = [];
     }
 
-    stateAlertMain(() {
-      departmentName = regions[index].name.toString();
-      provinceName = "Seleccione";
-      districtName = "Seleccione";
-    });
-
-    notifyListeners();
+    departmentName.value = regions[index].name.toString();
+    provinceName.value = "Seleccione";
+    districtName.value = "Seleccione";
   }
 
   void onChangeProvince({
     required int index,
-    required StateSetter stateAlertMain,
     required StateSetter stateAlertProvince,
   }) async {
     districts.clear();
@@ -225,15 +222,12 @@ class MainBloc extends ChangeNotifier {
       districts = [];
     }
 
-    stateAlertMain(() {
-      provinceName = provinces[index].name.toString();
-      districtName = "Seleccione";
-    });
+    provinceName.value = provinces[index].name.toString();
+    districtName.value = "Seleccione";
   }
 
   void onChangeDistrict({
     required int index,
-    required StateSetter stateAlertMain,
     required StateSetter stateAlertDistrict,
   }) {
     for (final district in districts) {
@@ -245,8 +239,11 @@ class MainBloc extends ChangeNotifier {
     }
 
     districtId = districts[index].id.toString();
-    stateAlertMain(() => districts[index].checked = true);
-    stateAlertDistrict(() => districtName = districts[index].name.toString());
+    districts[index].checked = true;
+
+    stateAlertDistrict(() {
+      districtName.value = districts[index].name.toString();
+    });
   }
 
   void addError({required String error, state}) {
@@ -258,54 +255,51 @@ class MainBloc extends ChangeNotifier {
   }
 
   Future<dynamic> onSaveShippingAddress({
-    required StateSetter stateAlertMain,
     required String slug,
     required int quantity,
   }) async {
-    departmentName == "Seleccione un departamento" ||
-            departmentName == "Seleccione"
+    departmentName.value == "Seleccione un departamento" ||
+            departmentName.value == "Seleccione"
         ? addError(
             error: kDeparmentNullError,
-            state: stateAlertMain,
           )
         : removeError(
             error: kDeparmentNullError,
-            state: stateAlertMain,
           );
 
-    provinceName == "Seleccione una provincia" || provinceName == "Seleccione"
+    provinceName.value == "Seleccione una provincia" ||
+            provinceName.value == "Seleccione"
         ? addError(
             error: kProvinceNullError,
-            state: stateAlertMain,
           )
         : removeError(
             error: kProvinceNullError,
-            state: stateAlertMain,
           );
 
-    districtName == "Seleccione un distrito" || districtName == "Seleccione"
+    districtName.value == "Seleccione un distrito" ||
+            districtName.value == "Seleccione"
         ? addError(
             error: kDistrictNullError,
-            state: stateAlertMain,
           )
         : removeError(
             error: kDistrictNullError,
-            state: stateAlertMain,
           );
 
     if (errors.isEmpty) {
       final userInformationLocal = UserInformationLocal(
-        department: departmentName,
-        province: provinceName,
-        district: districtName,
+        department: departmentName.value,
+        province: provinceName.value,
+        district: districtName.value,
         districtId: districtId,
-        ubigeo: "$departmentName - $provinceName - $districtName",
+        ubigeo:
+            "${departmentName.value} - ${provinceName.value} - ${districtName.value}",
       );
 
-      ubigeo = "$departmentName - $provinceName - $districtName";
+      ubigeo =
+          "${departmentName.value} - ${provinceName.value} - ${districtName.value}";
 
       hiveRepositoryInterface.save(
-        containerName: "profile",
+        containerName: "shipment",
         key: "residence",
         value: userInformationLocal.toMap(),
       );
@@ -330,7 +324,6 @@ class MainBloc extends ChangeNotifier {
         return null;
       }
     } else {
-      print("RETORNO NULL");
       return null;
     }
   }

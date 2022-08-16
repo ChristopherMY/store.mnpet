@@ -32,7 +32,7 @@ class Cart {
     userId: json["user_id"] == null ? null : json["user_id"],
     products: json["products"] == null ? null : List<Product>.from(json["products"].map((x) => Product.fromMap(x))),
     subTotal: json["sub_total"] == null ? null : json["sub_total"],
-    shipment: json["profile"] == null ? null : json["profile"],
+    shipment: json["shipment"] == null ? null : json["shipment"],
     total: json["total"] == null ? null : json["total"],
   );
 
@@ -41,7 +41,7 @@ class Cart {
     "user_id": userId == null ? null : userId,
     "products": products == null ? null : List<dynamic>.from(products!.map((x) => x.toMap())),
     "sub_total": subTotal == null ? null : subTotal,
-    "profile": shipment == null ? null : shipment,
+    "shipment": shipment == null ? null : shipment,
     "total": total == null ? null : total,
   };
 }

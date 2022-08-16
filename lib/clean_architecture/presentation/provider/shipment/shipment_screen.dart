@@ -1,15 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:roundcheckbox/roundcheckbox.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class ShipmentScreen extends StatelessWidget {
+  const ShipmentScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: kSecondaryBackgroundColor,
+      backgroundColor: kBackGroundColor,
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: Colors.white,
@@ -25,40 +30,13 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Información de envío"),
-                    Icon(CupertinoIcons.plus)
-                  ],
-                ),
-              ),
-              InformationTarget(
-                title: "Nombres: ",
-                value: "Christopher jean pierre",
-              ),
-              InformationTarget(
-                title: "Apellidos: ",
-                value: "Monzon Yacua",
-              ),
-              InformationTarget(
-                title: "Email:",
-                value: "christopher_jean_pierre@outlook.com",
-              ),
-              SizedBox(
-                height: getProportionateScreenHeight(10.0),
-              ),
-              Padding(
+              const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
                 child: Text("Información de envío"),
               ),
-              AddressesDetail(),
-              PhonesDetail(),
-
-
-              SizedBox(height: 15.0),
+              AddressesDetail.init(context),
+              const PhonesDetail(),
+              const SizedBox(height: 15.0),
             ],
           ),
         ),
@@ -114,10 +92,18 @@ class InformationTarget extends StatelessWidget {
 }
 
 class AddressesDetail extends StatelessWidget {
-  const AddressesDetail({Key? key}) : super(key: key);
+  const AddressesDetail._({Key? key}) : super(key: key);
+
+  static Widget init(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => ShipmentBloc(),
+      builder: (context, child) => const AddressesDetail._(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final mainBloc = context.watch<MainBloc>();
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -131,11 +117,12 @@ class AddressesDetail extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          const Expanded(
             child: Text("Direcciones: "),
           ),
+          const SizedBox(width: 5.0),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: GestureDetector(
               onTap: () {
                 // _showModalBottomSheetAddress(
@@ -167,27 +154,33 @@ class AddressesDetail extends StatelessWidget {
               },
               child: Column(
                 children: [
-                  _buildRowsAddressesDetails(),
-                  Row(
-                    children: [
-                      Container(
-                        width: 25,
-                        height: 25,
-                        decoration: BoxDecoration(
-                          color: Colors.black12,
-                          borderRadius: BorderRadius.circular(20),
+                  for (Address address in mainBloc.informationUser!.addresses)
+                    ItemAddress(
+                      addressType: address.addressType!,
+                      direction: address.direction!,
+                      ubigeo:
+                          "${address.ubigeo!.department!} - ${address.ubigeo!.province!} - ${address.ubigeo!.district!}",
+                    ),
+                  GestureDetector(
+                    onTap: () async {
+                      final DialogHelper dialogHelper = DialogHelper();
+                      await dialogHelper.showAddressDialog(
+                        context: context,
+                        address: Address(),
+                        isAdd: true,
+                      );
+                    },
+                    child: Row(
+                      children: const [
+                        SizedBox(
+                          width: 25.0,
+                          height: 25.0,
+                          child: Icon(CupertinoIcons.plus_circle),
                         ),
-                        child: const Text(
-                          "+",
-                          style: TextStyle(
-                            fontSize: 20,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(width: 10.0),
-                      const Text("Añadir dirección")
-                    ],
+                        SizedBox(width: 10.0),
+                        Text("Añadir dirección")
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -197,57 +190,6 @@ class AddressesDetail extends StatelessWidget {
       ),
     );
   }
-
-  _buildRowsAddressesDetails() {
-    List<Widget> widget = [];
-    var trying = [1];
-
-    widget.addAll(
-      trying.map(
-        (e) => Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Mi casa",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 5),
-                      Text("Mz t, l2, trebol azul, san juan de miraflores"),
-                      SizedBox(height: 5),
-                      Text("Lima - Lima - San juan de miraflores"),
-                      SizedBox(height: 15),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: RoundCheckBox(
-                    onTap: (selected) {},
-                    uncheckedWidget: Icon(Icons.close),
-                    animationDuration: Duration(
-                      milliseconds: 90,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Divider(
-              height: 1,
-              color: Colors.black26,
-            ),
-            SizedBox(height: 15),
-          ],
-        ),
-      ),
-    );
-    return Column(children: widget);
-  }
 }
 
 class PhonesDetail extends StatelessWidget {
@@ -256,7 +198,7 @@ class PhonesDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
           bottom: BorderSide(
@@ -264,15 +206,16 @@ class PhonesDetail extends StatelessWidget {
           ),
         ),
       ),
-      padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
+      padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          const Expanded(
             child: Text("Teléfonos: "),
           ),
+          const SizedBox(width: 5.0),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Column(
               children: [
                 _buildRowsPhonesDetails(),
@@ -300,7 +243,7 @@ class PhonesDetail extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10.0),
                     Text("Añadir teléfono")
                   ],
                 ),
@@ -335,5 +278,68 @@ class PhonesDetail extends StatelessWidget {
       ),
     );
     return Column(children: widget);
+  }
+}
+
+class ItemAddress extends StatelessWidget {
+  const ItemAddress({
+    Key? key,
+    required this.addressType,
+    required this.direction,
+    required this.ubigeo,
+  }) : super(key: key);
+
+  final String addressType;
+  final String direction;
+  final String ubigeo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    addressType,
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    direction,
+                    style: Theme.of(context).textTheme.bodyText2,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    ubigeo,
+                    style: Theme.of(context).textTheme.bodyText2,
+                  ),
+                  const SizedBox(height: 15),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 30,
+              height: 30,
+              child: RoundCheckBox(
+                onTap: (selected) {},
+                uncheckedWidget: Icon(Icons.close),
+                animationDuration: Duration(
+                  milliseconds: 90,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const Divider(
+          height: 1,
+          color: Colors.black26,
+        ),
+        const SizedBox(height: 15),
+      ],
+    );
   }
 }

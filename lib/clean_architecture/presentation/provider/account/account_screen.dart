@@ -9,11 +9,12 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_reposi
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/account/account_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/credit_cart/credit_cart_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/profile/profile_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
+
+import '../shipment/shipment_screen.dart';
+import 'account_bloc.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen._({Key? key}) : super(key: key);
@@ -88,7 +89,14 @@ class _AccountScreenState extends State<AccountScreen> {
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: GestureDetector(
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          SettingsScreen.init(context),
+                                    ),
+                                  );
+                                },
                                 child: const Icon(Icons.settings),
                               ),
                             )
@@ -123,12 +131,12 @@ class _AccountScreenState extends State<AccountScreen> {
                     visible: value,
                     sliver: SliverToBoxAdapter(
                       child: TargetOption(
-                        title: "Mis Perfil",
-                        subTitle: "Mi información general",
+                        title: "Mis Direcciones",
+                        subTitle: "Mis direcciones de envio",
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => const ProfileScreen(),
+                              builder: (context) => const ShipmentScreen(),
                             ),
                           );
                         },
@@ -228,7 +236,8 @@ class _AccountScreenState extends State<AccountScreen> {
                     sliver: SliverFillRemaining(
                       hasScrollBody: false,
                       child: Padding(
-                        padding: EdgeInsets.only(bottom: getProportionateScreenHeight(25.0)),
+                        padding: EdgeInsets.only(
+                            bottom: getProportionateScreenHeight(25.0)),
                         child: const CopyRight(),
                       ),
                     ),
