@@ -166,7 +166,7 @@ const String kDistrictNullError = "Distrito no seleccionado";
 const Map<String, String> headers = {
   "Content-type": "application/json",
   "Custom-Origin": "app",
-  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjI3NjhjMWVmNzc2MTU4YTU3NzQzMjI0IiwiaWF0IjoxNjU4MzI4NDU1LCJleHAiOjE2NTgzMzU2NTV9.p2mdt7kWGaohBgDPMwgK96MMyYj8EwkphwvET-mGEss"
+  // "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjI3NjhjMWVmNzc2MTU4YTU3NzQzMjI0IiwiaWF0IjoxNjU4MzI4NDU1LCJleHAiOjE2NTgzMzU2NTV9.p2mdt7kWGaohBgDPMwgK96MMyYj8EwkphwvET-mGEss"
 };
 
 final otpInputDecoration = InputDecoration(

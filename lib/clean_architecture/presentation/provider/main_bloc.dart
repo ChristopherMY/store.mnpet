@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +37,9 @@ class MainBloc extends ChangeNotifier {
   bool isLogged = false;
   ValueNotifier<bool> isLoadProfileScreen = ValueNotifier(false);
 
-  List<Region> regions = <Region>[];
+  List<Region> regions = List.of(<Region>[]);
+
+  List<Region> extraRegions = List.of(<Region>[]);
   List<Province> provinces = <Province>[];
   List<District> districts = <District>[];
 
@@ -60,7 +63,6 @@ class MainBloc extends ChangeNotifier {
   Map<String, String> headers = {
     "Content-type": "application/json",
     "Custom-Origin": "app",
-    "Authorization": ""
   };
 
   void onChangeIndexSelected({
@@ -128,16 +130,25 @@ class MainBloc extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
         regions.addAll(
-            data.map((element) => Region.fromMap(element)).toList().cast());
-      } else {
-        regions = [];
+          data.map((element) => Region.fromMap(element)).toList().cast(),
+        );
+
+        extraRegions.addAll(
+          data.map((element) => Region.fromMap(element)).toList().cast(),
+        );
+
+        return;
       }
+
+      regions = [];
+      extraRegions = [];
     } else if (response is String) {
       if (kDebugMode) {
         print(response);
       }
 
       regions = [];
+      extraRegions = [];
     }
   }
 
@@ -286,17 +297,15 @@ class MainBloc extends ChangeNotifier {
           );
 
     if (errors.isEmpty) {
+      ubigeo =
+          "${departmentName.value} - ${provinceName.value} - ${districtName.value}";
       final userInformationLocal = UserInformationLocal(
         department: departmentName.value,
         province: provinceName.value,
         district: districtName.value,
         districtId: districtId,
-        ubigeo:
-            "${departmentName.value} - ${provinceName.value} - ${districtName.value}",
+        ubigeo: ubigeo,
       );
-
-      ubigeo =
-          "${departmentName.value} - ${provinceName.value} - ${districtName.value}";
 
       hiveRepositoryInterface.save(
         containerName: "shipment",
@@ -339,7 +348,8 @@ class MainBloc extends ChangeNotifier {
 
     if (responseCredentials.token.isNotEmpty) {
       credentials = responseCredentials;
-      headers["Authorization"] = "Bearer ${responseCredentials.token}";
+      headers[HttpHeaders.authorizationHeader] =
+          "Bearer ${responseCredentials.token}";
       return true;
     }
 
@@ -358,7 +368,8 @@ class MainBloc extends ChangeNotifier {
 
     if (responseCredentials.token.isNotEmpty) {
       credentials = responseCredentials;
-      headers["Authorization"] = "Bearer ${responseCredentials.token}";
+      headers[HttpHeaders.authorizationHeader] =
+          "Bearer ${responseCredentials.token}";
     }
   }
 
@@ -369,7 +380,7 @@ class MainBloc extends ChangeNotifier {
     );
     credentials = dynamic;
     informationUser = dynamic;
-    headers["Authorization"] = '';
+    headers[HttpHeaders.authorizationHeader] = '';
 
     notifyListeners();
   }

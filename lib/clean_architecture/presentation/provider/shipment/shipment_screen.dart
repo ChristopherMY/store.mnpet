@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:roundcheckbox/roundcheckbox.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
@@ -96,7 +98,10 @@ class AddressesDetail extends StatelessWidget {
 
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ShipmentBloc(),
+      create: (context) => ShipmentBloc(
+        regionRepositoryInterface: context.read<RegionRepositoryInterface>(),
+        userRepositoryInterface: context.read<UserRepositoryInterface>()
+      ),
       builder: (context, child) => const AddressesDetail._(),
     );
   }
@@ -166,7 +171,6 @@ class AddressesDetail extends StatelessWidget {
                       final DialogHelper dialogHelper = DialogHelper();
                       await dialogHelper.showAddressDialog(
                         context: context,
-                        address: Address(),
                         isAdd: true,
                       );
                     },
@@ -326,8 +330,8 @@ class ItemAddress extends StatelessWidget {
               height: 30,
               child: RoundCheckBox(
                 onTap: (selected) {},
-                uncheckedWidget: Icon(Icons.close),
-                animationDuration: Duration(
+                uncheckedWidget: const Icon(Icons.close),
+                animationDuration: const Duration(
                   milliseconds: 90,
                 ),
               ),

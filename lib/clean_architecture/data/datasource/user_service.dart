@@ -32,7 +32,10 @@ class UserService implements UserRepositoryInterface {
 
   // http.response
   @override
-  Future<dynamic> createAddress({required Address address}) async {
+  Future<dynamic> createAddress({
+    required Address address,
+    required Map<String, String> headers,
+  }) async {
     try {
       String bodyParams = addressToMap(address);
 
@@ -198,5 +201,4 @@ class UserService implements UserRepositoryInterface {
       return e.toString();
     }
   }
-
 }

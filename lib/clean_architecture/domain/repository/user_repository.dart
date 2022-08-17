@@ -13,7 +13,10 @@ abstract class UserRepositoryInterface {
   });
 
   // http.response
-  Future<dynamic> createAddress({required Address address});
+  Future<dynamic> createAddress({
+    required Address address,
+    required Map<String, String> headers,
+  });
 
   // http.response
   Future<dynamic> changeMainAddress({required addressId});
@@ -32,5 +35,4 @@ abstract class UserRepositoryInterface {
 
   // List<Order>
   Future<dynamic> getOrderDetailById({required int paymentId});
-
 }

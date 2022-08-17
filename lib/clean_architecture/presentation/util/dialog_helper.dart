@@ -7,14 +7,14 @@ import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
-
-import '../../domain/model/user_information.dart';
 
 class DialogHelper {
   Future<void> showDialogShipping({
@@ -536,11 +536,11 @@ class DialogHelper {
                                       ),
                                       districts[index].checked == true
                                           ? const SizedBox(
-                                              height: 15,
+                                              height: 15.0,
                                               child: Icon(
                                                 CupertinoIcons.checkmark_alt,
                                                 color: Colors.blueAccent,
-                                                size: 20,
+                                                size: 20.0,
                                               ),
                                             )
                                           : const SizedBox()
@@ -548,7 +548,7 @@ class DialogHelper {
                                   ),
                                 ),
                                 const Divider(
-                                  height: 2,
+                                  height: 2.0,
                                   color: Colors.black,
                                 )
                               ],
@@ -569,14 +569,13 @@ class DialogHelper {
 
   Future<void> showAddressDialog({
     required BuildContext context,
-    required Address address,
     required bool isAdd,
   }) {
     return showModalBottomSheet<void>(
       backgroundColor: Colors.transparent,
       context: context,
       isScrollControlled: true,
-      builder: (BuildContext _) {
+      builder: (BuildContext context_) {
         return ChangeNotifierProvider<ShipmentBloc>.value(
           value: Provider.of<ShipmentBloc>(context, listen: false),
           child: DraggableScrollableSheet(
@@ -585,7 +584,7 @@ class DialogHelper {
             maxChildSize: 0.91,
             builder: (__, controller) {
               final shipmentBloc = __.watch<ShipmentBloc>();
-              final mainBloc = __.watch<MainBloc>();
+              final mainBloc = Provider.of<MainBloc>(__);
               return Container(
                 height: SizeConfig.screenHeight,
                 margin: const EdgeInsets.only(top: 50.0),
@@ -627,8 +626,7 @@ class DialogHelper {
                             height: getProportionateScreenHeight(15.0),
                           ),
                           TextFormField(
-                            controller: shipmentBloc.addressNameController,
-                            initialValue: address.addressName,
+                            initialValue: shipmentBloc.address.addressName,
                             onChanged: shipmentBloc.onChangeAddressName,
                             validator: shipmentBloc.onValidationAddressName,
                             style: Theme.of(context).textTheme.bodyText2,
@@ -646,7 +644,7 @@ class DialogHelper {
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30.0),
+                            height: getProportionateScreenHeight(15.0),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -657,18 +655,23 @@ class DialogHelper {
                               ),
                               const SizedBox(height: 5),
                               InkWell(
-                                onTap: () => showDropdownAddressType(
-                                  addressTypes: shipmentBloc.addressTypes,
-                                  context: context,
-                                  changeAddressType: (index) {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
+                                onTap: () {
+                                  showDropdownAddressType(
+                                    addressTypes: shipmentBloc.addressTypes,
+                                    context: context,
+                                    changeAddressType: (index) {
+                                      shipmentBloc.onChangeAddressTypes(
+                                          index: index);
+                                      Navigator.of(context).pop();
+                                    },
+                                  );
+                                },
                                 child: Row(
                                   children: <Widget>[
                                     Expanded(
                                       child: Text(
-                                        "address.addressType!",
+                                        shipmentBloc.address.addressType ??
+                                            "Seleccione un tipo",
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w400,
@@ -690,7 +693,7 @@ class DialogHelper {
                             height: getProportionateScreenHeight(20),
                           ),
                           TextFormField(
-                            initialValue: address.direction,
+                            initialValue: shipmentBloc.address.direction,
                             onChanged: shipmentBloc.onChangeDirection,
                             validator: shipmentBloc.onValidationDirection,
                             style: Theme.of(context).textTheme.bodyText2,
@@ -711,7 +714,8 @@ class DialogHelper {
                             height: getProportionateScreenHeight(30),
                           ),
                           TextFormField(
-                            initialValue: address.lotNumber.toString(),
+                            initialValue:
+                                shipmentBloc.address.lotNumber!.toString(),
                             keyboardType: TextInputType.number,
                             inputFormatters: <TextInputFormatter>[
                               FilteringTextInputFormatter.allow(
@@ -737,13 +741,14 @@ class DialogHelper {
                             height: getProportionateScreenHeight(30),
                           ),
                           TextFormField(
-                            onChanged: (value) =>
-                                address.dptoInt = int.parse(value),
-                            initialValue: address.dptoInt.toString(),
+                            onChanged: shipmentBloc.onChangeDPTO,
+                            initialValue:
+                                shipmentBloc.address.dptoInt.toString(),
                             keyboardType: TextInputType.number,
                             inputFormatters: <TextInputFormatter>[
                               FilteringTextInputFormatter.allow(
-                                  numberValidatorReg),
+                                numberValidatorReg,
+                              ),
                             ],
                             style: Theme.of(context).textTheme.bodyText2,
                             decoration: InputDecoration(
@@ -756,15 +761,16 @@ class DialogHelper {
                               hintStyle: Theme.of(context).textTheme.bodyText2,
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0),
+                              errorStyle: const TextStyle(height: 0.0),
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30),
+                            height: getProportionateScreenHeight(30.0),
                           ),
                           TextFormField(
-                            onChanged: (value) => address.urbanName = value,
-                            initialValue: address.urbanName,
+                            onChanged: (value) =>
+                                shipmentBloc.address.urbanName = value,
+                            initialValue: shipmentBloc.address.urbanName,
                             style: Theme.of(context).textTheme.bodyText2,
                             decoration: InputDecoration(
                               labelText: "Urbanización (opcional)",
@@ -776,15 +782,16 @@ class DialogHelper {
                               hintStyle: Theme.of(context).textTheme.bodyText2,
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0),
+                              errorStyle: const TextStyle(height: 0.0),
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30),
+                            height: getProportionateScreenHeight(30.0),
                           ),
                           TextFormField(
-                            onChanged: (value) => address.referenceName = value,
-                            initialValue: address.referenceName,
+                            onChanged: (value) =>
+                                shipmentBloc.address.referenceName = value,
+                            initialValue: shipmentBloc.address.referenceName,
                             style: Theme.of(context).textTheme.bodyText2,
                             decoration: InputDecoration(
                               labelText: "Referencia (opcional)",
@@ -796,11 +803,11 @@ class DialogHelper {
                               hintStyle: Theme.of(context).textTheme.bodyText2,
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0),
+                              errorStyle: const TextStyle(height: 0.0),
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30),
+                            height: getProportionateScreenHeight(30.0),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -808,7 +815,7 @@ class DialogHelper {
                               Text(
                                 'Departamento',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.w400,
                                   color: Colors.black12.withOpacity(0.6),
                                 ),
@@ -818,11 +825,12 @@ class DialogHelper {
                                 onTap: () async {
                                   await showDropdownRegions(
                                     context: context,
-                                    regions: mainBloc.regions,
+                                    regions: mainBloc.extraRegions,
                                     onChangeRegion:
                                         (index, stateAlertRegion, context) {
-                                      mainBloc.onChangeRegion(
+                                      shipmentBloc.onChangeRegion(
                                         index: index,
+                                        regions: mainBloc.extraRegions,
                                         stateAlertRegion: stateAlertRegion,
                                       );
 
@@ -833,19 +841,13 @@ class DialogHelper {
                                 child: Row(
                                   children: <Widget>[
                                     Expanded(
-                                      child: ValueListenableBuilder(
-                                        valueListenable:
-                                            mainBloc.departmentName,
-                                        builder:
-                                            (context, String value, child) {
-                                          return Text(
-                                            value,
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          );
-                                        },
+                                      child: Text(
+                                        shipmentBloc
+                                                .address.ubigeo!.department ??
+                                            "Seleccione un departamento",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
                                       ),
                                     ),
                                     const Icon(
@@ -859,7 +861,7 @@ class DialogHelper {
                           ),
                           const Divider(color: Colors.black),
                           SizedBox(
-                            height: getProportionateScreenHeight(30),
+                            height: getProportionateScreenHeight(30.0),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -877,10 +879,10 @@ class DialogHelper {
                                 onTap: () async {
                                   await showDropdownProvinces(
                                     context: context,
-                                    provinces: mainBloc.provinces,
+                                    provinces: shipmentBloc.provinces,
                                     onChangeProvince:
                                         (index, stateAlertProvince, context) {
-                                      mainBloc.onChangeProvince(
+                                      shipmentBloc.onChangeProvince(
                                         index: index,
                                         stateAlertProvince: stateAlertProvince,
                                       );
@@ -892,11 +894,11 @@ class DialogHelper {
                                   children: <Widget>[
                                     Expanded(
                                       child: Text(
-                                        "address.province",
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w400,
-                                        ),
+                                        shipmentBloc.address.ubigeo!.province ??
+                                            "Seleccione una provincia",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
                                       ),
                                     ),
                                     const Icon(
@@ -910,7 +912,7 @@ class DialogHelper {
                           ),
                           const Divider(color: Colors.black),
                           SizedBox(
-                            height: getProportionateScreenHeight(30),
+                            height: getProportionateScreenHeight(30.0),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -928,20 +930,27 @@ class DialogHelper {
                                 onTap: () async {
                                   await showDropdownDistricts(
                                     context: context,
-                                    districts: mainBloc.districts,
+                                    districts: shipmentBloc.districts,
                                     onChangeDistrict:
-                                        (index, state, context) {},
+                                        (index, stateAlertDistrict, context) {
+                                      shipmentBloc.onChangeDistrict(
+                                        index: index,
+                                        stateAlertDistrict: stateAlertDistrict,
+                                      );
+
+                                      Navigator.of(context).pop();
+                                    },
                                   );
                                 },
                                 child: Row(
                                   children: <Widget>[
                                     Expanded(
                                       child: Text(
-                                        "address.district",
-                                        style: TextStyle(
-                                          fontSize: 15.0,
-                                          fontWeight: FontWeight.w400,
-                                        ),
+                                        shipmentBloc.address.ubigeo!.district ??
+                                            "Seleccione un distrito",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
                                       ),
                                     ),
                                     const Icon(
@@ -955,26 +964,85 @@ class DialogHelper {
                           ),
                           const Divider(color: Colors.black),
                           SizedBox(
-                            height: getProportionateScreenHeight(30),
+                            height: getProportionateScreenHeight(30.0),
                           ),
                           // _buildCheckboxFormField(
                           //   setStateParent: setStateParent,
                           //   address: address,
                           // ),
-                          // FormError(errors: errors),
+
+                          ValueListenableBuilder(
+                            valueListenable: shipmentBloc.errors,
+                            builder: (context, List<String> value, child) {
+                              return FormError(errors: value);
+                            },
+                          ),
                           SizedBox(
-                            height: getProportionateScreenHeight(40),
+                            height: getProportionateScreenHeight(40.0),
                           ),
                           DefaultButton(
                             text: "Continuar",
-                            press: () {
-                              // fnSubmit(
-                              //   state: setStateParent,
-                              //   userId: userId,
-                              //   address: address,
-                              //   context: context,
-                              //   isAdd: isAdd,
-                              // );
+                            press: () async {
+                              // if (shipmentBloc.formKey.currentState!
+                              //     .validate()) {
+                              //   shipmentBloc.formKey.currentState!.save();
+                              //
+                              //   shipmentBloc.address.ubigeo!.department ==
+                              //               "Seleccione un departamento" ||
+                              //           shipmentBloc
+                              //                   .address.ubigeo!.department ==
+                              //               "Seleccione"
+                              //       ? shipmentBloc.addError(
+                              //           error: kDeparmentNullError,
+                              //         )
+                              //       : shipmentBloc.removeError(
+                              //           error: kDeparmentNullError);
+                              //
+                              //   shipmentBloc.address.ubigeo!.province ==
+                              //               "Seleccione una provincia" ||
+                              //           shipmentBloc.address.ubigeo!.province ==
+                              //               "Seleccione"
+                              //       ? shipmentBloc.addError(
+                              //           error: kProvinceNullError)
+                              //       : shipmentBloc.removeError(
+                              //           error: kProvinceNullError,
+                              //         );
+                              //
+                              //   shipmentBloc.address.ubigeo!.district ==
+                              //               "Seleccione un distrito" ||
+                              //           shipmentBloc.address.ubigeo!.district ==
+                              //               "Seleccione"
+                              //       ? shipmentBloc.addError(
+                              //           error: kDistrictNullError,
+                              //         )
+                              //       : shipmentBloc.removeError(
+                              //           error: kDistrictNullError,
+                              //         );
+                              //
+                              //   if (shipmentBloc.errors.value.isEmpty) {
+                              //     final response = await shipmentBloc.onSave(
+                              //       headers: mainBloc.headers,
+                              //     );
+                              //
+                              //     if (response is ResponseApi) {
+                              //       GlobalSnackBar.showNormalSnackBar(
+                              //         _,
+                              //         response.message,
+                              //       );
+                              //
+                              //       return;
+                              //     }
+                              //
+                              //     GlobalSnackBar.showWarningSnackBar(
+                              //       _,
+                              //       "Ups, vuelvalo a intentar más tarde",
+                              //     );
+                              //   }
+                              // }
+                              GlobalSnackBar.showWarningSnackBar(
+                                context,
+                                "Ups, vuelvalo a intentar más tarde",
+                              );
                             },
                           ),
                         ],
@@ -1021,7 +1089,7 @@ Future<void> showDropdownAddressType({
                     const SizedBox(width: 10.0),
                     const Expanded(
                       child: Text(
-                        "Departamento",
+                        "Tipo de dirección",
                         style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.w700,
