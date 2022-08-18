@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
@@ -42,12 +43,31 @@ class ShipmentBloc extends ChangeNotifier {
     {"name": "Otro", "checked": false}
   ];
 
-  Address address = Address(ubigeo: Ubigeo(), lotNumber: 1, dptoInt: 1);
+  Address address = Address(
+    ubigeo: Ubigeo(),
+    lotNumber: 1,
+    dptoInt: 1,
+    addressDefault: false,
+  );
 
   List<Province> provinces = <Province>[];
   List<District> districts = <District>[];
 
   bool isUpdate = false;
+
+  Color getColor(Set<MaterialState> states) {
+    const Set<MaterialState> interactiveStates = <MaterialState>{
+      MaterialState.pressed,
+      MaterialState.hovered,
+      MaterialState.focused,
+    };
+
+    if (states.any(interactiveStates.contains)) {
+      return Colors.blue;
+    }
+
+    return kPrimaryColor;
+  }
 
   void addError({required String error}) {
     List<String> values = List.from(errors.value);
@@ -275,4 +295,60 @@ class ShipmentBloc extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<dynamic> onChangeDefaultAddress({
+    required String addressId,
+    required Map<String, String> headers,
+  }) async {
+    final response = await userRepositoryInterface.changeMainAddress(
+      addressId: addressId,
+      headers: headers,
+    );
+
+    if (response is http.Response) {
+      if (response.statusCode == 200) {
+        return responseApiFromMap(response.body);
+      }
+
+      return false;
+    } else if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
+    return false;
+  }
+
+  Future<dynamic> onDeleteAddress({
+    required String addressId,
+    required Map<String, String> headers,
+  }) async {
+    final response = await userRepositoryInterface.deleteUserAddress(
+      addressId: addressId,
+      headers: headers,
+    );
+
+    if (response is http.Response) {
+      if (response.statusCode == 200) {
+        return responseApiFromMap(response.body);
+      }
+
+      return false;
+    } else if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
+    return false;
+  }
+
+  void onChangeAddressDefault(bool? value) {
+    address.addressDefault = value;
+
+    notifyListeners();
+  }
+
+
 }

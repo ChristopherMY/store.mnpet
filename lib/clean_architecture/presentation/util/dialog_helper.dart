@@ -1,13 +1,14 @@
-import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
@@ -15,6 +16,7 @@ import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipmen
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_button.dart';
 
 class DialogHelper {
   Future<void> showDialogShipping({
@@ -313,7 +315,7 @@ class DialogHelper {
                     SizedBox(
                       height: 200,
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(0),
+                        padding: const EdgeInsets.all(0.0),
                         itemCount: regions.length,
                         itemBuilder: (BuildContext context, int index) {
                           return InkWell(
@@ -324,7 +326,9 @@ class DialogHelper {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.only(
-                                      top: 15, bottom: 15),
+                                    top: 15.0,
+                                    bottom: 15.0,
+                                  ),
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -332,19 +336,19 @@ class DialogHelper {
                                       ),
                                       regions[index].checked == true
                                           ? const SizedBox(
-                                              height: 15,
+                                              height: 15.0,
                                               child: Icon(
                                                 CupertinoIcons.checkmark_alt,
                                                 color: Colors.blueAccent,
-                                                size: 20,
+                                                size: 20.0,
                                               ),
                                             )
-                                          : const SizedBox()
+                                          : const SizedBox.shrink()
                                     ],
                                   ),
                                 ),
                                 const Divider(
-                                  height: 2,
+                                  height: 2.0,
                                   color: Colors.black,
                                 )
                               ],
@@ -569,7 +573,6 @@ class DialogHelper {
 
   Future<void> showAddressDialog({
     required BuildContext context,
-    required bool isAdd,
   }) {
     return showModalBottomSheet<void>(
       backgroundColor: Colors.transparent,
@@ -577,13 +580,14 @@ class DialogHelper {
       isScrollControlled: true,
       builder: (BuildContext context_) {
         return ChangeNotifierProvider<ShipmentBloc>.value(
-          value: Provider.of<ShipmentBloc>(context, listen: false),
+          value: Provider.of<ShipmentBloc>(context, listen: false)
+            ..errors.value.clear(),
           child: DraggableScrollableSheet(
             initialChildSize: 0.91,
             minChildSize: 0.20,
             maxChildSize: 0.91,
             builder: (__, controller) {
-              final shipmentBloc = __.watch<ShipmentBloc>();
+              final shipmentBloc = Provider.of<ShipmentBloc>(__);
               final mainBloc = Provider.of<MainBloc>(__);
               return Container(
                 height: SizeConfig.screenHeight,
@@ -623,7 +627,7 @@ class DialogHelper {
                             ],
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(15.0),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           TextFormField(
                             initialValue: shipmentBloc.address.addressName,
@@ -644,7 +648,7 @@ class DialogHelper {
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(15.0),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -661,7 +665,8 @@ class DialogHelper {
                                     context: context,
                                     changeAddressType: (index) {
                                       shipmentBloc.onChangeAddressTypes(
-                                          index: index);
+                                        index: index,
+                                      );
                                       Navigator.of(context).pop();
                                     },
                                   );
@@ -679,8 +684,7 @@ class DialogHelper {
                                       ),
                                     ),
                                     const Icon(
-                                      CommunityMaterialIcons
-                                          .arrow_down_drop_circle,
+                                      Icons.arrow_drop_down_outlined,
                                       color: Colors.black,
                                     )
                                   ],
@@ -690,7 +694,7 @@ class DialogHelper {
                           ),
                           const Divider(color: Colors.black),
                           SizedBox(
-                            height: getProportionateScreenHeight(20),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           TextFormField(
                             initialValue: shipmentBloc.address.direction,
@@ -711,7 +715,7 @@ class DialogHelper {
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           TextFormField(
                             initialValue:
@@ -738,7 +742,7 @@ class DialogHelper {
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           TextFormField(
                             onChanged: shipmentBloc.onChangeDPTO,
@@ -765,7 +769,7 @@ class DialogHelper {
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30.0),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           TextFormField(
                             onChanged: (value) =>
@@ -786,7 +790,7 @@ class DialogHelper {
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30.0),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           TextFormField(
                             onChanged: (value) =>
@@ -807,7 +811,7 @@ class DialogHelper {
                             ),
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(30.0),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -851,7 +855,7 @@ class DialogHelper {
                                       ),
                                     ),
                                     const Icon(
-                                      CommunityMaterialIcons.arrow_down_box,
+                                      Icons.arrow_drop_down_outlined,
                                       color: Colors.black,
                                     )
                                   ],
@@ -861,7 +865,7 @@ class DialogHelper {
                           ),
                           const Divider(color: Colors.black),
                           SizedBox(
-                            height: getProportionateScreenHeight(30.0),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -902,7 +906,7 @@ class DialogHelper {
                                       ),
                                     ),
                                     const Icon(
-                                      CommunityMaterialIcons.arrow_down_box,
+                                      Icons.arrow_drop_down_outlined,
                                       color: Colors.black,
                                     )
                                   ],
@@ -912,7 +916,7 @@ class DialogHelper {
                           ),
                           const Divider(color: Colors.black),
                           SizedBox(
-                            height: getProportionateScreenHeight(30.0),
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -954,7 +958,7 @@ class DialogHelper {
                                       ),
                                     ),
                                     const Icon(
-                                      CommunityMaterialIcons.arrow_down_box,
+                                      Icons.arrow_drop_down_outlined,
                                       color: Colors.black,
                                     )
                                   ],
@@ -964,85 +968,172 @@ class DialogHelper {
                           ),
                           const Divider(color: Colors.black),
                           SizedBox(
-                            height: getProportionateScreenHeight(30.0),
+                            height: getProportionateScreenHeight(15.0),
                           ),
-                          // _buildCheckboxFormField(
-                          //   setStateParent: setStateParent,
-                          //   address: address,
-                          // ),
-
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Checkbox(
+                                checkColor: Colors.white,
+                                fillColor: MaterialStateProperty.resolveWith(
+                                  shipmentBloc.getColor,
+                                ),
+                                value: shipmentBloc.address.addressDefault,
+                                onChanged: shipmentBloc.onChangeAddressDefault,
+                              ),
+                              Text(
+                                "Usar como dirección predeterminada",
+                                style: Theme.of(context).textTheme.bodyText2,
+                              ),
+                            ],
+                          ),
                           ValueListenableBuilder(
                             valueListenable: shipmentBloc.errors,
                             builder: (context, List<String> value, child) {
-                              return FormError(errors: value);
+                              return Column(
+                                children: [
+                                  value.isNotEmpty
+                                      ? SizedBox(
+                                          height: getProportionateScreenHeight(
+                                            20.0,
+                                          ),
+                                        )
+                                      : const SizedBox(),
+                                  FormError(errors: value),
+                                ],
+                              );
                             },
                           ),
                           SizedBox(
-                            height: getProportionateScreenHeight(40.0),
+                            height: getProportionateScreenHeight(20.0),
+                          ),
+                          ItemButton(
+                            title: "Eliminar dirección",
+                            press: () async {
+                              context.loaderOverlay.show();
+                              Navigator.of(context).pop();
+                              final response =
+                                  await shipmentBloc.onDeleteAddress(
+                                addressId: shipmentBloc.address.id!,
+                                headers: mainBloc.headers,
+                              );
+
+                              if (response is ResponseApi) {
+                                shipmentBloc.address = Address(
+                                  ubigeo: Ubigeo(),
+                                  lotNumber: 1,
+                                  dptoInt: 1,
+                                  addressDefault: false,
+                                );
+
+                                final responseUserInformation =
+                                    await mainBloc.loadUserInformationPromise();
+
+                                if (responseUserInformation) {
+                                  mainBloc.refreshMainBloc();
+                                  context.loaderOverlay.hide();
+                                  await GlobalSnackBar.showInfoSnackBarIcon(
+                                    context,
+                                    response.message,
+                                  );
+
+                                  return;
+                                }
+                              }
+
+                              context.loaderOverlay.hide();
+                              await GlobalSnackBar.showWarningSnackBar(
+                                context,
+                                "Ups, vuelvalo a intentar más tarde",
+                              );
+
+                              return;
+                            },
+                            icon: Icons.delete_forever_sharp,
+                          ),
+                          SizedBox(
+                            height: getProportionateScreenHeight(20.0),
                           ),
                           DefaultButton(
                             text: "Continuar",
                             press: () async {
-                              // if (shipmentBloc.formKey.currentState!
-                              //     .validate()) {
-                              //   shipmentBloc.formKey.currentState!.save();
-                              //
-                              //   shipmentBloc.address.ubigeo!.department ==
-                              //               "Seleccione un departamento" ||
-                              //           shipmentBloc
-                              //                   .address.ubigeo!.department ==
-                              //               "Seleccione"
-                              //       ? shipmentBloc.addError(
-                              //           error: kDeparmentNullError,
-                              //         )
-                              //       : shipmentBloc.removeError(
-                              //           error: kDeparmentNullError);
-                              //
-                              //   shipmentBloc.address.ubigeo!.province ==
-                              //               "Seleccione una provincia" ||
-                              //           shipmentBloc.address.ubigeo!.province ==
-                              //               "Seleccione"
-                              //       ? shipmentBloc.addError(
-                              //           error: kProvinceNullError)
-                              //       : shipmentBloc.removeError(
-                              //           error: kProvinceNullError,
-                              //         );
-                              //
-                              //   shipmentBloc.address.ubigeo!.district ==
-                              //               "Seleccione un distrito" ||
-                              //           shipmentBloc.address.ubigeo!.district ==
-                              //               "Seleccione"
-                              //       ? shipmentBloc.addError(
-                              //           error: kDistrictNullError,
-                              //         )
-                              //       : shipmentBloc.removeError(
-                              //           error: kDistrictNullError,
-                              //         );
-                              //
-                              //   if (shipmentBloc.errors.value.isEmpty) {
-                              //     final response = await shipmentBloc.onSave(
-                              //       headers: mainBloc.headers,
-                              //     );
-                              //
-                              //     if (response is ResponseApi) {
-                              //       GlobalSnackBar.showNormalSnackBar(
-                              //         _,
-                              //         response.message,
-                              //       );
-                              //
-                              //       return;
-                              //     }
-                              //
-                              //     GlobalSnackBar.showWarningSnackBar(
-                              //       _,
-                              //       "Ups, vuelvalo a intentar más tarde",
-                              //     );
-                              //   }
-                              // }
-                              GlobalSnackBar.showWarningSnackBar(
-                                context,
-                                "Ups, vuelvalo a intentar más tarde",
-                              );
+                              if (shipmentBloc.formKey.currentState!
+                                  .validate()) {
+                                shipmentBloc.formKey.currentState!.save();
+
+                                shipmentBloc.address.ubigeo!.department ==
+                                            "Seleccione un departamento" ||
+                                        shipmentBloc
+                                                .address.ubigeo!.department ==
+                                            "Seleccione"
+                                    ? shipmentBloc.addError(
+                                        error: kDeparmentNullError,
+                                      )
+                                    : shipmentBloc.removeError(
+                                        error: kDeparmentNullError);
+
+                                shipmentBloc.address.ubigeo!.province ==
+                                            "Seleccione una provincia" ||
+                                        shipmentBloc.address.ubigeo!.province ==
+                                            "Seleccione"
+                                    ? shipmentBloc.addError(
+                                        error: kProvinceNullError,
+                                      )
+                                    : shipmentBloc.removeError(
+                                        error: kProvinceNullError,
+                                      );
+
+                                shipmentBloc.address.ubigeo!.district ==
+                                            "Seleccione un distrito" ||
+                                        shipmentBloc.address.ubigeo!.district ==
+                                            "Seleccione"
+                                    ? shipmentBloc.addError(
+                                        error: kDistrictNullError,
+                                      )
+                                    : shipmentBloc.removeError(
+                                        error: kDistrictNullError,
+                                      );
+
+                                if (shipmentBloc.errors.value.isEmpty) {
+                                  context.loaderOverlay.show();
+                                  Navigator.of(context).pop();
+                                  final response = await shipmentBloc.onSave(
+                                    headers: mainBloc.headers,
+                                  );
+
+                                  if (response is ResponseApi) {
+                                    shipmentBloc.address = Address(
+                                      ubigeo: Ubigeo(),
+                                      lotNumber: 1,
+                                      dptoInt: 1,
+                                      addressDefault: false,
+                                    );
+
+                                    final responseUserInformation =
+                                        await mainBloc
+                                            .loadUserInformationPromise();
+
+                                    if (responseUserInformation) {
+                                      mainBloc.refreshMainBloc();
+                                      context.loaderOverlay.hide();
+                                      await GlobalSnackBar.showInfoSnackBarIcon(
+                                        context,
+                                        response.message,
+                                      );
+
+                                      return;
+                                    }
+                                  }
+
+                                  context.loaderOverlay.hide();
+                                  await GlobalSnackBar.showWarningSnackBar(
+                                    context,
+                                    "Ups, vuelvalo a intentar más tarde",
+                                  );
+
+                                  return;
+                                }
+                              }
                             },
                           ),
                         ],

@@ -121,7 +121,7 @@ class Address {
   });
 
   final String? id;
-  final bool? addressDefault;
+  bool? addressDefault;
   String? direction;
   String? addressName;
   String? referenceName;
@@ -140,7 +140,7 @@ class Address {
         addressName: json["address_name"] == null ? null : json["address_name"],
         referenceName:
             json["reference_name"] == null ? null : json["reference_name"],
-        addressType: json["address_type"] == null ? null: json["address_type"],
+        addressType: json["address_type"] == null ? null : json["address_type"],
         lotNumber: json["lot_number"] == null ? null : json["lot_number"],
         dptoInt: json["dpto_int"] == null ? null : json["dpto_int"],
         urbanName: json["urban_name"] == null ? null : json["urban_name"],

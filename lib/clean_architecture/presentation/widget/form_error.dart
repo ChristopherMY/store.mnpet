@@ -19,25 +19,28 @@ class FormError extends StatelessWidget {
     );
   }
 
-  Row formErrorText({required String error}) {
-    return Row(
-      children: [
-        Container(
-          height: getProportionateScreenWidth(14.0),
-          width: getProportionateScreenWidth(14.0),
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              fit: BoxFit.contain,
-              alignment: FractionalOffset.topCenter,
-              image: AssetImage(
-                "assets/icons/advertencia.png",
+  Padding formErrorText({required String error}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5.0),
+      child: Row(
+        children: [
+          Container(
+            height: getProportionateScreenWidth(14.0),
+            width: getProportionateScreenWidth(14.0),
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                fit: BoxFit.contain,
+                alignment: FractionalOffset.topCenter,
+                image: AssetImage(
+                  "assets/icons/advertencia.png",
+                ),
               ),
             ),
           ),
-        ),
-        SizedBox(width: getProportionateScreenWidth(10)),
-        Text(error),
-      ],
+          SizedBox(width: getProportionateScreenWidth(10.0)),
+          Text(error),
+        ],
+      ),
     );
   }
 }

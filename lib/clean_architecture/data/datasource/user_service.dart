@@ -13,7 +13,10 @@ class UserService implements UserRepositoryInterface {
 
   // http.response
   @override
-  Future<dynamic> changeMainAddress({required addressId}) async {
+  Future<dynamic> changeMainAddress({
+    required addressId,
+    required Map<String, String> headers,
+  }) async {
     try {
       return await http.put(
         Uri.parse(
@@ -54,7 +57,10 @@ class UserService implements UserRepositoryInterface {
 
   // http.response
   @override
-  Future<dynamic> deleteUserAddress({required String addressId}) async {
+  Future<dynamic> deleteUserAddress({
+    required String addressId,
+    required Map<String, String> headers,
+  }) async {
     try {
       return await http.delete(
         Uri.parse(

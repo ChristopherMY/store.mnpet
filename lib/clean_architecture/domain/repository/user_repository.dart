@@ -19,10 +19,13 @@ abstract class UserRepositoryInterface {
   });
 
   // http.response
-  Future<dynamic> changeMainAddress({required addressId});
+  Future<dynamic> changeMainAddress({
+    required addressId,
+    required Map<String, String> headers,
+  });
 
   // http.response
-  Future<dynamic> deleteUserAddress({required String addressId});
+  Future<dynamic> deleteUserAddress({required String addressId, required Map<String, String> headers});
 
   // User
   Future<dynamic> getInformationUser({required Map<String, String> headers});
