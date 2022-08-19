@@ -325,10 +325,10 @@ class Phone {
   });
 
   final String? id;
-  final String? value;
+  String? value;
   final String? type;
   final String? areaCode;
-  final bool? phoneDefault;
+  bool? phoneDefault;
   final DateTime? updatedAt;
   final DateTime? createdAt;
 

@@ -9,6 +9,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repo
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/phone/phone_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
@@ -37,15 +38,17 @@ class ShipmentScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 15.0,
+                    vertical: 20.0,
+                  ),
                   child: Text(
                     "Información de envío",
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
                 ),
                 AddressesDetail.init(context),
-                const PhonesDetail(),
+                PhonesDetail.init(context),
                 const SizedBox(height: 15.0),
               ],
             ),
@@ -108,8 +111,9 @@ class AddressesDetail extends StatelessWidget {
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => ShipmentBloc(
-          regionRepositoryInterface: context.read<RegionRepositoryInterface>(),
-          userRepositoryInterface: context.read<UserRepositoryInterface>()),
+        regionRepositoryInterface: context.read<RegionRepositoryInterface>(),
+        userRepositoryInterface: context.read<UserRepositoryInterface>(),
+      ),
       builder: (context, child) => const AddressesDetail._(),
     );
   }
@@ -147,6 +151,7 @@ class AddressesDetail extends StatelessWidget {
                     child: InkWell(
                       highlightColor: kPrimaryColor,
                       onTap: () async {
+                        shipmentBloc.isUpdate = true;
                         shipmentBloc.address = address;
 
                         await dialogHelper.showAddressDialog(context: context);
@@ -163,6 +168,7 @@ class AddressesDetail extends StatelessWidget {
                     : const SizedBox(),
                 GestureDetector(
                   onTap: () async {
+                    shipmentBloc.isUpdate = false;
                     await dialogHelper.showAddressDialog(context: context);
                   },
                   child: Row(
@@ -183,95 +189,6 @@ class AddressesDetail extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class PhonesDetail extends StatelessWidget {
-  const PhonesDetail({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.black12,
-          ),
-        ),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Expanded(
-            child: Text("Teléfonos: "),
-          ),
-          const SizedBox(width: 5.0),
-          Expanded(
-            flex: 4,
-            child: Column(
-              children: [
-                _buildRowsPhonesDetails(),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        print("Clicked");
-                      },
-                      child: Container(
-                        // padding: EdgeInsets.symmetric(horizontal: 20, vertical: 1),
-                        width: 25,
-                        height: 25,
-                        decoration: BoxDecoration(
-                          color: Colors.black12,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          "+",
-                          style: TextStyle(
-                            // fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10.0),
-                    Text("Añadir teléfono")
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  _buildRowsPhonesDetails() {
-    List<Widget> widget = [];
-    var trying = [1];
-
-    widget.addAll(
-      trying.map(
-        (e) => new Container(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("(+51) 953 234 644"),
-              SizedBox(height: 15),
-              Divider(
-                height: 1,
-                color: Colors.black26,
-              ),
-              SizedBox(height: 15),
-            ],
-          ),
-        ),
-      ),
-    );
-    return Column(children: widget);
   }
 }
 
@@ -319,12 +236,15 @@ class ItemAddress extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(width: 8.0),
                 SizedBox(
                   width: 30.0,
                   height: 30.0,
                   child: RoundCheckBox(
                     onTap: (selected) async {
                       context.loaderOverlay.show();
+                      address.addressDefault = selected;
+
                       final response =
                           await shipmentBloc.onChangeDefaultAddress(
                         addressId: address.id!,

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -274,7 +273,24 @@ class ShipmentBloc extends ChangeNotifier {
   }
 
   Future<dynamic> onSave({required Map<String, String> headers}) async {
-    if (isUpdate == false) {
+    if (isUpdate) {
+      final response = await userRepositoryInterface.updateUserAddress(
+        address: address,
+        headers: headers,
+      );
+
+      if (response is http.Response) {
+        if (response.statusCode == 200) {
+          return responseApiFromMap(response.body);
+        }
+
+        return false;
+      } else if (response is String) {
+        if (kDebugMode) {
+          print(response);
+        }
+      }
+    } else {
       final response = await userRepositoryInterface.createAddress(
         address: address,
         headers: headers,
@@ -291,9 +307,9 @@ class ShipmentBloc extends ChangeNotifier {
           print(response);
         }
       }
-
-      return false;
     }
+
+    return false;
   }
 
   Future<dynamic> onChangeDefaultAddress({

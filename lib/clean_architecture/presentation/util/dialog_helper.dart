@@ -12,6 +12,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/model/user_information
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/phone/phone_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
@@ -594,7 +595,8 @@ class DialogHelper {
                 margin: const EdgeInsets.only(top: 50.0),
                 color: Colors.transparent,
                 child: Container(
-                  padding: const EdgeInsets.all(18.0),
+                  padding: const EdgeInsets.only(
+                      top: 10.0, right: 15.0, bottom: 15.0, left: 15.0),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -602,543 +604,811 @@ class DialogHelper {
                       topRight: Radius.circular(10.0),
                     ),
                   ),
-                  child: SingleChildScrollView(
-                    child: Form(
-                      key: shipmentBloc.formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              const Expanded(
-                                child: Text(
-                                  "Nueva Direccion",
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 33.0,
-                                height: 33.0,
-                                child: IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(CupertinoIcons.clear),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          TextFormField(
-                            initialValue: shipmentBloc.address.addressName,
-                            onChanged: shipmentBloc.onChangeAddressName,
-                            validator: shipmentBloc.onValidationAddressName,
-                            style: Theme.of(context).textTheme.bodyText2,
-                            decoration: InputDecoration(
-                              labelText: "Nombre de dirección",
-                              hintText: "Ej. Mi Casa, trabajo etc",
-                              labelStyle: const TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              hintStyle: Theme.of(context).textTheme.bodyText2,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0),
+                          Expanded(
+                            child: Text(
+                              shipmentBloc.isUpdate
+                                  ? "Actualizar Dirección"
+                                  : "Nueva Dirección",
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Tipo de dirección',
-                                style: Theme.of(context).textTheme.bodyText2,
-                              ),
-                              const SizedBox(height: 5),
-                              InkWell(
-                                onTap: () {
-                                  showDropdownAddressType(
-                                    addressTypes: shipmentBloc.addressTypes,
-                                    context: context,
-                                    changeAddressType: (index) {
-                                      shipmentBloc.onChangeAddressTypes(
-                                        index: index,
-                                      );
-                                      Navigator.of(context).pop();
-                                    },
-                                  );
-                                },
-                                child: Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Text(
-                                        shipmentBloc.address.addressType ??
-                                            "Seleccione un tipo",
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_drop_down_outlined,
-                                      color: Colors.black,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(color: Colors.black),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          TextFormField(
-                            initialValue: shipmentBloc.address.direction,
-                            onChanged: shipmentBloc.onChangeDirection,
-                            validator: shipmentBloc.onValidationDirection,
-                            style: Theme.of(context).textTheme.bodyText2,
-                            decoration: InputDecoration(
-                              labelText: "Dirección",
-                              hintText: "Ingresa tu dirección",
-                              labelStyle: const TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              hintStyle: Theme.of(context).textTheme.bodyText2,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0),
-                            ),
-                          ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          TextFormField(
-                            initialValue:
-                                shipmentBloc.address.lotNumber!.toString(),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(
-                                  numberValidatorReg),
-                            ],
-                            onChanged: shipmentBloc.onChangeLotNumber,
-                            validator: shipmentBloc.onValidationLotNumber,
-                            style: Theme.of(context).textTheme.bodyText2,
-                            decoration: InputDecoration(
-                              labelText: "Nro/Lote",
-                              hintText: "Ingresa tu numero de lote",
-                              labelStyle: const TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              hintStyle: Theme.of(context).textTheme.bodyText2,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0),
-                            ),
-                          ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          TextFormField(
-                            onChanged: shipmentBloc.onChangeDPTO,
-                            initialValue:
-                                shipmentBloc.address.dptoInt.toString(),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(
-                                numberValidatorReg,
-                              ),
-                            ],
-                            style: Theme.of(context).textTheme.bodyText2,
-                            decoration: InputDecoration(
-                              labelText: "Depto. /Int (opcional)",
-                              hintText: "Ingrese su información",
-                              labelStyle: const TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              hintStyle: Theme.of(context).textTheme.bodyText2,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0.0),
-                            ),
-                          ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          TextFormField(
-                            onChanged: (value) =>
-                                shipmentBloc.address.urbanName = value,
-                            initialValue: shipmentBloc.address.urbanName,
-                            style: Theme.of(context).textTheme.bodyText2,
-                            decoration: InputDecoration(
-                              labelText: "Urbanización (opcional)",
-                              hintText: "Ingrese su urbanización",
-                              labelStyle: const TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              hintStyle: Theme.of(context).textTheme.bodyText2,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0.0),
-                            ),
-                          ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          TextFormField(
-                            onChanged: (value) =>
-                                shipmentBloc.address.referenceName = value,
-                            initialValue: shipmentBloc.address.referenceName,
-                            style: Theme.of(context).textTheme.bodyText2,
-                            decoration: InputDecoration(
-                              labelText: "Referencia (opcional)",
-                              hintText: "Ingrese alguna referencia",
-                              labelStyle: const TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              hintStyle: Theme.of(context).textTheme.bodyText2,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              errorStyle: const TextStyle(height: 0.0),
-                            ),
-                          ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Departamento',
-                                style: TextStyle(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black12.withOpacity(0.6),
-                                ),
-                              ),
-                              const SizedBox(height: 5.0),
-                              InkWell(
-                                onTap: () async {
-                                  await showDropdownRegions(
-                                    context: context,
-                                    regions: mainBloc.extraRegions,
-                                    onChangeRegion:
-                                        (index, stateAlertRegion, context) {
-                                      shipmentBloc.onChangeRegion(
-                                        index: index,
-                                        regions: mainBloc.extraRegions,
-                                        stateAlertRegion: stateAlertRegion,
-                                      );
-
-                                      Navigator.of(context).pop();
-                                    },
-                                  );
-                                },
-                                child: Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Text(
-                                        shipmentBloc
-                                                .address.ubigeo!.department ??
-                                            "Seleccione un departamento",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_drop_down_outlined,
-                                      color: Colors.black,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(color: Colors.black),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Provincia',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black12.withOpacity(0.6),
-                                ),
-                              ),
-                              const SizedBox(height: 5.0),
-                              InkWell(
-                                onTap: () async {
-                                  await showDropdownProvinces(
-                                    context: context,
-                                    provinces: shipmentBloc.provinces,
-                                    onChangeProvince:
-                                        (index, stateAlertProvince, context) {
-                                      shipmentBloc.onChangeProvince(
-                                        index: index,
-                                        stateAlertProvince: stateAlertProvince,
-                                      );
-                                      Navigator.of(context).pop();
-                                    },
-                                  );
-                                },
-                                child: Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Text(
-                                        shipmentBloc.address.ubigeo!.province ??
-                                            "Seleccione una provincia",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_drop_down_outlined,
-                                      color: Colors.black,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(color: Colors.black),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Distrito',
-                                style: TextStyle(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black12.withOpacity(0.6),
-                                ),
-                              ),
-                              const SizedBox(height: 5.0),
-                              InkWell(
-                                onTap: () async {
-                                  await showDropdownDistricts(
-                                    context: context,
-                                    districts: shipmentBloc.districts,
-                                    onChangeDistrict:
-                                        (index, stateAlertDistrict, context) {
-                                      shipmentBloc.onChangeDistrict(
-                                        index: index,
-                                        stateAlertDistrict: stateAlertDistrict,
-                                      );
-
-                                      Navigator.of(context).pop();
-                                    },
-                                  );
-                                },
-                                child: Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Text(
-                                        shipmentBloc.address.ubigeo!.district ??
-                                            "Seleccione un distrito",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_drop_down_outlined,
-                                      color: Colors.black,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(color: Colors.black),
-                          SizedBox(
-                            height: getProportionateScreenHeight(15.0),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Checkbox(
-                                checkColor: Colors.white,
-                                fillColor: MaterialStateProperty.resolveWith(
-                                  shipmentBloc.getColor,
-                                ),
-                                value: shipmentBloc.address.addressDefault,
-                                onChanged: shipmentBloc.onChangeAddressDefault,
-                              ),
-                              Text(
-                                "Usar como dirección predeterminada",
-                                style: Theme.of(context).textTheme.bodyText2,
-                              ),
-                            ],
-                          ),
-                          ValueListenableBuilder(
-                            valueListenable: shipmentBloc.errors,
-                            builder: (context, List<String> value, child) {
-                              return Column(
-                                children: [
-                                  value.isNotEmpty
-                                      ? SizedBox(
-                                          height: getProportionateScreenHeight(
-                                            20.0,
-                                          ),
-                                        )
-                                      : const SizedBox(),
-                                  FormError(errors: value),
-                                ],
-                              );
-                            },
-                          ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          ItemButton(
-                            title: "Eliminar dirección",
-                            press: () async {
-                              context.loaderOverlay.show();
+                          IconButton(
+                            onPressed: () {
                               Navigator.of(context).pop();
-                              final response =
-                                  await shipmentBloc.onDeleteAddress(
-                                addressId: shipmentBloc.address.id!,
-                                headers: mainBloc.headers,
-                              );
-
-                              if (response is ResponseApi) {
-                                shipmentBloc.address = Address(
-                                  ubigeo: Ubigeo(),
-                                  lotNumber: 1,
-                                  dptoInt: 1,
-                                  addressDefault: false,
-                                );
-
-                                final responseUserInformation =
-                                    await mainBloc.loadUserInformationPromise();
-
-                                if (responseUserInformation) {
-                                  mainBloc.refreshMainBloc();
-                                  context.loaderOverlay.hide();
-                                  await GlobalSnackBar.showInfoSnackBarIcon(
-                                    context,
-                                    response.message,
-                                  );
-
-                                  return;
-                                }
-                              }
-
-                              context.loaderOverlay.hide();
-                              await GlobalSnackBar.showWarningSnackBar(
-                                context,
-                                "Ups, vuelvalo a intentar más tarde",
-                              );
-
-                              return;
                             },
-                            icon: Icons.delete_forever_sharp,
-                          ),
-                          SizedBox(
-                            height: getProportionateScreenHeight(20.0),
-                          ),
-                          DefaultButton(
-                            text: "Continuar",
-                            press: () async {
-                              if (shipmentBloc.formKey.currentState!
-                                  .validate()) {
-                                shipmentBloc.formKey.currentState!.save();
-
-                                shipmentBloc.address.ubigeo!.department ==
-                                            "Seleccione un departamento" ||
-                                        shipmentBloc
-                                                .address.ubigeo!.department ==
-                                            "Seleccione"
-                                    ? shipmentBloc.addError(
-                                        error: kDeparmentNullError,
-                                      )
-                                    : shipmentBloc.removeError(
-                                        error: kDeparmentNullError);
-
-                                shipmentBloc.address.ubigeo!.province ==
-                                            "Seleccione una provincia" ||
-                                        shipmentBloc.address.ubigeo!.province ==
-                                            "Seleccione"
-                                    ? shipmentBloc.addError(
-                                        error: kProvinceNullError,
-                                      )
-                                    : shipmentBloc.removeError(
-                                        error: kProvinceNullError,
-                                      );
-
-                                shipmentBloc.address.ubigeo!.district ==
-                                            "Seleccione un distrito" ||
-                                        shipmentBloc.address.ubigeo!.district ==
-                                            "Seleccione"
-                                    ? shipmentBloc.addError(
-                                        error: kDistrictNullError,
-                                      )
-                                    : shipmentBloc.removeError(
-                                        error: kDistrictNullError,
-                                      );
-
-                                if (shipmentBloc.errors.value.isEmpty) {
-                                  context.loaderOverlay.show();
-                                  Navigator.of(context).pop();
-                                  final response = await shipmentBloc.onSave(
-                                    headers: mainBloc.headers,
-                                  );
-
-                                  if (response is ResponseApi) {
-                                    shipmentBloc.address = Address(
-                                      ubigeo: Ubigeo(),
-                                      lotNumber: 1,
-                                      dptoInt: 1,
-                                      addressDefault: false,
-                                    );
-
-                                    final responseUserInformation =
-                                        await mainBloc
-                                            .loadUserInformationPromise();
-
-                                    if (responseUserInformation) {
-                                      mainBloc.refreshMainBloc();
-                                      context.loaderOverlay.hide();
-                                      await GlobalSnackBar.showInfoSnackBarIcon(
-                                        context,
-                                        response.message,
-                                      );
-
-                                      return;
-                                    }
-                                  }
-
-                                  context.loaderOverlay.hide();
-                                  await GlobalSnackBar.showWarningSnackBar(
-                                    context,
-                                    "Ups, vuelvalo a intentar más tarde",
-                                  );
-
-                                  return;
-                                }
-                              }
-                            },
+                            iconSize: 21.0,
+                            icon: const Icon(CupertinoIcons.clear),
                           ),
                         ],
                       ),
+                      SizedBox(
+                        height: getProportionateScreenHeight(5.0),
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Form(
+                            key: shipmentBloc.formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  initialValue:
+                                      shipmentBloc.address.addressName,
+                                  onChanged: shipmentBloc.onChangeAddressName,
+                                  validator:
+                                      shipmentBloc.onValidationAddressName,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                  decoration: InputDecoration(
+                                    labelText: "Nombre de dirección",
+                                    hintText: "Ej. Mi Casa, trabajo etc",
+                                    labelStyle: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintStyle:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    errorStyle: const TextStyle(height: 0),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Tipo de dirección',
+                                      style:
+                                          Theme.of(context).textTheme.bodyText2,
+                                    ),
+                                    const SizedBox(height: 5),
+                                    InkWell(
+                                      onTap: () {
+                                        showDropdownAddressType(
+                                          addressTypes:
+                                              shipmentBloc.addressTypes,
+                                          context: context,
+                                          changeAddressType: (index) {
+                                            shipmentBloc.onChangeAddressTypes(
+                                              index: index,
+                                            );
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
+                                      },
+                                      child: Row(
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text(
+                                              shipmentBloc
+                                                      .address.addressType ??
+                                                  "Seleccione un tipo",
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.arrow_drop_down_outlined,
+                                            color: Colors.black,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(color: Colors.black),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                TextFormField(
+                                  initialValue: shipmentBloc.address.direction,
+                                  onChanged: shipmentBloc.onChangeDirection,
+                                  validator: shipmentBloc.onValidationDirection,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                  decoration: InputDecoration(
+                                    labelText: "Dirección",
+                                    hintText: "Ingresa tu dirección",
+                                    labelStyle: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintStyle:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    errorStyle: const TextStyle(height: 0),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                TextFormField(
+                                  initialValue: shipmentBloc.address.lotNumber!
+                                      .toString(),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: <TextInputFormatter>[
+                                    FilteringTextInputFormatter.allow(
+                                        numberValidatorReg),
+                                  ],
+                                  onChanged: shipmentBloc.onChangeLotNumber,
+                                  validator: shipmentBloc.onValidationLotNumber,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                  decoration: InputDecoration(
+                                    labelText: "Nro/Lote",
+                                    hintText: "Ingresa tu numero de lote",
+                                    labelStyle: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintStyle:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    errorStyle: const TextStyle(height: 0),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                TextFormField(
+                                  onChanged: shipmentBloc.onChangeDPTO,
+                                  initialValue:
+                                      shipmentBloc.address.dptoInt.toString(),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: <TextInputFormatter>[
+                                    FilteringTextInputFormatter.allow(
+                                      numberValidatorReg,
+                                    ),
+                                  ],
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                  decoration: InputDecoration(
+                                    labelText: "Depto. /Int (opcional)",
+                                    hintText: "Ingrese su información",
+                                    labelStyle: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintStyle:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    errorStyle: const TextStyle(height: 0.0),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                TextFormField(
+                                  onChanged: (value) =>
+                                      shipmentBloc.address.urbanName = value,
+                                  initialValue: shipmentBloc.address.urbanName,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                  decoration: InputDecoration(
+                                    labelText: "Urbanización (opcional)",
+                                    hintText: "Ingrese su urbanización",
+                                    labelStyle: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintStyle:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    errorStyle: const TextStyle(height: 0.0),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                TextFormField(
+                                  onChanged: (value) => shipmentBloc
+                                      .address.referenceName = value,
+                                  initialValue:
+                                      shipmentBloc.address.referenceName,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                  decoration: InputDecoration(
+                                    labelText: "Referencia (opcional)",
+                                    hintText: "Ingrese alguna referencia",
+                                    labelStyle: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintStyle:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    errorStyle: const TextStyle(height: 0.0),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Departamento',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.black12.withOpacity(0.6),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5.0),
+                                    InkWell(
+                                      onTap: () async {
+                                        await showDropdownRegions(
+                                          context: context,
+                                          regions: mainBloc.extraRegions,
+                                          onChangeRegion: (index,
+                                              stateAlertRegion, context) {
+                                            shipmentBloc.onChangeRegion(
+                                              index: index,
+                                              regions: mainBloc.extraRegions,
+                                              stateAlertRegion:
+                                                  stateAlertRegion,
+                                            );
+
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
+                                      },
+                                      child: Row(
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text(
+                                              shipmentBloc.address.ubigeo!
+                                                      .department ??
+                                                  "Seleccione un departamento",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText2,
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.arrow_drop_down_outlined,
+                                            color: Colors.black,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(color: Colors.black),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Provincia',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.black12.withOpacity(0.6),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5.0),
+                                    InkWell(
+                                      onTap: () async {
+                                        await showDropdownProvinces(
+                                          context: context,
+                                          provinces: shipmentBloc.provinces,
+                                          onChangeProvince: (index,
+                                              stateAlertProvince, context) {
+                                            shipmentBloc.onChangeProvince(
+                                              index: index,
+                                              stateAlertProvince:
+                                                  stateAlertProvince,
+                                            );
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
+                                      },
+                                      child: Row(
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text(
+                                              shipmentBloc.address.ubigeo!
+                                                      .province ??
+                                                  "Seleccione una provincia",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText2,
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.arrow_drop_down_outlined,
+                                            color: Colors.black,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(color: Colors.black),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Distrito',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.black12.withOpacity(0.6),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5.0),
+                                    InkWell(
+                                      onTap: () async {
+                                        await showDropdownDistricts(
+                                          context: context,
+                                          districts: shipmentBloc.districts,
+                                          onChangeDistrict: (index,
+                                              stateAlertDistrict, context) {
+                                            shipmentBloc.onChangeDistrict(
+                                              index: index,
+                                              stateAlertDistrict:
+                                                  stateAlertDistrict,
+                                            );
+
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
+                                      },
+                                      child: Row(
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text(
+                                              shipmentBloc.address.ubigeo!
+                                                      .district ??
+                                                  "Seleccione un distrito",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText2,
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.arrow_drop_down_outlined,
+                                            color: Colors.black,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(color: Colors.black),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(15.0),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Checkbox(
+                                      checkColor: Colors.white,
+                                      fillColor:
+                                          MaterialStateProperty.resolveWith(
+                                        shipmentBloc.getColor,
+                                      ),
+                                      value:
+                                          shipmentBloc.address.addressDefault,
+                                      onChanged:
+                                          shipmentBloc.onChangeAddressDefault,
+                                    ),
+                                    Text(
+                                      "Usar como dirección predeterminada",
+                                      style:
+                                          Theme.of(context).textTheme.bodyText2,
+                                    ),
+                                  ],
+                                ),
+                                ValueListenableBuilder(
+                                  valueListenable: shipmentBloc.errors,
+                                  builder:
+                                      (context, List<String> value, child) {
+                                    return Column(
+                                      children: [
+                                        value.isNotEmpty
+                                            ? SizedBox(
+                                                height:
+                                                    getProportionateScreenHeight(
+                                                  20.0,
+                                                ),
+                                              )
+                                            : const SizedBox(),
+                                        FormError(errors: value),
+                                      ],
+                                    );
+                                  },
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                ItemButton(
+                                  title: "Eliminar dirección",
+                                  press: () async {
+                                    context.loaderOverlay.show();
+                                    Navigator.of(context).pop();
+                                    final response =
+                                        await shipmentBloc.onDeleteAddress(
+                                      addressId: shipmentBloc.address.id!,
+                                      headers: mainBloc.headers,
+                                    );
+
+                                    if (response is ResponseApi) {
+                                      shipmentBloc.address = Address(
+                                        ubigeo: Ubigeo(),
+                                        lotNumber: 1,
+                                        dptoInt: 1,
+                                        addressDefault: false,
+                                      );
+
+                                      final responseUserInformation =
+                                          await mainBloc
+                                              .loadUserInformationPromise();
+
+                                      if (responseUserInformation) {
+                                        mainBloc.refreshMainBloc();
+                                        context.loaderOverlay.hide();
+                                        await GlobalSnackBar
+                                            .showInfoSnackBarIcon(
+                                          context,
+                                          response.message,
+                                        );
+
+                                        return;
+                                      }
+                                    }
+
+                                    context.loaderOverlay.hide();
+                                    await GlobalSnackBar.showWarningSnackBar(
+                                      context,
+                                      "Ups, vuelvalo a intentar más tarde",
+                                    );
+
+                                    return;
+                                  },
+                                  icon: Icons.delete_forever_sharp,
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                DefaultButton(
+                                  text: "Continuar",
+                                  press: () async {
+                                    if (shipmentBloc.formKey.currentState!
+                                        .validate()) {
+                                      shipmentBloc.formKey.currentState!.save();
+
+                                      shipmentBloc.address.ubigeo!.department ==
+                                                  "Seleccione un departamento" ||
+                                              shipmentBloc.address.ubigeo!
+                                                      .department ==
+                                                  "Seleccione"
+                                          ? shipmentBloc.addError(
+                                              error: kDeparmentNullError,
+                                            )
+                                          : shipmentBloc.removeError(
+                                              error: kDeparmentNullError);
+
+                                      shipmentBloc.address.ubigeo!.province ==
+                                                  "Seleccione una provincia" ||
+                                              shipmentBloc.address.ubigeo!
+                                                      .province ==
+                                                  "Seleccione"
+                                          ? shipmentBloc.addError(
+                                              error: kProvinceNullError,
+                                            )
+                                          : shipmentBloc.removeError(
+                                              error: kProvinceNullError,
+                                            );
+
+                                      shipmentBloc.address.ubigeo!.district ==
+                                                  "Seleccione un distrito" ||
+                                              shipmentBloc.address.ubigeo!
+                                                      .district ==
+                                                  "Seleccione"
+                                          ? shipmentBloc.addError(
+                                              error: kDistrictNullError,
+                                            )
+                                          : shipmentBloc.removeError(
+                                              error: kDistrictNullError,
+                                            );
+
+                                      if (shipmentBloc.errors.value.isEmpty) {
+                                        context.loaderOverlay.show();
+                                        Navigator.of(context).pop();
+                                        final response =
+                                            await shipmentBloc.onSave(
+                                          headers: mainBloc.headers,
+                                        );
+
+                                        if (response is ResponseApi) {
+                                          shipmentBloc.address = Address(
+                                            ubigeo: Ubigeo(),
+                                            lotNumber: 1,
+                                            dptoInt: 1,
+                                            addressDefault: false,
+                                          );
+
+                                          final responseUserInformation =
+                                              await mainBloc
+                                                  .loadUserInformationPromise();
+
+                                          if (responseUserInformation) {
+                                            mainBloc.refreshMainBloc();
+                                            context.loaderOverlay.hide();
+
+                                            if (response.message == "success") {
+                                              return await GlobalSnackBar
+                                                  .showInfoSnackBarIcon(
+                                                context,
+                                                response.message,
+                                              );
+                                            }
+
+                                            return await GlobalSnackBar
+                                                .showErrorSnackBarIcon(
+                                              context,
+                                              response.message,
+                                            );
+                                          }
+                                        }
+
+                                        context.loaderOverlay.hide();
+                                        await GlobalSnackBar
+                                            .showWarningSnackBar(
+                                          context,
+                                          "Ups, vuelvalo a intentar más tarde",
+                                        );
+
+                                        return;
+                                      }
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> showPhonesDialog({
+    required BuildContext context,
+  }) {
+    return showModalBottomSheet<void>(
+      backgroundColor: Colors.transparent,
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context_) {
+        return ChangeNotifierProvider<PhoneBloc>.value(
+          value: Provider.of<PhoneBloc>(context, listen: false)
+            ..errors.value.clear(),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.91,
+            minChildSize: 0.20,
+            maxChildSize: 0.91,
+            builder: (__, controller) {
+              final phoneBloc = Provider.of<PhoneBloc>(__);
+              final mainBloc = Provider.of<MainBloc>(__);
+              return Container(
+                height: SizeConfig.screenHeight,
+                margin: const EdgeInsets.only(top: 50.0),
+                color: Colors.transparent,
+                child: Container(
+                  padding: const EdgeInsets.only(
+                      top: 10.0, right: 15.0, bottom: 15.0, left: 15.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10.0),
+                      topRight: Radius.circular(10.0),
                     ),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              phoneBloc.isUpdate
+                                  ? "Actualizar Teléfono"
+                                  : "Nuevo Teléfono",
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            iconSize: 21.0,
+                            icon: const Icon(CupertinoIcons.clear),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: getProportionateScreenHeight(5.0),
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Form(
+                            key: shipmentBloc.formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  initialValue:
+                                      shipmentBloc.address.addressName,
+                                  onChanged: shipmentBloc.onChangeAddressName,
+                                  validator:
+                                      shipmentBloc.onValidationAddressName,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                  decoration: InputDecoration(
+                                    labelText: "Nombre de dirección",
+                                    hintText: "Ej. Mi Casa, trabajo etc",
+                                    labelStyle: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintStyle:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    errorStyle: const TextStyle(height: 0),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                TextFormField(
+                                  initialValue: phoneBloc.phone.value,
+                                  onChanged: phoneBloc.onChangePhoneNumber,
+                                  validator: phoneBloc.onValidationPhoneNumber,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                  decoration: InputDecoration(
+                                    labelText: "Teléfono",
+                                    hintText: "Ingresa tu teléfono",
+                                    labelStyle: const TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintStyle: Theme.of(context).textTheme.bodyText2,
+                                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                                    errorStyle: const TextStyle(height: 0),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(15.0),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Checkbox(
+                                      checkColor: Colors.white,
+                                      fillColor:
+                                          MaterialStateProperty.resolveWith(
+                                        phoneBloc.getColor,
+                                      ),
+                                      value:
+                                      phoneBloc.phone.phoneDefault,
+                                      onChanged:
+                                      phoneBloc.onChangePhoneDefault,
+                                    ),
+                                    Text(
+                                      "Usar como dirección predeterminada",
+                                      style:
+                                          Theme.of(context).textTheme.bodyText2,
+                                    ),
+                                  ],
+                                ),
+                                ValueListenableBuilder(
+                                  valueListenable: shipmentBloc.errors,
+                                  builder:
+                                      (context, List<String> value, child) {
+                                    return Column(
+                                      children: [
+                                        value.isNotEmpty
+                                            ? SizedBox(
+                                                height:
+                                                    getProportionateScreenHeight(
+                                                  20.0,
+                                                ),
+                                              )
+                                            : const SizedBox(),
+                                        FormError(errors: value),
+                                      ],
+                                    );
+                                  },
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                ItemButton(
+                                  title: "Eliminar dirección",
+                                  press: () async {
+                                    context.loaderOverlay.show();
+                                    Navigator.of(context).pop();
+                                    final response =
+                                        await shipmentBloc.onDeleteAddress(
+                                      addressId: shipmentBloc.address.id!,
+                                      headers: mainBloc.headers,
+                                    );
+
+                                    if (response is ResponseApi) {
+                                      shipmentBloc.address = Address(
+                                        ubigeo: Ubigeo(),
+                                        lotNumber: 1,
+                                        dptoInt: 1,
+                                        addressDefault: false,
+                                      );
+
+                                      final responseUserInformation =
+                                          await mainBloc
+                                              .loadUserInformationPromise();
+
+                                      if (responseUserInformation) {
+                                        mainBloc.refreshMainBloc();
+                                        context.loaderOverlay.hide();
+                                        await GlobalSnackBar
+                                            .showInfoSnackBarIcon(
+                                          context,
+                                          response.message,
+                                        );
+
+                                        return;
+                                      }
+                                    }
+
+                                    context.loaderOverlay.hide();
+                                    await GlobalSnackBar.showWarningSnackBar(
+                                      context,
+                                      "Ups, vuelvalo a intentar más tarde",
+                                    );
+
+                                    return;
+                                  },
+                                  icon: Icons.delete_forever_sharp,
+                                ),
+                                SizedBox(
+                                  height: getProportionateScreenHeight(20.0),
+                                ),
+                                DefaultButton(
+                                  text: "Continuar",
+                                  press: () async {
+                                    if (shipmentBloc.formKey.currentState!
+                                        .validate()) {
+                                      shipmentBloc.formKey.currentState!.save();
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );

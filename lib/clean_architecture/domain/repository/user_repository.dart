@@ -8,8 +8,8 @@ abstract class UserRepositoryInterface {
 
   // http.response
   Future<dynamic> updateUserAddress({
-    required String addressId,
     required Address address,
+    required Map<String, String> headers,
   });
 
   // http.response
@@ -20,12 +20,38 @@ abstract class UserRepositoryInterface {
 
   // http.response
   Future<dynamic> changeMainAddress({
-    required addressId,
+    required String addressId,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> deleteUserAddress({required String addressId, required Map<String, String> headers});
+  Future<dynamic> deleteUserAddress({
+    required String addressId,
+    required Map<String, String> headers,
+  });
+
+  Future<dynamic> createPhone({
+    required Phone phone,
+    required Map<String, String> headers,
+  });
+
+  // http.response
+  Future<dynamic> updateUserPhone({
+    required Phone phone,
+    required Map<String, String> headers,
+  });
+
+  // http.response
+  Future<dynamic> changeMainPhone({
+    required String phoneId,
+    required Map<String, String> headers,
+  });
+
+  // http.response
+  Future<dynamic> deleteUserPhone({
+    required String phoneId,
+    required Map<String, String> headers,
+  });
 
   // User
   Future<dynamic> getInformationUser({required Map<String, String> headers});

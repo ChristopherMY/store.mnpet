@@ -185,15 +185,15 @@ class UserService implements UserRepositoryInterface {
   // http.response
   @override
   Future<dynamic> updateUserAddress({
-    required String addressId,
     required Address address,
+   required Map<String, String> headers,
   }) async {
     try {
       String bodyParams = addressToMap(address);
 
       final response = await http.put(
         Uri.parse(
-          "$_url/api/v1/ecommerce_users/addresses?address_id=$addressId",
+          "$_url/api/v1/ecommerce_users/addresses?address_id=${address.id}",
         ),
         headers: headers,
         body: bodyParams,
@@ -207,4 +207,30 @@ class UserService implements UserRepositoryInterface {
       return e.toString();
     }
   }
+
+  @override
+  Future<dynamic> changeMainPhone({required String phoneId, required Map<String, String> headers}) {
+    // TODO: implement changeMainPhone
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<dynamic> createPhone({required Phone phone, required Map<String, String> headers}) {
+    // TODO: implement createPhone
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<dynamic> deleteUserPhone({required String phoneId, required Map<String, String> headers}) {
+    // TODO: implement deleteUserPhone
+    throw UnimplementedError();
+  }
+
+  @override
+  Future updateUserPhone({required Phone phone, required Map<String, String> headers}) {
+    // TODO: implement updateUserPhone
+    throw UnimplementedError();
+  }
+
+
 }
