@@ -122,7 +122,6 @@ class AddressesDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final mainBloc = context.watch<MainBloc>();
     final shipmentBloc = context.watch<ShipmentBloc>();
-    final DialogHelper dialogHelper = DialogHelper();
 
     return Container(
       decoration: const BoxDecoration(
@@ -135,11 +134,9 @@ class AddressesDetail extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Expanded(
-            child: Text("Direcciones: "),
-          ),
+          const Text("Direcciones:"),
           const SizedBox(width: 5.0),
           Expanded(
             flex: 4,
@@ -154,7 +151,8 @@ class AddressesDetail extends StatelessWidget {
                         shipmentBloc.isUpdate = true;
                         shipmentBloc.address = address;
 
-                        await dialogHelper.showAddressDialog(context: context);
+                        await DialogHelper()
+                            .showAddressDialog(context: context);
                       },
                       child: ItemAddress(
                         address: address,
@@ -169,7 +167,7 @@ class AddressesDetail extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     shipmentBloc.isUpdate = false;
-                    await dialogHelper.showAddressDialog(context: context);
+                    await DialogHelper().showAddressDialog(context: context);
                   },
                   child: Row(
                     children: const [
@@ -255,7 +253,8 @@ class ItemAddress extends StatelessWidget {
                         final responseUserInformation =
                             await mainBloc.loadUserInformationPromise();
 
-                        if (responseUserInformation) {
+                        if (responseUserInformation is UserInformation) {
+                          mainBloc.informationUser = responseUserInformation;
                           mainBloc.refreshMainBloc();
 
                           await GlobalSnackBar.showInfoSnackBarIcon(

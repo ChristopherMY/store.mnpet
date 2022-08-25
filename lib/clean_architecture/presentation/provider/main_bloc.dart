@@ -17,6 +17,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/user_reposi
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/login/login_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
 class MainBloc extends ChangeNotifier {
   RegionRepositoryInterface regionRepositoryInterface;
@@ -33,9 +34,10 @@ class MainBloc extends ChangeNotifier {
 
   dynamic credentials;
 
-  int indexSelected = 0;
   bool isLogged = false;
-  ValueNotifier<bool> isLoadProfileScreen = ValueNotifier(false);
+  ValueNotifier<LoadStatus> accountLoaded = ValueNotifier(LoadStatus.loading);
+  ValueNotifier<bool> isLoadingProfileScreen = ValueNotifier(false);
+  ValueNotifier<int> indexSelected = ValueNotifier(0);
 
   List<Region> regions = List.of(<Region>[]);
 
@@ -69,41 +71,37 @@ class MainBloc extends ChangeNotifier {
     required int index,
     required BuildContext context,
   }) async {
-    if (indexSelected != index) {
-      indexSelected = index;
+    if (indexSelected.value != index) {
+      indexSelected.value = index;
 
-      if (indexSelected == 0) {
-        notifyListeners();
+      if (indexSelected.value == 0) {
         return;
       }
 
-      if (indexSelected == 1) {
+      if (indexSelected.value == 1) {
         if (credentials is! CredentialsAuth) {
           requestAccess(context);
         }
-
-        notifyListeners();
         return;
       }
 
-      if (indexSelected == 2) {
+      if (indexSelected.value == 2) {
         if (credentials is! CredentialsAuth) {
           requestAccess(context);
-          isLoadProfileScreen.value = true;
-          notifyListeners();
+          accountLoaded.value = LoadStatus.normal;
           return;
         } else {
           if (informationUser is! UserInformation) {
-            loadUserInformationPromise().then((loadInformation) {
-              // TODO: No importa la respuesta solo importa que termine de cargar para despejar el placeholder de espera proveniente de la lectura de Hive Storage
-
-              if (loadInformation) {
-                isLoadProfileScreen.value = true;
-              }
-            });
+            loadUserInformationPromise().then(
+              (loadInformation) {
+                if(loadInformation is UserInformation){
+                  informationUser = loadInformation;
+                  accountLoaded.value = LoadStatus.normal;
+                }
+              },
+            );
           }
 
-          notifyListeners();
           return;
         }
       }
@@ -378,14 +376,16 @@ class MainBloc extends ChangeNotifier {
       containerName: "authentication",
       key: "credentials",
     );
+
     credentials = dynamic;
     informationUser = dynamic;
     headers[HttpHeaders.authorizationHeader] = '';
+    accountLoaded.value = LoadStatus.loading;
 
     notifyListeners();
   }
 
-  Future<bool> loadUserInformationPromise() async {
+  Future<dynamic> loadUserInformationPromise() async {
     final response = await userRepositoryInterface.getInformationUser(
       headers: headers,
     );
@@ -393,12 +393,8 @@ class MainBloc extends ChangeNotifier {
     if (response is http.Response) {
       if (response.statusCode == 200) {
         final decodeResponse = json.decode(response.body);
-        if (kDebugMode) {
-          print(decodeResponse);
-        }
 
-        informationUser = UserInformation.fromMap(decodeResponse);
-        return true;
+        return UserInformation.fromMap(decodeResponse);
       }
     } else if (response is String) {
       if (kDebugMode) {
@@ -410,28 +406,28 @@ class MainBloc extends ChangeNotifier {
   }
 
   // TODO: Solo se trabajara en el Main Screen
-  void loadUserInformation() async {
-    final response = await userRepositoryInterface.getInformationUser(
-      headers: headers,
-    );
-
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decodeResponse = json.decode(response.body);
-        if (kDebugMode) {
-          print(decodeResponse);
-        }
-
-        informationUser = UserInformation.fromMap(decodeResponse);
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-    }
-
-    notifyListeners();
-  }
+  // void loadUserInformation() async {
+  //   final response = await userRepositoryInterface.getInformationUser(
+  //     headers: headers,
+  //   );
+  //
+  //   if (response is http.Response) {
+  //     if (response.statusCode == 200) {
+  //       final decodeResponse = json.decode(response.body);
+  //       // if (kDebugMode) {
+  //       //   print(decodeResponse);
+  //       // }
+  //
+  //       informationUser = UserInformation.fromMap(decodeResponse);
+  //       print("Quiere informat");
+  //       accountLoaded.value = LoadStatus.normal;
+  //     }
+  //   } else if (response is String) {
+  //     if (kDebugMode) {
+  //       print(response);
+  //     }
+  //   }
+  // }
 
   void refreshMainBloc() {
     notifyListeners();

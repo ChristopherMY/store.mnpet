@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/vimeo_video_config.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 
@@ -11,7 +10,7 @@ class AuthService implements AuthRepositoryInterface {
 
   // https.Response
   @override
-  Future<dynamic> createUser({required User user}) async {
+  Future<dynamic> createUser({required Map<String, dynamic> user}) async {
     try {
       return await http.post(
         Uri.parse("$_url/api/v1/ecommerce_users/register_native"),
@@ -21,6 +20,7 @@ class AuthService implements AuthRepositoryInterface {
     } on Exception catch (e) {
       return e.toString();
     }
+
   }
 
   // https.Response
@@ -39,6 +39,69 @@ class AuthService implements AuthRepositoryInterface {
         }),
       );
     } on Exception catch (e) {
+      return e.toString();
+    }
+  }
+
+  @override
+  Future<dynamic> requestPasswordChange({
+    required String value,
+    required String valueType,
+  }) async {
+    try {
+      Map<String, dynamic> bodyParams = {"value": value, "type": valueType};
+      final encode = json.encode(bodyParams);
+
+      return await http.post(
+        Uri.parse("$_url/api/v1/ecommerce_users/change_password"),
+        headers: headers,
+        body: encode,
+      );
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  @override
+  Future<dynamic> validateOtp({
+    required String otp,
+    required String userId,
+  }) async {
+    try {
+      Map<String, dynamic> bodyParams = {
+        "user_id": userId,
+        "otp_to_validate": otp
+      };
+
+      final encode = json.encode(bodyParams);
+
+      return await http.post(
+        Uri.parse("$_url/api/v1/ecommerce_users/validate_otp"),
+        headers: headers,
+        body: encode,
+      );
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  @override
+  Future changePassword({
+    required String userId,
+    required String password,
+    required String passwordConfirmation,
+  }) async{
+    try {
+      Uri url = Uri.parse("$_url/api/v1/ecommerce_users/change_password");
+      Map<String, dynamic> bodyParams = {
+        "user_id": userId,
+        "password": password,
+        "password_confirmation": passwordConfirmation
+      };
+
+      final encode = json.encode(bodyParams);
+      return await http.put(url, headers: headers, body: encode);
+    } on Exception catch (e){
       return e.toString();
     }
   }

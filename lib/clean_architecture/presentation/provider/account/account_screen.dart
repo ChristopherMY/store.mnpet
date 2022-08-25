@@ -11,6 +11,9 @@ import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
 
 import '../shipment/shipment_screen.dart';
@@ -34,17 +37,6 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  void _init() async {
-    // final mainBloc = context.read<MainBloc>();
-    // final isLogged = await mainBloc.loadSession();
-    // if (isLogged) {
-    // } else {
-    //   Navigator.of(context).push(
-    //     MaterialPageRoute(builder: ((context) => const LoginScreen())),
-    //   );
-    // }
-  }
-
   @override
   void initState() {
     // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -58,206 +50,217 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     final mainBloc = context.watch<MainBloc>();
 
-    return SafeArea(
-      child: SizedBox(
-        // height: SizeConfig.screenHeight! * 0.9,
-        child: RefreshIndicator(
-          notificationPredicate: 1 == 1 ? (_) => true : (_) => false,
-          triggerMode: RefreshIndicatorTriggerMode.onEdge,
-          onRefresh: () async {},
-          // isLoadProfileScreen
-          child: ValueListenableBuilder(
-            valueListenable: mainBloc.isLoadProfileScreen,
-            builder: (context, bool value, child) {
-              return CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    pinned: true,
-                    snap: false,
-                    floating: false,
-                    toolbarHeight: 56.0,
-                    backgroundColor: kPrimaryColor,
-                    systemOverlayStyle: const SystemUiOverlayStyle(
-                      statusBarColor: kPrimaryColor,
-                      statusBarIconBrightness: Brightness.light,
-                    ),
-                    expandedHeight: getProportionateScreenHeight(56.0),
-                    title: const Text("Mi cuenta"),
-                    actions: [
-                      value
-                          ? Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          SettingsScreen.init(context),
-                                    ),
-                                  );
-                                },
-                                child: const Icon(Icons.settings),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ],
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: const SliverToBoxAdapter(
-                      child: HeaderInformation(),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: const SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20.0,
-                        horizontal: 25.0,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Text(
-                          "Mi perfil",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: SliverToBoxAdapter(
-                      child: TargetOption(
-                        title: "Mis Direcciones",
-                        subTitle: "Mis direcciones de envio",
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ShipmentScreen(),
-                            ),
+    return ValueListenableBuilder(
+      valueListenable: mainBloc.accountLoaded,
+      builder: (context, LoadStatus accountLoaded, child) {
+        return Stack(
+          children: [
+            accountLoaded == LoadStatus.normal
+                ? RefreshIndicator(
+                    notificationPredicate: 1 == 1 ? (_) => true : (_) => false,
+                    triggerMode: RefreshIndicatorTriggerMode.onEdge,
+                    onRefresh: () async {
+                      if (mainBloc.informationUser is UserInformation) {
+                        final response =
+                            await mainBloc.loadUserInformationPromise();
+                        if (response is UserInformation) {
+                          mainBloc.informationUser = response;
+                          mainBloc.refreshMainBloc();
+                          if (!mounted) return;
+                          await GlobalSnackBar.showInfoSnackBarIcon(
+                            context,
+                            "Información actualizada.",
                           );
-                        },
-                        icon: Icons.directions,
-                      ),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: SliverToBoxAdapter(
-                      child: TargetOption(
-                        title: "Mis ordenes",
-                        subTitle: 'Detalle de ordenes',
-                        onTap: () {},
-                        icon: Icons.local_shipping_outlined,
-                      ),
-                    ),
-                  ),
-                  // SliverVisibility(
-                  //   visible: value,
-                  //   sliver: SliverToBoxAdapter(
-                  //     child: TargetOption(
-                  //       title: "Mis Tarjetas",
-                  //       subTitle: 'Detalle de tarjetas guardadas',
-                  //       onTap: () {
-                  //         Navigator.of(context).push(
-                  //           MaterialPageRoute(
-                  //             builder: (context) => const CreditCartScreen(),
-                  //           ),
-                  //         );
-                  //       },
-                  //       icon: Icons.credit_score,
-                  //       // Icons.credit_card
-                  //     ),
-                  //   ),
-                  // ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: const SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20.0,
-                        horizontal: 25.0,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Text(
-                          "Ayuda",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                        }
+                      }
+                    },
+                    child: CustomScrollView(
+                      slivers: [
+                        SliverAppBar(
+                          pinned: true,
+                          snap: false,
+                          floating: false,
+                          toolbarHeight: 56.0,
+                          backgroundColor: kBackGroundColor,
+                          systemOverlayStyle: const SystemUiOverlayStyle(
+                            statusBarColor: kBackGroundColor,
+                            statusBarIconBrightness: Brightness.dark,
+                          ),
+                          expandedHeight: getProportionateScreenHeight(56.0),
+                          actions: [
+                            mainBloc.informationUser is UserInformation
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                SettingsScreen.init(context),
+                                          ),
+                                        );
+                                      },
+                                      child: const Icon(
+                                        Icons.settings,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ],
+                        ),
+                        const SliverToBoxAdapter(
+                          child: HeaderInformation(),
+                        ),
+                        SliverVisibility(
+                          visible: mainBloc.informationUser is UserInformation,
+                          sliver: const SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 20.0,
+                              horizontal: 25.0,
+                            ),
+                            sliver: SliverToBoxAdapter(
+                              child: Text(
+                                "Mi perfil",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: SliverToBoxAdapter(
-                      child: TargetOption(
-                        title: "Contacto",
-                        subTitle: 'Horario de atención',
-                        onTap: () {},
-                        icon: Icons.phone,
-                      ),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: SliverToBoxAdapter(
-                      child: TargetOption(
-                        title: "Privacidad",
-                        subTitle: 'Terminos y condiciones',
-                        onTap: () {},
-                        icon: Icons.question_mark_rounded,
-                      ),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: SliverToBoxAdapter(
-                      child: TargetOption(
-                        title: "Cerrar sesión",
-                        subTitle: "Cerrar sesión en este dispositivo",
-                        onTap: mainBloc.signOut,
-                        icon: CommunityMaterialIcons.logout,
-                      ),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: SliverToBoxAdapter(
-                      child:
-                          SizedBox(height: getProportionateScreenHeight(25.0)),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: value,
-                    sliver: SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                            bottom: getProportionateScreenHeight(25.0)),
-                        child: const CopyRight(),
-                      ),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: !value,
-                    sliver: const SliverFillRemaining(
-                      child: Center(
-                        child: LottieAnimation(
-                          source: "assets/lottie/paw.json",
+                        SliverVisibility(
+                          visible: mainBloc.informationUser is UserInformation,
+                          sliver: SliverToBoxAdapter(
+                            child: TargetOption(
+                              title: "Mis Direcciones",
+                              subTitle: "Mis direcciones de envío",
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ShipmentScreen(),
+                                  ),
+                                );
+                              },
+                              icon: Icons.directions,
+                            ),
+                          ),
                         ),
-                      ),
+                        SliverVisibility(
+                          visible: mainBloc.informationUser is UserInformation,
+                          sliver: SliverToBoxAdapter(
+                            child: TargetOption(
+                              title: "Mis órdenes",
+                              subTitle: 'Detalle de órdenes',
+                              onTap: () {},
+                              icon: Icons.local_shipping_outlined,
+                            ),
+                          ),
+                        ),
+                        // SliverVisibility(
+                        //   visible: value,
+                        //   sliver: SliverToBoxAdapter(
+                        //     child: TargetOption(
+                        //       title: "Mis Tarjetas",
+                        //       subTitle: 'Detalle de tarjetas guardadas',
+                        //       onTap: () {
+                        //         Navigator.of(context).push(
+                        //           MaterialPageRoute(
+                        //             builder: (context) => const CreditCartScreen(),
+                        //           ),
+                        //         );
+                        //       },
+                        //       icon: Icons.credit_score,
+                        //       // Icons.credit_card
+                        //     ),
+                        //   ),
+                        // ),
+                        const SliverPadding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 20.0,
+                            horizontal: 25.0,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: Text(
+                              "Ayuda",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: TargetOption(
+                            title: "Contacto",
+                            subTitle: 'Horario de atención',
+                            onTap: () {},
+                            icon: Icons.phone,
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: TargetOption(
+                            title: "Privacidad",
+                            subTitle: 'Terminos y condiciones',
+                            onTap: () {},
+                            icon: Icons.question_mark_rounded,
+                          ),
+                        ),
+                        SliverVisibility(
+                          visible: mainBloc.informationUser is UserInformation,
+                          sliver: SliverToBoxAdapter(
+                            child: TargetOption(
+                              title: "Cerrar sesión",
+                              subTitle: "Cerrar sesión en este dispositivo",
+                              onTap: mainBloc.signOut,
+                              icon: CommunityMaterialIcons.logout,
+                            ),
+                          ),
+                        ),
+
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          fillOverscroll: true,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              bottom: getProportionateScreenHeight(25.0),
+                              top: getProportionateScreenHeight(25.0),
+                            ),
+                            child: const CopyRight(),
+                          ),
+                        ),
+                        // SliverFillRemaining(
+                        //   child: ValueListenableBuilder(
+                        //     valueListenable: mainBloc.isLoadingProfileScreen,
+                        //     builder: (context, bool value, child) {
+                        //       if (value) {
+                        //         return const Center(
+                        //           child: LottieAnimation(
+                        //             source: "assets/lottie/paw.json",
+                        //           ),
+                        //         );
+                        //       }
+                        //
+                        //       return const SizedBox.shrink();
+                        //     },
+                        //   ),
+                        // )
+                      ],
                     ),
                   )
-                ],
-              );
-            },
-          ),
-        ),
-      ),
+                : const Positioned.fill(
+                    child: Center(
+                      child: LottieAnimation(
+                        source: "assets/lottie/paw.json",
+                      ),
+                    ),
+                  ),
+          ],
+        );
+      },
     );
   }
 
@@ -344,9 +347,9 @@ class HeaderInformation extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 5.0),
-                            const Text(
+                            Text(
                               "# Codigo de referido",
-                              style: TextStyle(fontSize: 14),
+                              style: Theme.of(context).textTheme.bodyText2,
                             ),
                           ],
                         )
@@ -382,7 +385,6 @@ class HeaderInformation extends StatelessWidget {
                             child: ValueListenableBuilder(
                               valueListenable: accountBloc.pressed,
                               builder: (context, bool value, child) {
-                                print(bool);
                                 return FlatButton(
                                   color: Colors.white,
                                   splashColor: kPrimaryColor,
@@ -397,7 +399,12 @@ class HeaderInformation extends StatelessWidget {
                                   onHighlightChanged:
                                       accountBloc.onHighlightChanged,
                                   onPressed: () {
-                                    print("Presiono");
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            SignUpScreen.init(context),
+                                      ),
+                                    );
                                   },
                                   child: const Text(
                                     "Crear cuenta",
@@ -487,7 +494,8 @@ class TargetOption extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 7.0),
-                    Text(subTitle),
+                    Text(subTitle,
+                        style: Theme.of(context).textTheme.bodyText2),
                   ],
                 ),
               ),

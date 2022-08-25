@@ -28,10 +28,8 @@ const kAnimationDuration = Duration(milliseconds: 200);
 const kFontSizeTitleAppBar = 16.0;
 
 final headingStyle = TextStyle(
-  fontSize: getProportionateScreenWidth(28),
+  fontSize: getProportionateScreenWidth(22),
   fontWeight: FontWeight.bold,
-  color: Colors.black,
-  height: 1.5,
 );
 /*
 //Styling
@@ -162,6 +160,7 @@ const String kAddressTypeNullError =
 const String kDeparmentNullError = "Departamento no seleccionado";
 const String kProvinceNullError = "Provincia no seleccionado";
 const String kDistrictNullError = "Distrito no seleccionado";
+const String kEmptyField = "Verifique la información ingresada";
 
 const Map<String, String> headers = {
   "Content-type": "application/json",

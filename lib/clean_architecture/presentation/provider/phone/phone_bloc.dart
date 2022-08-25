@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:http/http.dart' as http;
 
 class PhoneBloc extends ChangeNotifier {
   RegionRepositoryInterface regionRepositoryInterface;
@@ -60,7 +60,11 @@ class PhoneBloc extends ChangeNotifier {
 
   void onChangePhoneNumber(String value) {
     if (value.isNotEmpty) {
-      // removeError(error: kAddressNameNullError);
+      removeError(error: kPhoneNumberNullError);
+    }
+
+    if(value.length == 9){
+      removeError(error: kPhoneNumberLostNullError);
     }
 
     phone.value = value;
@@ -68,7 +72,12 @@ class PhoneBloc extends ChangeNotifier {
 
   String? onValidationPhoneNumber(String? value) {
     if (value!.isEmpty) {
-      //addError(error: kAddressNameNullError);
+      addError(error: kPhoneNumberNullError);
+      return "";
+    }
+
+    if(value.length < 9){
+      addError(error: kPhoneNumberLostNullError);
       return "";
     }
 
@@ -81,13 +90,12 @@ class PhoneBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<dynamic> onChangeDefaultPhone({
-    required String addressId,
+    required String phoneId,
     required Map<String, String> headers,
   }) async {
-    final response = await userRepositoryInterface.changeMainAddress(
-      addressId: addressId,
+    final response = await userRepositoryInterface.changeMainPhone(
+      phoneId: phoneId,
       headers: headers,
     );
 
@@ -107,11 +115,11 @@ class PhoneBloc extends ChangeNotifier {
   }
 
   Future<dynamic> onDeletePhone({
-    required String addressId,
+    required String phoneId,
     required Map<String, String> headers,
   }) async {
-    final response = await userRepositoryInterface.deleteUserAddress(
-      addressId: addressId,
+    final response = await userRepositoryInterface.deleteUserPhone(
+      phoneId: phoneId,
       headers: headers,
     );
 
@@ -130,4 +138,44 @@ class PhoneBloc extends ChangeNotifier {
     return false;
   }
 
+
+  Future<dynamic> onSave({required Map<String, String> headers}) async {
+    if (isUpdate) {
+      final response = await userRepositoryInterface.updateUserPhone(
+        phone: phone,
+        headers: headers,
+      );
+
+      if (response is http.Response) {
+        if (response.statusCode == 200) {
+          return responseApiFromMap(response.body);
+        }
+
+        return false;
+      } else if (response is String) {
+        if (kDebugMode) {
+          print(response);
+        }
+      }
+    } else {
+      final response = await userRepositoryInterface.createPhone(
+        phone: phone,
+        headers: headers,
+      );
+
+      if (response is http.Response) {
+        if (response.statusCode == 200) {
+          return responseApiFromMap(response.body);
+        }
+
+        return false;
+      } else if (response is String) {
+        if (kDebugMode) {
+          print(response);
+        }
+      }
+    }
+
+    return false;
+  }
 }

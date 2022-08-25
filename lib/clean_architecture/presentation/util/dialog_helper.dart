@@ -1207,9 +1207,9 @@ class DialogHelper {
           value: Provider.of<PhoneBloc>(context, listen: false)
             ..errors.value.clear(),
           child: DraggableScrollableSheet(
-            initialChildSize: 0.91,
+            initialChildSize: 0.51,
             minChildSize: 0.20,
-            maxChildSize: 0.91,
+            maxChildSize: 0.51,
             builder: (__, controller) {
               final phoneBloc = Provider.of<PhoneBloc>(__);
               final mainBloc = Provider.of<MainBloc>(__);
@@ -1254,20 +1254,19 @@ class DialogHelper {
                       Expanded(
                         child: SingleChildScrollView(
                           child: Form(
-                            key: shipmentBloc.formKey,
+                            key: phoneBloc.formKey,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextFormField(
-                                  initialValue:
-                                      shipmentBloc.address.addressName,
-                                  onChanged: shipmentBloc.onChangeAddressName,
-                                  validator:
-                                      shipmentBloc.onValidationAddressName,
+                                  initialValue: phoneBloc.phone.value,
+                                  onChanged: phoneBloc.onChangePhoneNumber,
+                                  validator: phoneBloc.onValidationPhoneNumber,
                                   style: Theme.of(context).textTheme.bodyText2,
+                                  maxLength: 9,
                                   decoration: InputDecoration(
-                                    labelText: "Nombre de dirección",
-                                    hintText: "Ej. Mi Casa, trabajo etc",
+                                    labelText: "Teléfono",
+                                    hintText: "Ingresa tu teléfono",
                                     labelStyle: const TextStyle(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.w400,
@@ -1276,26 +1275,6 @@ class DialogHelper {
                                         Theme.of(context).textTheme.bodyText2,
                                     floatingLabelBehavior:
                                         FloatingLabelBehavior.always,
-                                    errorStyle: const TextStyle(height: 0),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: getProportionateScreenHeight(20.0),
-                                ),
-                                TextFormField(
-                                  initialValue: phoneBloc.phone.value,
-                                  onChanged: phoneBloc.onChangePhoneNumber,
-                                  validator: phoneBloc.onValidationPhoneNumber,
-                                  style: Theme.of(context).textTheme.bodyText2,
-                                  decoration: InputDecoration(
-                                    labelText: "Teléfono",
-                                    hintText: "Ingresa tu teléfono",
-                                    labelStyle: const TextStyle(
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    hintStyle: Theme.of(context).textTheme.bodyText2,
-                                    floatingLabelBehavior: FloatingLabelBehavior.always,
                                     errorStyle: const TextStyle(height: 0),
                                   ),
                                 ),
@@ -1311,20 +1290,18 @@ class DialogHelper {
                                           MaterialStateProperty.resolveWith(
                                         phoneBloc.getColor,
                                       ),
-                                      value:
-                                      phoneBloc.phone.phoneDefault,
-                                      onChanged:
-                                      phoneBloc.onChangePhoneDefault,
+                                      value: phoneBloc.phone.phoneDefault,
+                                      onChanged: phoneBloc.onChangePhoneDefault,
                                     ),
                                     Text(
-                                      "Usar como dirección predeterminada",
+                                      "Usar como teléfono predeterminado",
                                       style:
                                           Theme.of(context).textTheme.bodyText2,
                                     ),
                                   ],
                                 ),
                                 ValueListenableBuilder(
-                                  valueListenable: shipmentBloc.errors,
+                                  valueListenable: phoneBloc.errors,
                                   builder:
                                       (context, List<String> value, child) {
                                     return Column(
@@ -1346,22 +1323,21 @@ class DialogHelper {
                                   height: getProportionateScreenHeight(20.0),
                                 ),
                                 ItemButton(
-                                  title: "Eliminar dirección",
+                                  title: "Eliminar teléfono",
                                   press: () async {
                                     context.loaderOverlay.show();
                                     Navigator.of(context).pop();
                                     final response =
-                                        await shipmentBloc.onDeleteAddress(
-                                      addressId: shipmentBloc.address.id!,
+                                        await phoneBloc.onDeletePhone(
+                                      phoneId: phoneBloc.phone.id!,
                                       headers: mainBloc.headers,
                                     );
 
                                     if (response is ResponseApi) {
-                                      shipmentBloc.address = Address(
-                                        ubigeo: Ubigeo(),
-                                        lotNumber: 1,
-                                        dptoInt: 1,
-                                        addressDefault: false,
+                                      phoneBloc.phone = Phone(
+                                        phoneDefault: false,
+                                        type: "phone",
+                                        areaCode: "51",
                                       );
 
                                       final responseUserInformation =
@@ -1397,9 +1373,55 @@ class DialogHelper {
                                 DefaultButton(
                                   text: "Continuar",
                                   press: () async {
-                                    if (shipmentBloc.formKey.currentState!
+                                    if (phoneBloc.formKey.currentState!
                                         .validate()) {
-                                      shipmentBloc.formKey.currentState!.save();
+                                      phoneBloc.formKey.currentState!.save();
+                                      if (phoneBloc.errors.value.isEmpty) {
+                                        context.loaderOverlay.show();
+                                        Navigator.of(context).pop();
+                                        final response = await phoneBloc.onSave(
+                                          headers: mainBloc.headers,
+                                        );
+
+                                        if (response is ResponseApi) {
+                                          phoneBloc.phone = Phone(
+                                            phoneDefault: false,
+                                            type: "phone",
+                                            areaCode: "51",
+                                          );
+
+                                          final responseUserInformation =
+                                              await mainBloc.loadUserInformationPromise();
+
+                                          if (responseUserInformation) {
+                                            mainBloc.refreshMainBloc();
+                                            context.loaderOverlay.hide();
+
+                                            if (response.status == "success") {
+                                              return await GlobalSnackBar
+                                                  .showInfoSnackBarIcon(
+                                                context,
+                                                response.message,
+                                              );
+                                            }
+
+                                            return await GlobalSnackBar
+                                                .showErrorSnackBarIcon(
+                                              context,
+                                              response.message,
+                                            );
+                                          }
+                                        }
+
+                                        context.loaderOverlay.hide();
+                                        await GlobalSnackBar
+                                            .showWarningSnackBar(
+                                          context,
+                                          "Ups, vuelvalo a intentar más tarde",
+                                        );
+
+                                        return;
+                                      }
                                     }
                                   },
                                 ),

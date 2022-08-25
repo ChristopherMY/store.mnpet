@@ -62,6 +62,7 @@ dependencies:
   roundcheckbox: ^2.0.5
   awesome_card: ^1.1.7
   loader_overlay: ^2.0.10
+  pinput: ^2.2.12
 
 dev_dependencies:
   flutter_test:

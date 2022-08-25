@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/order.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/order.dart'
+    as order;
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
@@ -125,7 +126,8 @@ class UserService implements UserRepositoryInterface {
         headers: headers,
       );
 
-      if (res.statusCode == 200) return Order.fromMap(jsonDecode(res.body));
+      if (res.statusCode == 200)
+        return order.Order.fromMap(jsonDecode(res.body));
 
       return null;
     } catch (e) {
@@ -147,7 +149,10 @@ class UserService implements UserRepositoryInterface {
 
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
-        return data.map((element) => Order.fromMap(element)).toList().cast();
+        return data
+            .map((element) => order.Order.fromMap(element))
+            .toList()
+            .cast();
       }
 
       return null;
@@ -186,7 +191,7 @@ class UserService implements UserRepositoryInterface {
   @override
   Future<dynamic> updateUserAddress({
     required Address address,
-   required Map<String, String> headers,
+    required Map<String, String> headers,
   }) async {
     try {
       String bodyParams = addressToMap(address);
@@ -209,28 +214,88 @@ class UserService implements UserRepositoryInterface {
   }
 
   @override
-  Future<dynamic> changeMainPhone({required String phoneId, required Map<String, String> headers}) {
-    // TODO: implement changeMainPhone
-    throw UnimplementedError();
+  Future<dynamic> changeMainPhone({
+    required String phoneId,
+    required Map<String, String> headers,
+  }) async {
+    try {
+      return await http.put(
+        Uri.parse(
+          "$_url/api/v1/ecommerce_users/phones/main?phone_id=$phoneId",
+        ),
+        headers: headers,
+      );
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return e.toString();
+    }
   }
 
   @override
-  Future<dynamic> createPhone({required Phone phone, required Map<String, String> headers}) {
-    // TODO: implement createPhone
-    throw UnimplementedError();
+  Future<dynamic> createPhone({
+    required Phone phone,
+    required Map<String, String> headers,
+  }) async {
+    try {
+      String bodyParams = phoneToMap(phone);
+
+      return await http.post(
+        Uri.parse("$_url/api/v1/ecommerce_users/phones"),
+        headers: headers,
+        body: bodyParams,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return e.toString();
+    }
   }
 
   @override
-  Future<dynamic> deleteUserPhone({required String phoneId, required Map<String, String> headers}) {
-    // TODO: implement deleteUserPhone
-    throw UnimplementedError();
+  Future<dynamic> deleteUserPhone(
+      {required String phoneId, required Map<String, String> headers}) async {
+    try {
+      return await http.delete(
+        Uri.parse(
+          "$_url/api/v1/ecommerce_users/phones?phone_id=$phoneId",
+        ),
+        headers: headers,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+      return e.toString();
+    }
   }
 
   @override
-  Future updateUserPhone({required Phone phone, required Map<String, String> headers}) {
-    // TODO: implement updateUserPhone
-    throw UnimplementedError();
-  }
+  Future updateUserPhone({
+    required Phone phone,
+    required Map<String, String> headers,
+  }) async {
+    try {
+      String bodyParams = phoneToMap(phone);
 
+      return await http.put(
+        Uri.parse(
+          "$_url/api/v1/ecommerce_users/phones?phone_id=${phone.id}",
+        ),
+        headers: headers,
+        body: bodyParams,
+      );
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return e.toString();
+    }
+  }
 
 }

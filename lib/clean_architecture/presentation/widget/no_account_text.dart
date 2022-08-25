@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
 
 class NoAccountText extends StatelessWidget {
   const NoAccountText({
@@ -14,16 +15,18 @@ class NoAccountText extends StatelessWidget {
       children: [
         Text(
           "¿No tienes una cuenta? ",
-          style: TextStyle(fontSize: getProportionateScreenHeight(16.0)),
+          style: Theme.of(context).textTheme.bodyText2,
         ),
         GestureDetector(
-          //onTap: () => Navigator.pushNamed(context, SignUpScreen.routeName),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => SignUpScreen.init(context)),
+          ),
           child: Text(
             "Registrate",
-            style: TextStyle(
-              fontSize: getProportionateScreenWidth(16.0),
-              color: kPrimaryColor,
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .bodyText2!
+                .copyWith(color: kPrimaryColor),
           ),
         ),
       ],

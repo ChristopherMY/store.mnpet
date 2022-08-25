@@ -20,6 +20,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repo
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -68,9 +69,8 @@ class MyApp extends StatelessWidget {
                 context.read<ProductRepositoryInterface>(),
             userRepositoryInterface: context.read<UserRepositoryInterface>(),
           )
-            ..isLoadProfileScreen.value = false
+            ..accountLoaded.value = LoadStatus.loading
             ..loadSession()
-            ..loadUserInformation()
             ..initRegion(),
           builder: (context, child) => Consumer<MainBloc>(
             builder: (context, provider, child) {
@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
                     cursorColor: Colors.black,
                     selectionHandleColor: Colors.black,
                   ),
-                  textTheme: GoogleFonts.robotoTextTheme()
+                  textTheme: GoogleFonts.poppinsTextTheme()
                       .copyWith(
                         subtitle1: const TextStyle(
                           fontWeight: FontWeight.bold,

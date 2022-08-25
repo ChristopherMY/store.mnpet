@@ -74,37 +74,47 @@ class _MainScreenState extends State<MainScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: IndexedStack(
-              index: mainBloc.indexSelected,
-              children: <Widget>[
-                const HomeScreen(),
-                CartScreen.init(context),
-                AccountScreen.init(context),
-              ],
+            child: ValueListenableBuilder(
+              valueListenable: mainBloc.indexSelected,
+              builder: (context, int value, child) {
+                return IndexedStack(
+                  index: value,
+                  children: <Widget>[
+                    const HomeScreen(),
+                    CartScreen.init(context),
+                    AccountScreen.init(context),
+                  ],
+                );
+              },
             ),
           )
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        // showSelectedLabels: false,
-        // showUnselectedLabels: false,
-        currentIndex: mainBloc.indexSelected,
-        onTap: (index) =>
-            mainBloc.onChangeIndexSelected(index: index, context: context),
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_basket_outlined),
-            label: "Carrito",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: "Mi cuenta",
-          ),
-        ],
+      bottomNavigationBar: ValueListenableBuilder(
+        valueListenable: mainBloc.indexSelected,
+        builder: (context, int value, child) {
+          return BottomNavigationBar(
+            // showSelectedLabels: false,
+            // showUnselectedLabels: false,
+            currentIndex: value,
+            onTap: (index) =>
+                mainBloc.onChangeIndexSelected(index: index, context: context),
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                label: "Home",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.shopping_basket_outlined),
+                label: "Carrito",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                label: "Mi cuenta",
+              ),
+            ],
+          );
+        },
       ),
     );
   }

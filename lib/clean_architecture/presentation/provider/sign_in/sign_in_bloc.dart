@@ -47,9 +47,9 @@ class SignInBloc extends ChangeNotifier {
 
   void onChangePassword(String value) {
     if (value.length >= 8) {
-      removeError(error: kPassNullError);
-    } else if (value.isNotEmpty) {
       removeError(error: kShortPassError);
+    } else if (value.isNotEmpty) {
+      removeError(error: kPassNullError);
     }
   }
 

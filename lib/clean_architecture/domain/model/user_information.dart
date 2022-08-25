@@ -15,6 +15,10 @@ Address addressFromMap(String str) => Address.fromMap(json.decode(str));
 
 String addressToMap(Address data) => json.encode(data.toMap());
 
+Phone phoneFromMap(String str) => Phone.fromMap(json.decode(str));
+
+String phoneToMap(Phone data) => json.encode(data.toMap());
+
 class UserInformation {
   UserInformation({
     this.id,

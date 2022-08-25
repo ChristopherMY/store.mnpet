@@ -1,5 +1,3 @@
-import 'package:store_mundo_pet/clean_architecture/domain/model/vimeo_video_config.dart';
-
 abstract class AuthRepositoryInterface {
   // https.Response
   Future<dynamic> loginVerification({
@@ -8,5 +6,22 @@ abstract class AuthRepositoryInterface {
   });
 
   // https.Response
-  Future<dynamic> createUser({required User user});
+  Future<dynamic> createUser({required Map<String, dynamic> user});
+
+  // https.Response
+  Future<dynamic> requestPasswordChange({
+    required String value,
+    required String valueType,
+  });
+
+  Future<dynamic> validateOtp({
+    required String otp,
+    required String userId,
+  });
+
+  Future<dynamic> changePassword({
+    required String userId,
+    required String password,
+    required String passwordConfirmation,
+  });
 }
