@@ -62,7 +62,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     onRefresh: () async {
                       if (mainBloc.informationUser is UserInformation) {
                         final response =
-                            await mainBloc.loadUserInformationPromise();
+                            await mainBloc.fetchGetUserInformation();
                         if (response is UserInformation) {
                           mainBloc.informationUser = response;
                           mainBloc.refreshMainBloc();

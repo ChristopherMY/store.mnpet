@@ -38,6 +38,7 @@ class Product {
     this.productTypes,
     this.rating,
     this.popularity,
+    this.quantity,
     this.totalPurchased,
     this.combosSettings,
     this.combos,
@@ -71,6 +72,7 @@ class Product {
   final List<Brand>? productTypes;
   final int? rating;
   final int? popularity;
+  int? quantity;
   final int? totalPurchased;
   final List<dynamic>? combosSettings;
   final List<dynamic>? combos;
@@ -144,6 +146,7 @@ class Product {
                 json["product_types"].map((x) => Brand.fromMap(x))),
         rating: json["rating"] == null ? null : json["rating"],
         popularity: json["popularity"] == null ? null : json["popularity"],
+        quantity: json["quantity"] == null ? null : json["quantity"],
         totalPurchased:
             json["total_purchased"] == null ? null : json["total_purchased"],
         combosSettings: json["combos_settings"] == null
@@ -205,12 +208,12 @@ class Product {
             : List<dynamic>.from(productTypes!.map((x) => x.toMap())),
         "rating": rating == null ? null : rating,
         "popularity": popularity == null ? null : popularity,
+        "quantity": quantity == null ? null : quantity,
         "total_purchased": totalPurchased == null ? null : totalPurchased,
         "combos_settings": combosSettings == null
             ? null
             : List<dynamic>.from(combosSettings!.map((x) => x)),
-        "combos":
-            combos == null ? null : List<dynamic>.from(combos!.map((x) => x)),
+        "combos": combos == null ? null : List<dynamic>.from(combos!.map((x) => x)),
       };
 }
 
@@ -439,7 +442,7 @@ class GalleryVideo {
 
   factory GalleryVideo.fromMap(Map<String, dynamic> json) => GalleryVideo(
         src: json["src"] == null ? null : json["src"],
-    url: json["url"] == null ? null : json["url"],
+        url: json["url"] == null ? null : json["url"],
         type: json["type"] == null ? null : json["type"],
         dimensions: json["dimensions"] == null
             ? null
@@ -469,6 +472,7 @@ class GalleryVideo {
 }
 
 class Price {
+
   Price({
     this.regular,
     this.sale,
@@ -478,8 +482,8 @@ class Price {
   final String? sale;
 
   factory Price.fromMap(Map<String, dynamic> json) => Price(
-        regular: json["regular"] == null ? null : json["regular"],
-        sale: json["sale"] == null ? null : json["sale"],
+        regular: json["regular"] == null ? null : json["regular"].toString(),
+        sale: json["sale"] == null ? null : json["sale"].toString(),
       );
 
   Map<String, dynamic> toMap() => {

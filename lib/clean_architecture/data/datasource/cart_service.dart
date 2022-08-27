@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:http/http.dart' as http;
 
 class CartService implements CartRepositoryInterface {
   final _url = Environment.API_DAO;
@@ -42,16 +42,16 @@ class CartService implements CartRepositoryInterface {
 
   // Cart
   @override
-  Future<dynamic> getShoppingCart({required String districtId}) async {
+  Future<dynamic> getShoppingCart({
+    required String districtId,
+    required Map<String, String> headers,
+  }) async {
     try {
-      final res = await http.get(
+      return await http.get(
         Uri.parse("$_url/api/v1/shopping_cart?&district_id=$districtId"),
         headers: headers,
       );
-      if (res.statusCode == 200) {
-        return Cart.fromMap(json.decode(res.body));
-      }
-      return null;
+
     } on Exception catch (e) {
       if (kDebugMode) {
         print(e);

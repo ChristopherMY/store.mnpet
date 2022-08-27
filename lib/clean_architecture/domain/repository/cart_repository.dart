@@ -6,7 +6,10 @@ abstract class CartRepositoryInterface {
   });
 
   // Cart
-  Future<dynamic> getShoppingCart({required String districtId});
+  Future<dynamic> getShoppingCart({
+    required String districtId,
+    required Map<String, String> headers,
+  });
 
   // http.response
   Future<dynamic> deleteProductCart({

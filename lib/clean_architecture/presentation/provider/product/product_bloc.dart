@@ -377,15 +377,16 @@ class ProductBloc extends ChangeNotifier {
 
   void refreshUbigeo({required String slug}) async {
     informationLocal.value = UserInformationLocal.fromMap(
-        await hiveRepositoryInterface.read(
-                containerName: "shipment", key: "residence") ??
-            {
-              "department": "Lima",
-              "province": "Lima",
-              "district": "Miraflores",
-              "districtId": "61856a14587c82ef50c1b44b",
-              "ubigeo": "Lima - Lima - Miraflores",
-            });
+      await hiveRepositoryInterface.read(
+              containerName: "shipment", key: "residence") ??
+          {
+            "department": "Lima",
+            "province": "Lima",
+            "district": "Miraflores",
+            "districtId": "61856a14587c82ef50c1b44b",
+            "ubigeo": "Lima - Lima - Miraflores",
+          },
+    );
 
     productRepositoryInterface
         .getShipmentPriceCost(

@@ -1057,9 +1057,12 @@ class DialogHelper {
 
                                       final responseUserInformation =
                                           await mainBloc
-                                              .loadUserInformationPromise();
+                                              .fetchGetUserInformation();
 
                                       if (responseUserInformation) {
+                                        mainBloc.informationUser =
+                                            responseUserInformation;
+
                                         mainBloc.refreshMainBloc();
                                         context.loaderOverlay.hide();
                                         await GlobalSnackBar
@@ -1145,9 +1148,11 @@ class DialogHelper {
 
                                           final responseUserInformation =
                                               await mainBloc
-                                                  .loadUserInformationPromise();
+                                                  .fetchGetUserInformation();
 
                                           if (responseUserInformation) {
+                                            mainBloc.informationUser =
+                                                responseUserInformation;
                                             mainBloc.refreshMainBloc();
                                             context.loaderOverlay.hide();
 
@@ -1342,11 +1347,14 @@ class DialogHelper {
 
                                       final responseUserInformation =
                                           await mainBloc
-                                              .loadUserInformationPromise();
+                                              .fetchGetUserInformation();
 
                                       if (responseUserInformation) {
+                                        mainBloc.informationUser =
+                                            responseUserInformation;
                                         mainBloc.refreshMainBloc();
                                         context.loaderOverlay.hide();
+
                                         await GlobalSnackBar
                                             .showInfoSnackBarIcon(
                                           context,
@@ -1391,9 +1399,12 @@ class DialogHelper {
                                           );
 
                                           final responseUserInformation =
-                                              await mainBloc.loadUserInformationPromise();
+                                              await mainBloc
+                                                  .fetchGetUserInformation();
 
                                           if (responseUserInformation) {
+                                            mainBloc.informationUser =
+                                                responseUserInformation;
                                             mainBloc.refreshMainBloc();
                                             context.loaderOverlay.hide();
 

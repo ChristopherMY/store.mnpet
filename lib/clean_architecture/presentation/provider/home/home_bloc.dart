@@ -24,7 +24,7 @@ class HomeBloc extends ChangeNotifier {
 
   Future<List<Product>> paginationProducts() async {
     loadStatus.value = LoadStatus.loading;
-    print("Esta entrando");
+
     if (reloadPagination) {
       initialRange = 1;
       finalRange = 20;
@@ -48,11 +48,12 @@ class HomeBloc extends ChangeNotifier {
           finalRange += 20;
 
           loadStatus.value = LoadStatus.normal;
-          print("Esta entrando");
+
           return values
               .map((product) => Product.fromMap(product))
               .toList()
               .cast();
+
         } else {
           loadStatus.value = LoadStatus.completed;
           return [];

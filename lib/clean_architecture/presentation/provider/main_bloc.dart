@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information_local.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repository.dart';
@@ -24,19 +26,22 @@ class MainBloc extends ChangeNotifier {
   HiveRepositoryInterface hiveRepositoryInterface;
   ProductRepositoryInterface productRepositoryInterface;
   UserRepositoryInterface userRepositoryInterface;
+  CartRepositoryInterface cartRepositoryInterface;
 
   MainBloc({
     required this.regionRepositoryInterface,
     required this.hiveRepositoryInterface,
     required this.productRepositoryInterface,
     required this.userRepositoryInterface,
+    required this.cartRepositoryInterface,
   });
 
   dynamic credentials;
 
   bool isLogged = false;
   ValueNotifier<LoadStatus> accountLoaded = ValueNotifier(LoadStatus.loading);
-  ValueNotifier<bool> isLoadingProfileScreen = ValueNotifier(false);
+  ValueNotifier<LoadStatus> shoppingCartLoaded =
+      ValueNotifier(LoadStatus.loading);
   ValueNotifier<int> indexSelected = ValueNotifier(0);
 
   List<Region> regions = List.of(<Region>[]);
@@ -61,6 +66,7 @@ class MainBloc extends ChangeNotifier {
   String ubigeo = "";
 
   dynamic informationUser;
+  dynamic informationCart;
 
   Map<String, String> headers = {
     "Content-type": "application/json",
@@ -70,7 +76,7 @@ class MainBloc extends ChangeNotifier {
   void onChangeIndexSelected({
     required int index,
     required BuildContext context,
-  }) async {
+  }) {
     if (indexSelected.value != index) {
       indexSelected.value = index;
 
@@ -81,8 +87,25 @@ class MainBloc extends ChangeNotifier {
       if (indexSelected.value == 1) {
         if (credentials is! CredentialsAuth) {
           requestAccess(context);
+          accountLoaded.value = LoadStatus.normal;
+          // return;
+        } else {
+          if (informationUser is! UserInformation) {
+            loadShipmentResidence().then(
+              (shipmentResidence) {
+                fetchGetShoppingCart(districtId: shipmentResidence.districtId!)
+                    .then(
+                  (cart) {
+                    if (cart is Cart) {
+                      informationCart = cart;
+                    }
+                    shoppingCartLoaded.value = LoadStatus.normal;
+                  },
+                );
+              },
+            );
+          }
         }
-        return;
       }
 
       if (indexSelected.value == 2) {
@@ -92,12 +115,13 @@ class MainBloc extends ChangeNotifier {
           return;
         } else {
           if (informationUser is! UserInformation) {
-            loadUserInformationPromise().then(
+            fetchGetUserInformation().then(
               (loadInformation) {
-                if(loadInformation is UserInformation){
+                if (loadInformation is UserInformation) {
                   informationUser = loadInformation;
-                  accountLoaded.value = LoadStatus.normal;
                 }
+
+                accountLoaded.value = LoadStatus.normal;
               },
             );
           }
@@ -335,6 +359,22 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
+  Future<UserInformationLocal> loadShipmentResidence() async {
+    return UserInformationLocal.fromMap(
+      await hiveRepositoryInterface.read(
+            containerName: "shipment",
+            key: "residence",
+          ) ??
+          {
+            "department": "Lima",
+            "province": "Lima",
+            "district": "Miraflores",
+            "districtId": "61856a14587c82ef50c1b44b",
+            "ubigeo": "Lima - Lima - Miraflores",
+          },
+    );
+  }
+
   Future<bool> loadSessionPromise() async {
     final responseCredentials = CredentialsAuth.fromMap(
       await hiveRepositoryInterface.read(
@@ -348,6 +388,7 @@ class MainBloc extends ChangeNotifier {
       credentials = responseCredentials;
       headers[HttpHeaders.authorizationHeader] =
           "Bearer ${responseCredentials.token}";
+
       return true;
     }
 
@@ -385,7 +426,7 @@ class MainBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> loadUserInformationPromise() async {
+  Future<dynamic> fetchGetUserInformation() async {
     final response = await userRepositoryInterface.getInformationUser(
       headers: headers,
     );
@@ -395,6 +436,27 @@ class MainBloc extends ChangeNotifier {
         final decodeResponse = json.decode(response.body);
 
         return UserInformation.fromMap(decodeResponse);
+      }
+    } else if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
+    return false;
+  }
+
+  Future<dynamic> fetchGetShoppingCart({required String districtId}) async {
+    final response = await cartRepositoryInterface.getShoppingCart(
+      districtId: districtId,
+      headers: headers,
+    );
+
+    if (response is http.Response) {
+      if (response.statusCode == 200) {
+        final decodeResponse = json.decode(response.body);
+
+        return Cart.fromMap(decodeResponse);
       }
     } else if (response is String) {
       if (kDebugMode) {

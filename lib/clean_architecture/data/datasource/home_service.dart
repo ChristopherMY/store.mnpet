@@ -1,6 +1,6 @@
+import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
-import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 
 class HomeService implements HomeRepositoryInterface {
@@ -21,8 +21,10 @@ class HomeService implements HomeRepositoryInterface {
   }
 
   @override
-  Future<dynamic> getPaginationProduct(
-      {required int initialRange, required int finalRange}) async {
+  Future<dynamic> getPaginationProduct({
+    required int initialRange,
+    required int finalRange,
+  }) async {
     try {
       return await http.get(
         Uri.parse(

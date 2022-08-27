@@ -68,6 +68,7 @@ class MyApp extends StatelessWidget {
             productRepositoryInterface:
                 context.read<ProductRepositoryInterface>(),
             userRepositoryInterface: context.read<UserRepositoryInterface>(),
+            cartRepositoryInterface: context.read<CartRepositoryInterface>(),
           )
             ..accountLoaded.value = LoadStatus.loading
             ..loadSession()
@@ -84,7 +85,9 @@ class MyApp extends StatelessWidget {
                     cursorColor: Colors.black,
                     selectionHandleColor: Colors.black,
                   ),
-                  textTheme: GoogleFonts.poppinsTextTheme()
+                  primaryTextTheme: GoogleFonts.robotoTextTheme(),
+                  accentTextTheme: GoogleFonts.robotoTextTheme(),
+                  textTheme: GoogleFonts.robotoTextTheme()
                       .copyWith(
                         subtitle1: const TextStyle(
                           fontWeight: FontWeight.bold,
@@ -129,9 +132,7 @@ class MyApp extends StatelessWidget {
                           color: Colors.blueAccent,
                         ),
                       )
-                      .apply(
-                        bodyColor: Colors.black,
-                      ),
+                      .apply(bodyColor: Colors.black, fontFamily: 'roboto'),
                 ),
                 home: MainScreen.init(context),
               );

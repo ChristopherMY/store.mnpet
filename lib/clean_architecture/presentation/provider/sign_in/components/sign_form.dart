@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/keyboard.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/forgot_password/forgot_password_screen.dart';
@@ -35,37 +35,27 @@ class _SignFormState extends State<SignForm> {
         final responseSession = await mainBloc.loadSessionPromise();
         if (responseSession) {
           final responseUserInformation =
-              await mainBloc.loadUserInformationPromise();
+              await mainBloc.fetchGetUserInformation();
 
-          if (responseUserInformation) {
+          if (responseUserInformation is UserInformation) {
+            mainBloc.informationUser = responseUserInformation;
             if (!mounted) return;
             mainBloc.refreshMainBloc();
             signInBloc.isLoading.value = false;
             int count = 0;
+
             Navigator.of(context).popUntil((route) => count++ >= 2);
+            return;
           }
 
-          return;
+          GlobalSnackBar.showWarningSnackBar(
+              context, "Tenemos un problema, por favor inténtelo más tarde.");
+
         }
       } else if (response is bool && response == false) {
-        if (!mounted) return;
-        final snackBar = SnackBar(
-          content: const Text(
-            "Tenemos un problema, por favor inténtelo más tarde.",
-            style: TextStyle(color: Colors.black),
-          ),
-          backgroundColor: kPrimaryBackgroundColor,
-          action: SnackBarAction(
-            label: 'Ok',
-            onPressed: () {},
-          ),
-        );
-
-        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Tenemos un problema, por favor inténtelo más tarde.");
       } else if (response is ResponseAuth) {
-        if (!mounted) return;
-
         GlobalSnackBar.showWarningSnackBar(context, response.message);
       }
     }
