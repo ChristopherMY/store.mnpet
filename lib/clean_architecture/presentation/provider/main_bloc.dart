@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
@@ -16,6 +15,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_reposi
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/login/login_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_screen.dart';
@@ -39,9 +39,7 @@ class MainBloc extends ChangeNotifier {
   dynamic credentials;
 
   bool isLogged = false;
-  ValueNotifier<LoadStatus> accountLoaded = ValueNotifier(LoadStatus.loading);
-  ValueNotifier<LoadStatus> shoppingCartLoaded =
-      ValueNotifier(LoadStatus.loading);
+  ValueNotifier<Session> sessionAccount = ValueNotifier(Session.inactive);
   ValueNotifier<int> indexSelected = ValueNotifier(0);
 
   List<Region> regions = List.of(<Region>[]);
@@ -87,31 +85,16 @@ class MainBloc extends ChangeNotifier {
       if (indexSelected.value == 1) {
         if (credentials is! CredentialsAuth) {
           requestAccess(context);
-          accountLoaded.value = LoadStatus.normal;
-          // return;
-        } else {
-          if (informationUser is! UserInformation) {
-            loadShipmentResidence().then(
-              (shipmentResidence) {
-                fetchGetShoppingCart(districtId: shipmentResidence.districtId!)
-                    .then(
-                  (cart) {
-                    if (cart is Cart) {
-                      informationCart = cart;
-                    }
-                    shoppingCartLoaded.value = LoadStatus.normal;
-                  },
-                );
-              },
-            );
-          }
+          sessionAccount.value = Session.inactive;
+          return;
         }
       }
 
       if (indexSelected.value == 2) {
         if (credentials is! CredentialsAuth) {
           requestAccess(context);
-          accountLoaded.value = LoadStatus.normal;
+          sessionAccount.value = Session.inactive;
+
           return;
         } else {
           if (informationUser is! UserInformation) {
@@ -121,7 +104,7 @@ class MainBloc extends ChangeNotifier {
                   informationUser = loadInformation;
                 }
 
-                accountLoaded.value = LoadStatus.normal;
+                sessionAccount.value = Session.active;
               },
             );
           }
@@ -359,21 +342,6 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
-  Future<UserInformationLocal> loadShipmentResidence() async {
-    return UserInformationLocal.fromMap(
-      await hiveRepositoryInterface.read(
-            containerName: "shipment",
-            key: "residence",
-          ) ??
-          {
-            "department": "Lima",
-            "province": "Lima",
-            "district": "Miraflores",
-            "districtId": "61856a14587c82ef50c1b44b",
-            "ubigeo": "Lima - Lima - Miraflores",
-          },
-    );
-  }
 
   Future<bool> loadSessionPromise() async {
     final responseCredentials = CredentialsAuth.fromMap(
@@ -421,7 +389,7 @@ class MainBloc extends ChangeNotifier {
     credentials = dynamic;
     informationUser = dynamic;
     headers[HttpHeaders.authorizationHeader] = '';
-    accountLoaded.value = LoadStatus.loading;
+    sessionAccount.value = Session.inactive;
 
     notifyListeners();
   }
@@ -446,26 +414,7 @@ class MainBloc extends ChangeNotifier {
     return false;
   }
 
-  Future<dynamic> fetchGetShoppingCart({required String districtId}) async {
-    final response = await cartRepositoryInterface.getShoppingCart(
-      districtId: districtId,
-      headers: headers,
-    );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decodeResponse = json.decode(response.body);
-
-        return Cart.fromMap(decodeResponse);
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-    }
-
-    return false;
-  }
 
   // TODO: Solo se trabajara en el Main Screen
   // void loadUserInformation() async {

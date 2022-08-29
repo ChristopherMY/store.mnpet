@@ -7,14 +7,13 @@ import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
 
 import '../shipment/shipment_screen.dart';
 import 'account_bloc.dart';
@@ -51,213 +50,212 @@ class _AccountScreenState extends State<AccountScreen> {
     final mainBloc = context.watch<MainBloc>();
 
     return ValueListenableBuilder(
-      valueListenable: mainBloc.accountLoaded,
-      builder: (context, LoadStatus accountLoaded, child) {
+      valueListenable: mainBloc.sessionAccount,
+      builder: (context, Session sessionAccount, child) {
         return Stack(
           children: [
-            accountLoaded == LoadStatus.normal
-                ? RefreshIndicator(
-                    notificationPredicate: 1 == 1 ? (_) => true : (_) => false,
-                    triggerMode: RefreshIndicatorTriggerMode.onEdge,
-                    onRefresh: () async {
-                      if (mainBloc.informationUser is UserInformation) {
-                        final response =
-                            await mainBloc.fetchGetUserInformation();
-                        if (response is UserInformation) {
-                          mainBloc.informationUser = response;
-                          mainBloc.refreshMainBloc();
-                          if (!mounted) return;
-                          await GlobalSnackBar.showInfoSnackBarIcon(
-                            context,
-                            "Información actualizada.",
-                          );
-                        }
-                      }
-                    },
-                    child: CustomScrollView(
-                      slivers: [
-                        SliverAppBar(
-                          pinned: true,
-                          snap: false,
-                          floating: false,
-                          toolbarHeight: 56.0,
-                          backgroundColor: kBackGroundColor,
-                          systemOverlayStyle: const SystemUiOverlayStyle(
-                            statusBarColor: kBackGroundColor,
-                            statusBarIconBrightness: Brightness.dark,
-                          ),
-                          expandedHeight: getProportionateScreenHeight(56.0),
-                          actions: [
-                            mainBloc.informationUser is UserInformation
-                                ? Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20.0),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                SettingsScreen.init(context),
-                                          ),
-                                        );
-                                      },
-                                      child: const Icon(
-                                        Icons.settings,
-                                        color: Colors.black,
-                                      ),
+            // sessionAccount == Session.normal
+            //     ?
+            RefreshIndicator(
+              notificationPredicate: (_) => sessionAccount == Session.active,
+              triggerMode: RefreshIndicatorTriggerMode.onEdge,
+              onRefresh: () async {
+                if (mainBloc.informationUser is UserInformation) {
+                  final response = await mainBloc.fetchGetUserInformation();
+                  if (response is UserInformation) {
+                    mainBloc.informationUser = response;
+                    mainBloc.refreshMainBloc();
+                    if (!mounted) return;
+                    await GlobalSnackBar.showInfoSnackBarIcon(
+                      context,
+                      "Información actualizada.",
+                    );
+                  }
+                }
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    snap: false,
+                    floating: false,
+                    toolbarHeight: 56.0,
+                    backgroundColor: kBackGroundColor,
+                    systemOverlayStyle: const SystemUiOverlayStyle(
+                      statusBarColor: kBackGroundColor,
+                      statusBarIconBrightness: Brightness.dark,
+                    ),
+                    expandedHeight: getProportionateScreenHeight(56.0),
+                    actions: [
+                      mainBloc.informationUser is UserInformation
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          SettingsScreen.init(context),
                                     ),
-                                  )
-                                : const SizedBox.shrink(),
-                          ],
-                        ),
-                        const SliverToBoxAdapter(
-                          child: HeaderInformation(),
-                        ),
-                        SliverVisibility(
-                          visible: mainBloc.informationUser is UserInformation,
-                          sliver: const SliverPadding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 20.0,
-                              horizontal: 25.0,
-                            ),
-                            sliver: SliverToBoxAdapter(
-                              child: Text(
-                                "Mi perfil",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
+                                  );
+                                },
+                                child: const Icon(
+                                  Icons.settings,
+                                  color: Colors.black,
                                 ),
                               ),
-                            ),
+                            )
+                          : const SizedBox.shrink(),
+                    ],
+                  ),
+                  const SliverToBoxAdapter(
+                    child: HeaderInformation(),
+                  ),
+                  SliverVisibility(
+                    visible: mainBloc.informationUser is UserInformation,
+                    sliver: const SliverPadding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 20.0,
+                        horizontal: 25.0,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: Text(
+                          "Mi perfil",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SliverVisibility(
-                          visible: mainBloc.informationUser is UserInformation,
-                          sliver: SliverToBoxAdapter(
-                            child: TargetOption(
-                              title: "Mis Direcciones",
-                              subTitle: "Mis direcciones de envío",
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ShipmentScreen(),
-                                  ),
-                                );
-                              },
-                              icon: Icons.directions,
-                            ),
-                          ),
-                        ),
-                        SliverVisibility(
-                          visible: mainBloc.informationUser is UserInformation,
-                          sliver: SliverToBoxAdapter(
-                            child: TargetOption(
-                              title: "Mis órdenes",
-                              subTitle: 'Detalle de órdenes',
-                              onTap: () {},
-                              icon: Icons.local_shipping_outlined,
-                            ),
-                          ),
-                        ),
-                        // SliverVisibility(
-                        //   visible: value,
-                        //   sliver: SliverToBoxAdapter(
-                        //     child: TargetOption(
-                        //       title: "Mis Tarjetas",
-                        //       subTitle: 'Detalle de tarjetas guardadas',
-                        //       onTap: () {
-                        //         Navigator.of(context).push(
-                        //           MaterialPageRoute(
-                        //             builder: (context) => const CreditCartScreen(),
-                        //           ),
-                        //         );
-                        //       },
-                        //       icon: Icons.credit_score,
-                        //       // Icons.credit_card
-                        //     ),
-                        //   ),
-                        // ),
-                        const SliverPadding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 20.0,
-                            horizontal: 25.0,
-                          ),
-                          sliver: SliverToBoxAdapter(
-                            child: Text(
-                              "Ayuda",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: TargetOption(
-                            title: "Contacto",
-                            subTitle: 'Horario de atención',
-                            onTap: () {},
-                            icon: Icons.phone,
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: TargetOption(
-                            title: "Privacidad",
-                            subTitle: 'Terminos y condiciones',
-                            onTap: () {},
-                            icon: Icons.question_mark_rounded,
-                          ),
-                        ),
-                        SliverVisibility(
-                          visible: mainBloc.informationUser is UserInformation,
-                          sliver: SliverToBoxAdapter(
-                            child: TargetOption(
-                              title: "Cerrar sesión",
-                              subTitle: "Cerrar sesión en este dispositivo",
-                              onTap: mainBloc.signOut,
-                              icon: CommunityMaterialIcons.logout,
-                            ),
-                          ),
-                        ),
-
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          fillOverscroll: true,
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              bottom: getProportionateScreenHeight(25.0),
-                              top: getProportionateScreenHeight(25.0),
-                            ),
-                            child: const CopyRight(),
-                          ),
-                        ),
-                        // SliverFillRemaining(
-                        //   child: ValueListenableBuilder(
-                        //     valueListenable: mainBloc.isLoadingProfileScreen,
-                        //     builder: (context, bool value, child) {
-                        //       if (value) {
-                        //         return const Center(
-                        //           child: LottieAnimation(
-                        //             source: "assets/lottie/paw.json",
-                        //           ),
-                        //         );
-                        //       }
-                        //
-                        //       return const SizedBox.shrink();
-                        //     },
-                        //   ),
-                        // )
-                      ],
-                    ),
-                  )
-                : const Positioned.fill(
-                    child: Center(
-                      child: LottieAnimation(
-                        source: "assets/lottie/paw.json",
                       ),
                     ),
                   ),
+                  SliverVisibility(
+                    visible: mainBloc.informationUser is UserInformation,
+                    sliver: SliverToBoxAdapter(
+                      child: TargetOption(
+                        title: "Mis Direcciones",
+                        subTitle: "Mis direcciones de envío",
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ShipmentScreen(),
+                            ),
+                          );
+                        },
+                        icon: Icons.directions,
+                      ),
+                    ),
+                  ),
+                  SliverVisibility(
+                    visible: mainBloc.informationUser is UserInformation,
+                    sliver: SliverToBoxAdapter(
+                      child: TargetOption(
+                        title: "Mis órdenes",
+                        subTitle: 'Detalle de órdenes',
+                        onTap: () {},
+                        icon: Icons.local_shipping_outlined,
+                      ),
+                    ),
+                  ),
+                  // SliverVisibility(
+                  //   visible: value,
+                  //   sliver: SliverToBoxAdapter(
+                  //     child: TargetOption(
+                  //       title: "Mis Tarjetas",
+                  //       subTitle: 'Detalle de tarjetas guardadas',
+                  //       onTap: () {
+                  //         Navigator.of(context).push(
+                  //           MaterialPageRoute(
+                  //             builder: (context) => const CreditCartScreen(),
+                  //           ),
+                  //         );
+                  //       },
+                  //       icon: Icons.credit_score,
+                  //       // Icons.credit_card
+                  //     ),
+                  //   ),
+                  // ),
+                  const SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 20.0,
+                      horizontal: 25.0,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: Text(
+                        "Ayuda",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: TargetOption(
+                      title: "Contacto",
+                      subTitle: 'Horario de atención',
+                      onTap: () {},
+                      icon: Icons.phone,
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: TargetOption(
+                      title: "Privacidad",
+                      subTitle: 'Terminos y condiciones',
+                      onTap: () {},
+                      icon: Icons.question_mark_rounded,
+                    ),
+                  ),
+                  SliverVisibility(
+                    visible: mainBloc.informationUser is UserInformation,
+                    sliver: SliverToBoxAdapter(
+                      child: TargetOption(
+                        title: "Cerrar sesión",
+                        subTitle: "Cerrar sesión en este dispositivo",
+                        onTap: mainBloc.signOut,
+                        icon: CommunityMaterialIcons.logout,
+                      ),
+                    ),
+                  ),
+
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    fillOverscroll: true,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        bottom: getProportionateScreenHeight(25.0),
+                        top: getProportionateScreenHeight(25.0),
+                      ),
+                      child: const CopyRight(),
+                    ),
+                  ),
+                  // SliverFillRemaining(
+                  //   child: ValueListenableBuilder(
+                  //     valueListenable: mainBloc.isLoadingProfileScreen,
+                  //     builder: (context, bool value, child) {
+                  //       if (value) {
+                  //         return const Center(
+                  //           child: LottieAnimation(
+                  //             source: "assets/lottie/paw.json",
+                  //           ),
+                  //         );
+                  //       }
+                  //
+                  //       return const SizedBox.shrink();
+                  //     },
+                  //   ),
+                  // )
+                ],
+              ),
+            )
+            // : const Positioned.fill(
+            //     child: Center(
+            //       child: LottieAnimation(
+            //         source: "assets/lottie/paw.json",
+            //       ),
+            //     ),
+            //   ),
           ],
         );
       },
@@ -292,155 +290,162 @@ class HeaderInformation extends StatelessWidget {
           vertical: 20.0,
           horizontal: 15.0,
         ),
-        child: Column(
-          children: <Widget>[
-            Row(
+        child: ValueListenableBuilder(
+          valueListenable: mainBloc.sessionAccount,
+          builder: (context, Session sessionAccount, child) {
+            return Column(
               children: <Widget>[
-                SizedBox(
-                  width: 70.0,
-                  height: 70.0,
-                  child: mainBloc.informationUser is UserInformation
-                      ? CachedNetworkImage(
-                          imageUrl:
-                              mainBloc.informationUser.image!.src.toString(),
-                          imageBuilder: (context, imageProvider) => Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(35.0),
-                              image: DecorationImage(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
+                Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: 70.0,
+                      height: 70.0,
+                      child: sessionAccount == Session.active
+                          ? CachedNetworkImage(
+                              imageUrl: mainBloc.informationUser.image!.src
+                                  .toString(),
+                              imageBuilder: (context, imageProvider) =>
+                                  Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(35.0),
+                                  image: DecorationImage(
+                                    image: imageProvider,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
+                              placeholder: (context, url) => Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: BorderRadius.circular(35.0),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => const Icon(
+                                // FontAwesomeIcons.circleUser,0
+                                CupertinoIcons.person_circle,
+                                // Icons.account_circle_outlined,
+                                size: 70.0,
+                                color: kPrimaryColor,
+                              ),
+                            )
+                          : const Icon(
+                              CupertinoIcons.person_circle,
+                              size: 70.0,
+                              color: kPrimaryColor,
                             ),
-                          ),
-                          placeholder: (context, url) => Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              borderRadius: BorderRadius.circular(35.0),
+                    ),
+                    const SizedBox(width: 10.0),
+                    Expanded(
+                      child: sessionAccount == Session.active
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${mainBloc.informationUser.name} ${mainBloc.informationUser.lastname}",
+                                  maxLines: 1,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 5.0),
+                                Text(
+                                  "# Codigo de referido",
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                ),
+                              ],
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'No tenemos registro de su cuenta',
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                SizedBox(height: 5.0),
+                                Text(
+                                  'Accedar para visualizar su información',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ],
                             ),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(
-                            // FontAwesomeIcons.circleUser,0
-                            CupertinoIcons.person_circle,
-                            // Icons.account_circle_outlined,
-                            size: 70.0,
-                            color: kPrimaryColor,
-                          ),
-                        )
-                      : const Icon(
-                          CupertinoIcons.person_circle,
-                          size: 70.0,
-                          color: kPrimaryColor,
-                        ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10.0),
-                Expanded(
-                  child: mainBloc.informationUser is UserInformation
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "${mainBloc.informationUser.name} ${mainBloc.informationUser.lastname}",
-                              maxLines: 1,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 5.0),
-                            Text(
-                              "# Codigo de referido",
-                              style: Theme.of(context).textTheme.bodyText2,
-                            ),
-                          ],
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'No tenemos registro de su cuenta',
-                              maxLines: 1,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            SizedBox(height: 5.0),
-                            Text(
-                              'Accedar para visualizar su información',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        ),
-                ),
-              ],
-            ),
-            mainBloc.informationUser is UserInformation
-                ? const SizedBox.shrink()
-                : Column(
-                    children: [
-                      const SizedBox(height: 17.0),
-                      Row(
+                sessionAccount == Session.active
+                    ? const SizedBox.shrink()
+                    : Column(
                         children: [
-                          Expanded(
-                            child: ValueListenableBuilder(
-                              valueListenable: accountBloc.pressed,
-                              builder: (context, bool value, child) {
-                                return FlatButton(
-                                  color: Colors.white,
-                                  splashColor: kPrimaryColor,
-                                  textColor:
-                                      value ? Colors.white : kPrimaryColor,
+                          const SizedBox(height: 17.0),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ValueListenableBuilder(
+                                  valueListenable: accountBloc.pressed,
+                                  builder: (context, bool value, child) {
+                                    return FlatButton(
+                                      color: Colors.white,
+                                      splashColor: kPrimaryColor,
+                                      textColor:
+                                          value ? Colors.white : kPrimaryColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: const BorderSide(
+                                            color: kPrimaryColor, width: 1),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      height: 45.0,
+                                      onHighlightChanged:
+                                          accountBloc.onHighlightChanged,
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                SignUpScreen.init(context),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text(
+                                        "Crear cuenta",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 30.0),
+                              Expanded(
+                                child: FlatButton(
+                                  color: kPrimaryColor,
                                   shape: RoundedRectangleBorder(
                                     side: const BorderSide(
                                         color: kPrimaryColor, width: 1),
                                     borderRadius: BorderRadius.circular(15.0),
                                   ),
                                   height: 45.0,
-                                  onHighlightChanged:
-                                      accountBloc.onHighlightChanged,
                                   onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            SignUpScreen.init(context),
-                                      ),
-                                    );
+                                    mainBloc.requestAccess(context);
                                   },
                                   child: const Text(
-                                    "Crear cuenta",
+                                    "Iniciar sesión",
                                     textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 30.0),
-                          Expanded(
-                            child: FlatButton(
-                              color: kPrimaryColor,
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                    color: kPrimaryColor, width: 1),
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              height: 45.0,
-                              onPressed: () {
-                                mainBloc.requestAccess(context);
-                              },
-                              child: const Text(
-                                "Iniciar sesión",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
                                 ),
-                              ),
-                            ),
-                          )
+                              )
+                            ],
+                          ),
                         ],
-                      ),
-                    ],
-                  )
-          ],
+                      )
+              ],
+            );
+          },
         ),
       ),
     );

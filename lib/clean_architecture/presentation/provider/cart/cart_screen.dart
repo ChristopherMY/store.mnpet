@@ -2,10 +2,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:masonry_grid/masonry_grid.dart';
 import 'package:provider/provider.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/cart_bloc.dart';
@@ -14,12 +19,20 @@ import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_b
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
 
+import '../../../domain/model/credentials_auth.dart';
+import '../../../domain/model/user_information.dart';
+import '../../widget/item_main_product.dart';
+
 class CartScreen extends StatelessWidget {
   const CartScreen._({Key? key}) : super(key: key);
 
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => CartBloc(),
+      create: (context) => CartBloc(
+        cartRepositoryInterface: context.read<CartRepositoryInterface>(),
+        hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
+        productRepositoryInterface: context.read<ProductRepositoryInterface>(),
+      )..initRelatedProductsPagination(categories: [Brand(id: "621f9beeb5ab45b8097f3454", slug: "accesorios-para-mascotas")]),
       builder: (_, __) => const CartScreen._(),
     );
   }
@@ -28,55 +41,89 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final mainBloc = context.watch<MainBloc>();
     final cartBloc = context.watch<CartBloc>();
+    print("RECARGO SHOPPING CART SCREEN");
 
-    return ValueListenableBuilder(
-      valueListenable: mainBloc.shoppingCartLoaded,
-      builder: (context, LoadStatus shoppingCartLoaded, child) {
-        return Stack(
-          children: [
-            shoppingCartLoaded == LoadStatus.normal
-                ? RefreshIndicator(
-                    notificationPredicate: (notification) => true,
-                    triggerMode: RefreshIndicatorTriggerMode.onEdge,
-                    onRefresh: () async {},
-                    child: CustomScrollView(
-                      slivers: [
-                        SliverAppBar(
-                          pinned: true,
-                          snap: false,
-                          floating: false,
-                          toolbarHeight: 56.0,
-                          backgroundColor: kBackGroundColor,
-                          systemOverlayStyle: const SystemUiOverlayStyle(
-                            statusBarColor: kBackGroundColor,
-                            statusBarIconBrightness: Brightness.dark,
-                          ),
-                          expandedHeight: getProportionateScreenHeight(56.0),
-                          title: Text(
-                            "Carrito(18)",
-                            style: TextStyle(
+    if (mainBloc.credentials is CredentialsAuth) {
+      if (mainBloc.informationUser is! UserInformation) {
+        cartBloc.loadShipmentResidence().then(
+          (shipmentResidence) {
+            cartBloc
+                .fetchGetShoppingCart(
+              districtId: shipmentResidence.districtId!,
+              headers: mainBloc.headers,
+            )
+                .then(
+              (cart) {
+                if (cart is Cart) {
+                  mainBloc.informationCart = cart;
+                }
+
+                cartBloc.cart.value = LoadStatus.normal;
+              },
+            );
+          },
+        );
+      }
+    }
+
+    return Stack(
+      children: [
+        // shoppingCartLoaded == LoadStatus.normal
+        //     ?
+        RefreshIndicator(
+          notificationPredicate: (notification) => true,
+          triggerMode: RefreshIndicatorTriggerMode.onEdge,
+          onRefresh: () async {},
+          child: ValueListenableBuilder(
+            valueListenable: cartBloc.loadStatus,
+            builder: (context, LoadStatus value, child) {
+              return LoadAny(
+                status: value,
+                loadingMsg: 'Cargando... ',
+                errorMsg: 'Error de carga, haga clic en reintentar ',
+                finishMsg:
+                    'Seguiremos trabajando para tener los productos que buscas.',
+                endLoadMore: false,
+                onLoadMore: () async {
+                  cartBloc.initRelatedProductsPagination(
+                    categories: [],
+                  );
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      pinned: true,
+                      snap: false,
+                      floating: false,
+                      toolbarHeight: 56.0,
+                      backgroundColor: kBackGroundColor,
+                      systemOverlayStyle: const SystemUiOverlayStyle(
+                        statusBarColor: kBackGroundColor,
+                        statusBarIconBrightness: Brightness.dark,
+                      ),
+                      expandedHeight: getProportionateScreenHeight(56.0),
+                      title: ValueListenableBuilder(
+                        valueListenable: cartBloc.cartLength,
+                        builder: (context, int value, child) {
+                          return Text(
+                            "Carrito($value)",
+                            style: const TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          actions: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: GestureDetector(
-                                onTap: () {},
-                                child: const Icon(Icons.settings),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SliverVisibility(
-                          visible: mainBloc.informationCart is Cart,
-                          sliver: SliverPadding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 15.0),
-                            sliver: SliverToBoxAdapter(
-                              child: Column(
+                          );
+                        },
+                      ),
+                      actions: const [],
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      sliver: SliverToBoxAdapter(
+                        child: ValueListenableBuilder(
+                          valueListenable: cartBloc.cart,
+                          builder: (context, LoadStatus shoppingCart, child) {
+                            if (shoppingCart == LoadStatus.normal) {
+                              return Column(
                                 children: [
                                   ListView.separated(
                                     physics:
@@ -105,48 +152,111 @@ class CartScreen extends StatelessWidget {
                                     },
                                   ),
                                 ],
+                              );
+                            }
+                            return const Center(
+                              child: LottieAnimation(
+                                source: "assets/lottie/paw.json",
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
-                        SliverVisibility(
-                          visible: mainBloc.informationCart is Cart,
-                          sliver: SliverPadding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15.0, vertical: 15.0),
-                            sliver: SliverToBoxAdapter(
-                              child: InfoCartDetail(
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15.0,
+                        vertical: 15.0,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: ValueListenableBuilder(
+                          valueListenable: cartBloc.cart,
+                          builder: (context, LoadStatus shoppingCart, child) {
+                            if (shoppingCart == LoadStatus.normal) {
+                              return InfoCartDetail(
                                 cart: mainBloc.informationCart!,
-                              ),
-                            ),
-                          ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
                         ),
-                        SliverVisibility(
-                          visible: mainBloc.informationCart is Cart,
-                          sliver: SliverPadding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15.0, vertical: 15.0),
-                            sliver: SliverToBoxAdapter(
-                              child: DefaultButton(
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15.0,
+                        vertical: 15.0,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: ValueListenableBuilder(
+                          valueListenable: cartBloc.cart,
+                          builder: (context, LoadStatus shoppingCart, child) {
+                            if (shoppingCart == LoadStatus.normal) {
+                              return DefaultButton(
                                 text: "Ir a pagar",
                                 press: () {},
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ),
+                    ),
+                    MultiSliver(
+                      children: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  "Seguro que te gusta",
+                                  style: Theme.of(context).textTheme.subtitle2,
+                                  textAlign: TextAlign.start,
+                                ),
+                                const SizedBox(height: 5)
+                              ],
+                            ),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            child: MasonryGrid(
+                              column: 2,
+                              staggered: false,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              children: List.generate(
+                                cartBloc.productsList.length,
+                                (index) => TrendingItemMain(
+                                  product: cartBloc.productsList[index],
+                                  gradientColors: [
+                                    const Color(0xFFF28767),
+                                    Colors.orange.shade400
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         )
                       ],
-                    ),
-                  )
-                : const Positioned.fill(
-                    child: Center(
-                      child: LottieAnimation(
-                        source: "assets/lottie/paw.json",
-                      ),
-                    ),
-                  ),
-          ],
-        );
-      },
+                    )
+                  ],
+                ),
+              );
+            },
+          ),
+        )
+        // : const Positioned.fill(
+        //     child: Center(
+        //       child: LottieAnimation(
+        //         source: "assets/lottie/paw.json",
+        //       ),
+        //     ),
+        //   ),
+      ],
     );
   }
 }

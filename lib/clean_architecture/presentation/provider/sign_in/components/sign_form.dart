@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/keyboard.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/forgot_password/forgot_password_screen.dart';
@@ -40,8 +41,9 @@ class _SignFormState extends State<SignForm> {
           if (responseUserInformation is UserInformation) {
             mainBloc.informationUser = responseUserInformation;
             if (!mounted) return;
-            mainBloc.refreshMainBloc();
             signInBloc.isLoading.value = false;
+            mainBloc.sessionAccount.value = Session.active;
+            mainBloc.refreshMainBloc();
             int count = 0;
 
             Navigator.of(context).popUntil((route) => count++ >= 2);

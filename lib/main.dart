@@ -18,6 +18,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repos
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
@@ -70,7 +71,7 @@ class MyApp extends StatelessWidget {
             userRepositoryInterface: context.read<UserRepositoryInterface>(),
             cartRepositoryInterface: context.read<CartRepositoryInterface>(),
           )
-            ..accountLoaded.value = LoadStatus.loading
+            ..sessionAccount.value = Session.inactive
             ..loadSession()
             ..initRegion(),
           builder: (context, child) => Consumer<MainBloc>(

@@ -61,7 +61,8 @@ class ProductScreen extends StatelessWidget {
               endLoadMore: false,
               onLoadMore: () async {
                 productBloc.initRelatedProductsPagination(
-                    categories: product.categories!);
+                  categories: product.categories!,
+                );
               },
               child: CustomScrollView(
                 // controller: _scrollController,
@@ -653,41 +654,37 @@ class ProductScreen extends StatelessWidget {
     return MultiSliver(
       children: [
         SliverToBoxAdapter(
-          child: Container(
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "Seguro que te gusta",
-                    style: Theme.of(context).textTheme.subtitle2,
-                    textAlign: TextAlign.start,
-                  ),
-                  const SizedBox(height: 5)
-                ],
-              ),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Seguro que te gusta",
+                  style: Theme.of(context).textTheme.subtitle2,
+                  textAlign: TextAlign.start,
+                ),
+                const SizedBox(height: 5)
+              ],
             ),
           ),
         ),
         SliverToBoxAdapter(
-          child: Container(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: MasonryGrid(
-                column: 2,
-                staggered: false,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                children: List.generate(
-                  products.length,
-                  (index) => TrendingItemMain(
-                    product: products[index],
-                    gradientColors: [
-                      const Color(0xFFF28767),
-                      Colors.orange.shade400
-                    ],
-                  ),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: MasonryGrid(
+              column: 2,
+              staggered: false,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              children: List.generate(
+                products.length,
+                (index) => TrendingItemMain(
+                  product: products[index],
+                  gradientColors: [
+                    const Color(0xFFF28767),
+                    Colors.orange.shade400
+                  ],
                 ),
               ),
             ),

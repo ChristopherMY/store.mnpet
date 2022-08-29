@@ -114,7 +114,6 @@ class ProductBloc extends ChangeNotifier {
 
   void initRelatedProductsPagination({required List<Brand> categories}) async {
     loadStatus.value = LoadStatus.loading;
-    notifyListeners();
 
     final response =
         await productRepositoryInterface.getRelatedProductsPagination(
@@ -135,22 +134,22 @@ class ProductBloc extends ChangeNotifier {
           finalRange += 20;
 
           loadStatus.value = LoadStatus.normal;
-        } else {
-          // TODO: Conditional Problem
-          loadStatus.value = LoadStatus.completed;
+          return;
         }
-      } else {
-        loadStatus.value = LoadStatus.error;
+
+        loadStatus.value = LoadStatus.completed;
+        return;
       }
+
+      loadStatus.value = LoadStatus.error;
+      return;
     } else if (response is String) {
       if (kDebugMode) {
         print(response);
       }
-
-      loadStatus.value = LoadStatus.error;
     }
 
-    notifyListeners();
+    loadStatus.value = LoadStatus.error;
   }
 
   void initVariation({required Product product}) {
@@ -198,8 +197,7 @@ class ProductBloc extends ChangeNotifier {
                   ),
                 ),
                 placeholder: (context, url) => const SizedBox.shrink(),
-                errorWidget: (context, url, error) =>
-                    Image.asset("assets/no-image.png"),
+                errorWidget: (context, url, error) => Image.asset("assets/no-image.png"),
               ),
             ),
           ),
