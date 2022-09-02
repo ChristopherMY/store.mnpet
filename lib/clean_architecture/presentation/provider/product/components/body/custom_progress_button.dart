@@ -3,18 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 
 import '../../product_bloc.dart';
 
 class CustomProgressButton extends StatelessWidget {
   const CustomProgressButton({
     Key? key,
+    this.buttonComesFromModal = false,
   }) : super(key: key);
+
+  final bool buttonComesFromModal;
 
   @override
   Widget build(BuildContext context) {
     final productBloc = context.watch<ProductBloc>();
-
+    final mainBloc = context.read<MainBloc>();
     return ValueListenableBuilder(
       valueListenable: productBloc.stateOnlyCustomIndicatorText,
       builder: (context, ButtonState value, child) {
@@ -28,7 +33,7 @@ class CustomProgressButton extends StatelessWidget {
                   CommunityMaterialIcons.cart_outline,
                   color: Colors.white,
                 ),
-                SizedBox(width: 10),
+                SizedBox(width: 10.0),
                 Text(
                   "Añadir al carrito",
                   style: TextStyle(color: Colors.white),
@@ -45,12 +50,12 @@ class CustomProgressButton extends StatelessWidget {
             ButtonState.fail: const Text(
               "Ups, algo salio mal",
               style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
             ),
             ButtonState.success: const Text(
               "Producto añadido",
               style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
             )
           },
           progressIndicator: const CircularProgressIndicator(
@@ -66,65 +71,28 @@ class CustomProgressButton extends StatelessWidget {
           },
           //onPressed: isDialog! ? onAddDialogCart : onAddCart,
           onPressed: () async {
-            print("PRESIONO");
-            final isSaved = await productBloc.onAddShoppingCart();
-            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+            final response =
+                await productBloc.onSaveShoppingCart(headers: mainBloc.headers);
 
-            if (isSaved is bool) {
-              if (isSaved) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Row(
-                    children: const [
-                      Icon(
-                        Icons.check_circle_outline,
-                        color: Colors.green,
-                      ),
-                      Text(
-                        'Tu producto a sido agregado exitosamente a su carrito',
-                        style: TextStyle(color: Colors.white),
-                      )
-                    ],
-                  ),
-                  backgroundColor: Colors.red[400],
-                ));
+            if (response is bool) {
+              if (response) {
+                GlobalSnackBar.showInfoSnackBarIcon(context,
+                    "Tu producto a sido agregado exitosamente al carrito");
+
+                mainBloc.handleFnShoppingCart;
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: const Text(
-                    'Tuvimos problemas, vuelva a intentarlo',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: Colors.red[400],
-                ));
+                GlobalSnackBar.showErrorSnackBarIcon(context,
+                    'Ups, tuvimos un problema. Vuelva a intentarlo más tarde');
               }
-            } else if (isSaved is String) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Icon(
-                      Icons.error_outline_rounded,
-                      color: Colors.blueAccent,
-                    ),
-                    Text(
-                      'La sessión no se encuentra activa',
-                      style: Theme.of(context).textTheme.bodyText2,
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Iniciar sessión",
-                        style: Theme.of(context).textTheme.headline2,
-                      ),
-                    )
-                  ],
-                ),
-                backgroundColor: kPrimaryBackgroundColor,
-              ));
+
+              if (buttonComesFromModal) {
+                Navigator.of(context).pop();
+              }
             }
           },
           state: value,
-          padding: const EdgeInsets.only(left: 15),
-          progressIndicatorSize: 20,
+          padding: const EdgeInsets.only(left: 15.0),
+          progressIndicatorSize: 20.0,
         );
       },
     );

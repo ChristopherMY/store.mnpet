@@ -19,6 +19,7 @@ class Product {
     this.attributes,
     this.modalAttributes,
     this.variations,
+    this.variation,
     this.mainImage,
     this.galleryHeader,
     this.galleryDescription,
@@ -53,6 +54,7 @@ class Product {
   List<ProductAttribute>? attributes;
   List<ProductAttribute>? modalAttributes;
   List<Variation>? variations;
+  final VariationCart? variation;
   final MainImage? mainImage;
   final List<MainImage>? galleryHeader;
   final String? shortDescription;
@@ -98,6 +100,9 @@ class Product {
             ? null
             : List<Variation>.from(
                 json["variations"].map((x) => Variation.fromMap(x))),
+        variation: json["variation"] == null
+            ? null
+            : VariationCart.fromMap(json["variation"]),
         mainImage: json["main_image"] == null
             ? null
             : MainImage.fromMap(json["main_image"]),
@@ -174,6 +179,7 @@ class Product {
         "variations": variations == null
             ? null
             : List<dynamic>.from(variations!.map((x) => x.toMap())),
+        "variation": variation == null ? null : variation!.toMap(),
         "main_image": mainImage == null ? null : mainImage!.toMap(),
         "gallery_header": galleryHeader == null
             ? null
@@ -213,7 +219,8 @@ class Product {
         "combos_settings": combosSettings == null
             ? null
             : List<dynamic>.from(combosSettings!.map((x) => x)),
-        "combos": combos == null ? null : List<dynamic>.from(combos!.map((x) => x)),
+        "combos":
+            combos == null ? null : List<dynamic>.from(combos!.map((x) => x)),
       };
 }
 
@@ -472,7 +479,6 @@ class GalleryVideo {
 }
 
 class Price {
-
   Price({
     this.regular,
     this.sale,
@@ -648,5 +654,59 @@ class VariationAttribute {
         "slug": slug == null ? null : slug,
         "value": value == null ? null : value!.toMap(),
         "image": image == null ? null : image!.toMap(),
+      };
+}
+
+class VariationCart {
+  VariationCart({
+    this.id,
+    this.active,
+    this.sku,
+    this.price,
+    this.stockControl,
+    this.stock,
+    this.coincidence,
+    this.attributes,
+  });
+
+  final String? id;
+  final bool? active;
+  final String? sku;
+  final Price? price;
+  final bool? stockControl;
+  final int? stock;
+  final List<String>? coincidence;
+  final List<VariationAttribute>? attributes;
+
+  factory VariationCart.fromMap(Map<String, dynamic> json) => VariationCart(
+        id: json["_id"] == null ? null : json["_id"],
+        active: json["active"] == null ? null : json["active"],
+        sku: json["sku"] == null ? null : json["sku"],
+        price: json["price"] == null ? null : Price.fromMap(json["price"]),
+        stockControl:
+            json["stock_control"] == null ? null : json["stock_control"],
+        stock: json["stock"] == null ? null : json["stock"],
+        coincidence: json["coincidence"] == null
+            ? null
+            : List<String>.from(json["coincidence"].map((x) => x)),
+        attributes: json["attributes"] == null
+            ? null
+            : List<VariationAttribute>.from(
+                json["attributes"].map((x) => VariationAttribute.fromMap(x))),
+      );
+
+  Map<String, dynamic> toMap() => {
+        "_id": id == null ? null : id,
+        "active": active == null ? null : active,
+        "sku": sku == null ? null : sku,
+        "price": price == null ? null : price!.toMap(),
+        "stock_control": stockControl == null ? null : stockControl,
+        "stock": stock == null ? null : stock,
+        "coincidence": coincidence == null
+            ? null
+            : List<dynamic>.from(coincidence!.map((x) => x)),
+        "attributes": attributes == null
+            ? null
+            : List<dynamic>.from(attributes!.map((x) => x.toMap())),
       };
 }

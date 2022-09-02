@@ -21,7 +21,6 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/user_reposi
 import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -72,8 +71,10 @@ class MyApp extends StatelessWidget {
             cartRepositoryInterface: context.read<CartRepositoryInterface>(),
           )
             ..sessionAccount.value = Session.inactive
-            ..loadSession()
-            ..initRegion(),
+            ..handleLoadSession()
+            ..initRegion()
+            ..handleLoadShipmentResidence()
+            ..handleLoadShoppingCartId(),
           builder: (context, child) => Consumer<MainBloc>(
             builder: (context, provider, child) {
               return MaterialApp(

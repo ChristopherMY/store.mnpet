@@ -347,7 +347,7 @@ class InfoAttributes extends StatelessWidget {
                               height: 50,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 15.0),
-                                child: CustomProgressButton(),
+                                child: CustomProgressButton(buttonComesFromModal: true),
                               ),
 
                               /*Row(

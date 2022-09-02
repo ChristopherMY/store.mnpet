@@ -61,7 +61,7 @@ class _AccountScreenState extends State<AccountScreen> {
               triggerMode: RefreshIndicatorTriggerMode.onEdge,
               onRefresh: () async {
                 if (mainBloc.informationUser is UserInformation) {
-                  final response = await mainBloc.fetchGetUserInformation();
+                  final response = await mainBloc.getUserInformation();
                   if (response is UserInformation) {
                     mainBloc.informationUser = response;
                     mainBloc.refreshMainBloc();

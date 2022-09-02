@@ -30,7 +30,7 @@ class InfoShipment extends StatelessWidget {
 
             if (shippingPrice is double) {
               productBloc.shippingPrice.value = shippingPrice;
-              productBloc.refreshUbigeo(slug: productBloc.product!.slug!);
+              productBloc.handleRefreshUbigeo(slug: productBloc.product!.slug!);
 
               const snackBar = SnackBar(
                 content: Text('Dirección guardada correctamente'),

@@ -9,8 +9,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 63,
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      height: 63.0,
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
       decoration: BoxDecoration(
         border: Border.all(width: 0.5, color: Colors.black12),
       ),
@@ -20,11 +20,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
             child: ProductPrice(),
           ),
           SizedBox(
-            height: 45,
+            height: 45.0,
             width: SizeConfig.screenWidth! * 0.515,
-            child: const CustomProgressButton(),
+            child: const CustomProgressButton(buttonComesFromModal: false),
           ),
-
 /*
                     Container(
                       height: 60,

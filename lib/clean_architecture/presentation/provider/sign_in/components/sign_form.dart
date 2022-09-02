@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
@@ -35,13 +36,20 @@ class _SignFormState extends State<SignForm> {
       if (response is CredentialsAuth) {
         final responseSession = await mainBloc.loadSessionPromise();
         if (responseSession) {
-          final responseUserInformation =
-              await mainBloc.fetchGetUserInformation();
+          final responseUserInformation = await mainBloc.getUserInformation();
 
           if (responseUserInformation is UserInformation) {
             mainBloc.informationUser = responseUserInformation;
             if (!mounted) return;
             signInBloc.isLoading.value = false;
+
+            final response = await mainBloc.changeShoppingCart();
+            if (response is ResponseApi) {
+              if (response.status == "success") {
+                mainBloc.handleDeleteShoppingCartTemp();
+              }
+            }
+
             mainBloc.sessionAccount.value = Session.active;
             mainBloc.refreshMainBloc();
             int count = 0;
@@ -51,12 +59,15 @@ class _SignFormState extends State<SignForm> {
           }
 
           GlobalSnackBar.showWarningSnackBar(
-              context, "Tenemos un problema, por favor inténtelo más tarde.");
-
+            context,
+            "Tenemos un problema, por favor inténtelo más tarde.",
+          );
         }
       } else if (response is bool && response == false) {
         GlobalSnackBar.showWarningSnackBar(
-            context, "Tenemos un problema, por favor inténtelo más tarde.");
+          context,
+          "Tenemos un problema, por favor inténtelo más tarde.",
+        );
       } else if (response is ResponseAuth) {
         GlobalSnackBar.showWarningSnackBar(context, response.message);
       }

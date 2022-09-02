@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information_local.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
@@ -18,7 +20,6 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/user_reposi
 import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/login/login_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
 class MainBloc extends ChangeNotifier {
@@ -41,9 +42,10 @@ class MainBloc extends ChangeNotifier {
   bool isLogged = false;
   ValueNotifier<Session> sessionAccount = ValueNotifier(Session.inactive);
   ValueNotifier<int> indexSelected = ValueNotifier(0);
+  ValueNotifier<LoadStatus> cartStatus = ValueNotifier(LoadStatus.loading);
 
   List<Region> regions = List.of(<Region>[]);
-
+  ValueNotifier<int> cartLength = ValueNotifier(0);
   List<Region> extraRegions = List.of(<Region>[]);
   List<Province> provinces = <Province>[];
   List<District> districts = <District>[];
@@ -63,8 +65,10 @@ class MainBloc extends ChangeNotifier {
 
   String ubigeo = "";
 
+  dynamic shoppingCartId;
   dynamic informationUser;
   dynamic informationCart;
+  dynamic residence;
 
   Map<String, String> headers = {
     "Content-type": "application/json",
@@ -74,7 +78,7 @@ class MainBloc extends ChangeNotifier {
   void onChangeIndexSelected({
     required int index,
     required BuildContext context,
-  }) {
+  }) async {
     if (indexSelected.value != index) {
       indexSelected.value = index;
 
@@ -84,8 +88,13 @@ class MainBloc extends ChangeNotifier {
 
       if (indexSelected.value == 1) {
         if (credentials is! CredentialsAuth) {
-          requestAccess(context);
-          sessionAccount.value = Session.inactive;
+          if (informationCart is! Cart) {
+            handleLoadShoppingCartId();
+            handleGetShoppingCartNotAccount();
+            return;
+          }
+        } else {
+          handleGetShoppingCart();
           return;
         }
       }
@@ -94,11 +103,10 @@ class MainBloc extends ChangeNotifier {
         if (credentials is! CredentialsAuth) {
           requestAccess(context);
           sessionAccount.value = Session.inactive;
-
           return;
         } else {
           if (informationUser is! UserInformation) {
-            fetchGetUserInformation().then(
+            getUserInformation().then(
               (loadInformation) {
                 if (loadInformation is UserInformation) {
                   informationUser = loadInformation;
@@ -121,12 +129,6 @@ class MainBloc extends ChangeNotifier {
         builder: ((context) => const LoginScreen()),
       ),
     );
-  }
-
-  void forceLoadingScreen(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => const SplashScreen(),
-    ));
   }
 
   void initRegion() async {
@@ -312,7 +314,7 @@ class MainBloc extends ChangeNotifier {
         ubigeo: ubigeo,
       );
 
-      hiveRepositoryInterface.save(
+      await hiveRepositoryInterface.save(
         containerName: "shipment",
         key: "residence",
         value: userInformationLocal.toMap(),
@@ -332,7 +334,7 @@ class MainBloc extends ChangeNotifier {
         }
       } else if (response is String) {
         if (kDebugMode) {
-          print("Error in response shipping price main bloc");
+          print(response);
         }
 
         return null;
@@ -342,15 +344,19 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
-
   Future<bool> loadSessionPromise() async {
-    final responseCredentials = CredentialsAuth.fromMap(
-      await hiveRepositoryInterface.read(
-            containerName: "authentication",
-            key: "credentials",
-          ) ??
-          {"email": "", "email_confirmed": false, "token": ""},
-    );
+    final responseCredentials = await Future.microtask(() async {
+      return CredentialsAuth.fromMap(
+        await hiveRepositoryInterface.read(
+              containerName: "authentication",
+              key: "credentials",
+            ) ??
+            {"email": "", "email_confirmed": false, "token": ""},
+      );
+    });
+
+    print("responseCredentials: ");
+    print(responseCredentials.toMap());
 
     if (responseCredentials.token.isNotEmpty) {
       credentials = responseCredentials;
@@ -364,14 +370,16 @@ class MainBloc extends ChangeNotifier {
   }
 
 // TODO: Solo se trabajara en el Main Screen
-  void loadSession() async {
-    final responseCredentials = CredentialsAuth.fromMap(
-      await hiveRepositoryInterface.read(
-            containerName: "authentication",
-            key: "credentials",
-          ) ??
-          {"email": "", "email_confirmed": false, "token": ""},
-    );
+  void handleLoadSession() async {
+    final responseCredentials = await Future.microtask(() async {
+      return CredentialsAuth.fromMap(
+        await hiveRepositoryInterface.read(
+              containerName: "authentication",
+              key: "credentials",
+            ) ??
+            {"email": "", "email_confirmed": false, "token": ""},
+      );
+    });
 
     if (responseCredentials.token.isNotEmpty) {
       credentials = responseCredentials;
@@ -386,15 +394,19 @@ class MainBloc extends ChangeNotifier {
       key: "credentials",
     );
 
+    await hiveRepositoryInterface.remove(
+      containerName: "shipment",
+      key: "residence",
+    );
+
     credentials = dynamic;
     informationUser = dynamic;
     headers[HttpHeaders.authorizationHeader] = '';
     sessionAccount.value = Session.inactive;
-
-    notifyListeners();
+    informationCart = dynamic;
   }
 
-  Future<dynamic> fetchGetUserInformation() async {
+  Future<dynamic> getUserInformation() async {
     final response = await userRepositoryInterface.getInformationUser(
       headers: headers,
     );
@@ -413,8 +425,6 @@ class MainBloc extends ChangeNotifier {
 
     return false;
   }
-
-
 
   // TODO: Solo se trabajara en el Main Screen
   // void loadUserInformation() async {
@@ -442,5 +452,269 @@ class MainBloc extends ChangeNotifier {
 
   void refreshMainBloc() {
     notifyListeners();
+  }
+
+  void handleLoadShipmentResidence() async {
+    residence = await Future.microtask(() async {
+      return UserInformationLocal.fromMap(
+        await hiveRepositoryInterface.read(
+              containerName: "shipment",
+              key: "residence",
+            ) ??
+            {
+              "department": "Lima",
+              "province": "Lima",
+              "district": "Miraflores",
+              "districtId": "61856a14587c82ef50c1b44b",
+              "ubigeo": "Lima - Lima - Miraflores",
+            },
+      );
+    });
+  }
+
+  Future<dynamic> getShoppingCart({
+    required String districtId,
+    required Map<String, String> headers,
+  }) async {
+    final response = await cartRepositoryInterface.getShoppingCart(
+      districtId: districtId,
+      headers: headers,
+    );
+
+    if (response is http.Response) {
+      if (response.statusCode == 200) {
+        final decodeResponse = jsonDecode(response.body);
+
+        return Cart.fromMap(decodeResponse);
+      }
+    } else if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
+    return false;
+  }
+
+  Future<dynamic> getShoppingCartTemp({
+    required String districtId,
+    required String carId,
+  }) async {
+    Map<String, String> bodyParams = {'cart_id': carId};
+
+    final response = await cartRepositoryInterface.getShoppingCartTemp(
+      districtId: districtId,
+      bodyParams: bodyParams,
+    );
+
+    if (response is http.Response) {
+      if (response.statusCode == 200) {
+        final decodeResponse = jsonDecode(response.body);
+        return Cart.fromMap(decodeResponse);
+      }
+    } else if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
+    return false;
+  }
+
+  void handleGetShoppingCartNotAccount() async {
+    cartStatus.value = LoadStatus.loading;
+    sessionAccount.value = Session.inactive;
+
+    getShoppingCartTemp(
+      districtId: residence.districtId!,
+      carId: shoppingCartId,
+    ).then(
+      (cart) async {
+        if (cart is Cart) {
+          if (shoppingCartId.toString().isEmpty || shoppingCartId is! String) {
+            await hiveRepositoryInterface.save(
+              containerName: "shopping",
+              key: "cartId",
+              value: cart.id,
+            );
+          }
+
+          cartLength.value = cart.products!.length;
+          informationCart = cart;
+        }
+
+        cartStatus.value = LoadStatus.normal;
+      },
+    );
+  }
+
+  void handleGetShoppingCart() {
+    cartStatus.value = LoadStatus.loading;
+
+    getShoppingCart(
+      districtId: residence.districtId!,
+      headers: headers,
+    ).then(
+      (cart) {
+        if (cart is Cart) {
+          informationCart = cart;
+          cartLength.value = cart.products!.length;
+        }
+
+        cartStatus.value = LoadStatus.normal;
+      },
+    );
+  }
+
+  Future<dynamic> refreshShoppingCart() async {
+    cartStatus.value = LoadStatus.loading;
+
+    final shoppingCart = await getShoppingCart(
+      districtId: residence.districtId!,
+      headers: headers,
+    );
+
+    cartStatus.value = LoadStatus.normal;
+    return shoppingCart;
+  }
+
+  Future<dynamic> changeShoppingCart() async {
+    final response = await cartRepositoryInterface.moveShoppingCart(
+      cartId: shoppingCartId,
+      headers: headers,
+    );
+
+    if (response is http.Response) {
+      if (response.statusCode == 200) {
+        return responseApiFromMap(response.body);
+
+        // return ResponseApi.fromMap(decode);
+      }
+    } else if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
+    return false;
+  }
+
+  void handleDeleteShoppingCartTemp() async {
+    await hiveRepositoryInterface.remove(
+      containerName: "shopping",
+      key: "cartId",
+    );
+  }
+
+  void handleLoadShoppingCartId() async {
+    if (shoppingCartId.toString().isEmpty || shoppingCartId is! String) {
+      shoppingCartId = await Future.microtask(() async {
+        return await hiveRepositoryInterface.read(
+              containerName: "shopping",
+              key: "cartId",
+            ) ??
+            "";
+      });
+    }
+  }
+
+  Future<dynamic> deleteItemShoppingCart({
+    required String variationId,
+    required String productId,
+  }) async {
+    dynamic response;
+    if (sessionAccount.value == Session.active) {
+      response = await cartRepositoryInterface.deleteProductCart(
+        productId: productId,
+        variationId: variationId,
+        headers: headers,
+      );
+    } else {
+      response = await cartRepositoryInterface.deleteProductCartTemp(
+        cartId: informationCart.id!,
+        variationId: variationId,
+        productId: productId,
+      );
+    }
+
+    if (response is http.Response) {
+      if (response.statusCode == 200) {
+        return responseApiFromMap(response.body);
+      }
+    } else if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
+    return false;
+  }
+
+  Future<dynamic> handleFnShoppingCart() async {
+    if (sessionAccount.value == Session.active) {
+      final cart = await getShoppingCart(
+        districtId: residence.districtId!,
+        headers: headers,
+      );
+
+      if (cart is Cart) {
+        informationCart = cart;
+        cartLength.value = cart.products!.length;
+
+        return true;
+      }
+    } else {
+      final cart = await getShoppingCartTemp(
+        districtId: residence.districtId!,
+        carId: shoppingCartId,
+      );
+
+      if (cart is Cart) {
+        if (shoppingCartId.toString().isEmpty || shoppingCartId is! String) {
+          await hiveRepositoryInterface.save(
+            containerName: "shopping",
+            key: "cartId",
+            value: cart.id,
+          );
+        }
+
+        cartLength.value = cart.products!.length;
+        informationCart = cart;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Future<dynamic> changeQuantity({
+    required String productId,
+    required int quantity,
+    required String variationId,
+  }) async {
+    dynamic response;
+    if (sessionAccount.value == Session.active) {
+      response = await cartRepositoryInterface.updateProductCart(
+        productId: productId,
+        variationId: variationId,
+        quantity: quantity,
+        headers: headers,
+      );
+    } else {
+      response = await cartRepositoryInterface.updateProductCartTemp(
+        cartId: shoppingCartId,
+        productId: productId,
+        variationId: variationId,
+        quantity: quantity,
+      );
+
+      if (response is http.Response) {
+        if (response is ResponseApi) {
+          return responseApiFromMap(response.body);
+        }
+      }
+
+      return false;
+    }
   }
 }

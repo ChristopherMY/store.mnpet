@@ -102,6 +102,7 @@ class SignInBloc extends ChangeNotifier {
           key: "credentials",
           value: credentials.toMap(),
         );
+
         return credentials;
       } else {
         return ResponseAuth.fromMap(response);
@@ -113,65 +114,6 @@ class SignInBloc extends ChangeNotifier {
     }
 
     return false;
-    //   if (responseAuth.statusCode == 200) {
-    //     KeyboardUtil.hideKeyboard(context);
-    //
-    //     final responseApi = User.fromMap(decodeResponse);
-    //     _hiveStorage.save(
-    //       "credentials",
-    //       "user",
-    //       responseApi.toMap(),
-    //     );
-    //
-    //     Timer(
-    //       Duration(milliseconds: 500),
-    //       () {
-    //         // _sharedPref
-    //         _hiveStorage.save(
-    //           "mail",
-    //           "mail_confirmed",
-    //           responseApi.emailConfirmed,
-    //         );
-    //
-    //         if (widget.position != null)
-    //           Navigator.pushNamedAndRemoveUntil(
-    //             context,
-    //             Home.routeName,
-    //             (route) => false,
-    //             arguments: widget.position,
-    //           );
-    //         else {
-    //           Navigator.pop(context);
-    //           Navigator.pop(widget.context);
-    //         }
-    //       },
-    //     );
-    //   } else if (responseAuth.statusCode == 400 ||
-    //       responseAuth.statusCode == 404) {
-    //     ResponseAuthLogin responseAuthLogin =
-    //         ResponseAuthLogin.fromMap(decodeResponse);
-    //
-    //     FocusScope.of(context).requestFocus(FocusNode());
-    //
-    //     final snackBar = SnackBar(
-    //       content: Text(
-    //         responseAuthLogin.message,
-    //         style: TextStyle(color: Colors.black),
-    //       ),
-    //       backgroundColor: kPrimaryBackgroundColor,
-    //       action: SnackBarAction(
-    //         label: 'Ok',
-    //         onPressed: () {},
-    //       ),
-    //     );
-    //     ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    //     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    //
-    //     // customToast.showToastIcon(
-    //     //   context: context,
-    //     //   type: "error",
-    //     //   message: responseAuthLogin.message,
-    //     // );
-    //   }
   }
+
 }

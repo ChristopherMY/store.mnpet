@@ -251,7 +251,7 @@ class ItemAddress extends StatelessWidget {
 
                       if (response is ResponseApi) {
                         final responseUserInformation =
-                            await mainBloc.fetchGetUserInformation();
+                            await mainBloc.getUserInformation();
 
                         if (responseUserInformation is UserInformation) {
                           mainBloc.informationUser = responseUserInformation;

@@ -60,7 +60,7 @@ class ProductScreen extends StatelessWidget {
                   'Seguiremos trabajando para tener los productos que buscas.',
               endLoadMore: false,
               onLoadMore: () async {
-                productBloc.initRelatedProductsPagination(
+                productBloc.handleInitRelatedProductsPagination(
                   categories: product.categories!,
                 );
               },
@@ -268,7 +268,7 @@ class ProductScreen extends StatelessWidget {
             padding: const EdgeInsets.all(4),
             child: GestureDetector(
               onTap: () {
-                productBloc.onIndexChanged(index: index);
+                productBloc.onChangedIndex(index: index);
                 onOpenGallery(
                   context: context,
                   index: index,
@@ -647,6 +647,7 @@ class ProductScreen extends StatelessWidget {
     );
   }
 
+
   _buildProducts({
     required BuildContext context,
     required List<Product> products,
@@ -727,7 +728,7 @@ class ProductScreen extends StatelessWidget {
           onIndexChanged: (index) {
             final productBloc =
                 Provider.of<ProductBloc>(context, listen: false);
-            productBloc.onIndexChanged(index: index);
+            productBloc.onChangedIndex(index: index);
           },
           pagination: const SwiperPagination(
             alignment: Alignment.bottomCenter,

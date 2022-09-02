@@ -100,7 +100,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
                 gallery: gallery,
                 managerType: widget.managerTypePhotoViewer,
                 position: productBloc.indexPhotoViewer,
-                onPhotoPageChanged: productBloc.onPhotoPageChanged,
+                onPhotoPageChanged: productBloc.onChangedPhotoPage,
               ),
             ),
             Positioned(

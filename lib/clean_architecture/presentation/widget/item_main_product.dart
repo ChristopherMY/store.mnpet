@@ -84,11 +84,11 @@ class TrendingItemMain extends StatelessWidget {
                 )
                   ..isLoadingPage = true
                   ..loadVimeoVideoConfig(galleryVideo: product.galleryVideo!)
-                  ..initProduct(slug: product.slug!)
-                  ..initRelatedProductsPagination(
+                  ..handleInitProduct(slug: product.slug!)
+                  ..handleInitRelatedProductsPagination(
                     categories: product.categories!,
                   )
-                  ..refreshUbigeo(
+                  ..handleRefreshUbigeo(
                     slug: product.slug!,
                   );
               },

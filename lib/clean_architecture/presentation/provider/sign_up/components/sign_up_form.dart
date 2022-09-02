@@ -266,7 +266,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     final responseSession = await mainBloc.loadSessionPromise();
                     if (responseSession) {
                       final responseUserInformation =
-                          await mainBloc.fetchGetUserInformation();
+                          await mainBloc.getUserInformation();
 
                       if (responseUserInformation) {
                         if (!mounted) return;

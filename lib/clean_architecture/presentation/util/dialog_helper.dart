@@ -1057,7 +1057,7 @@ class DialogHelper {
 
                                       final responseUserInformation =
                                           await mainBloc
-                                              .fetchGetUserInformation();
+                                              .getUserInformation();
 
                                       if (responseUserInformation) {
                                         mainBloc.informationUser =
@@ -1148,7 +1148,7 @@ class DialogHelper {
 
                                           final responseUserInformation =
                                               await mainBloc
-                                                  .fetchGetUserInformation();
+                                                  .getUserInformation();
 
                                           if (responseUserInformation) {
                                             mainBloc.informationUser =
@@ -1347,7 +1347,7 @@ class DialogHelper {
 
                                       final responseUserInformation =
                                           await mainBloc
-                                              .fetchGetUserInformation();
+                                              .getUserInformation();
 
                                       if (responseUserInformation) {
                                         mainBloc.informationUser =
@@ -1400,7 +1400,7 @@ class DialogHelper {
 
                                           final responseUserInformation =
                                               await mainBloc
-                                                  .fetchGetUserInformation();
+                                                  .getUserInformation();
 
                                           if (responseUserInformation) {
                                             mainBloc.informationUser =

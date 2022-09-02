@@ -41,7 +41,7 @@ class HiveService implements HiveRepositoryInterface {
     required String key,
   }) async {
     final box1 = await Hive.openBox(containerName);
-    return box1.delete(key);
+    return await box1.delete(key);
   }
 
 }

@@ -1,8 +1,8 @@
 abstract class CartRepositoryInterface {
   // http.Response
-  Future<dynamic> onSaveShoppingCart({
+  Future<dynamic> saveShoppingCart({
     required Map<String, dynamic> cart,
-    required String districtId,
+    required Map<String, String> headers,
   });
 
   // Cart
@@ -11,43 +11,47 @@ abstract class CartRepositoryInterface {
     required Map<String, String> headers,
   });
 
+  // Cart
+  Future<dynamic> moveShoppingCart({
+    required String cartId,
+    required Map<String, String> headers,
+  });
+
+
   // http.response
   Future<dynamic> deleteProductCart({
-    required String cartId,
+    required String productId,
     required String variationId,
-    required String districtId,
+    required Map<String, String> headers,
   });
 
   // http.response
   Future<dynamic> updateProductCart({
-    required String districtId,
     required String productId,
     required String variationId,
     required int quantity,
+    required Map<String, String> headers,
   });
 
   // http.Response
-  Future<dynamic> onSaveShoppingCartTemp({
-    required Map<String, dynamic> cart,
-    required String districtId,
-  });
+  Future<dynamic> onSaveShoppingCartTemp({required Map<String, dynamic> cart});
 
   // Cart
   Future<dynamic> getShoppingCartTemp({
     required String districtId,
-    required Map<String, String> headers,
+    required Map<String, String> bodyParams,
   });
 
   // http.response
   Future<dynamic> deleteProductCartTemp({
     required String cartId,
+    required String productId,
     required String variationId,
-    required String districtId,
   });
 
   // http.response
   Future<dynamic> updateProductCartTemp({
-    required String districtId,
+    required String cartId,
     required String productId,
     required String variationId,
     required int quantity,

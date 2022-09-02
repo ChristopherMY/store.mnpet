@@ -34,7 +34,8 @@ class _MainScreenState extends State<MainScreen> {
       PageRouteBuilder(
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
-        pageBuilder: (context, animation1, animation2) => const SplashScreen(),
+        pageBuilder: (context, animation1, animation2) =>
+            SplashScreen.init(context),
       ),
     );
   }

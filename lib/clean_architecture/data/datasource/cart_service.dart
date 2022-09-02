@@ -12,14 +12,13 @@ class CartService implements CartRepositoryInterface {
   // http.response
   @override
   Future<dynamic> deleteProductCart({
-    required String cartId,
+    required String productId,
     required String variationId,
-    required String districtId,
+    required Map<String, String> headers,
   }) async {
     Map<String, dynamic> binding = {
-      "product_id": cartId,
+      "product_id": productId,
       "variation_id": variationId,
-      "district_id": districtId,
     };
 
     final body = json.encode(binding);
@@ -60,9 +59,9 @@ class CartService implements CartRepositoryInterface {
   }
 
   @override
-  Future<dynamic> onSaveShoppingCart({
+  Future<dynamic> saveShoppingCart({
     required Map<String, dynamic> cart,
-    required String districtId,
+    required Map<String, String> headers,
   }) async {
     try {
       return await http.put(
@@ -78,16 +77,41 @@ class CartService implements CartRepositoryInterface {
     }
   }
 
+  @override
+  Future moveShoppingCart({
+    required String cartId,
+    required Map<String, String> headers,
+  }) async {
+    Map<String, dynamic> binding = {
+      "temp_id": cartId,
+    };
+
+    final body = json.encode(binding);
+
+    try {
+      return await http.put(
+        Uri.parse("$_url/api/v1/shopping_cart/move"),
+        headers: headers,
+        body: body,
+      );
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return e.toString();
+    }
+  }
+
   // http.response
   @override
   Future<dynamic> updateProductCart({
-    required String districtId,
     required String productId,
     required String variationId,
     required int quantity,
+    required Map<String, String> headers,
   }) async {
     Map<String, dynamic> binding = {
-      "district_id": districtId,
       "product_id": productId,
       "variation_id": variationId,
       "quantity": quantity,
@@ -114,19 +138,19 @@ class CartService implements CartRepositoryInterface {
   @override
   Future<dynamic> deleteProductCartTemp({
     required String cartId,
+    required String productId,
     required String variationId,
-    required String districtId,
   }) async {
     Map<String, dynamic> binding = {
-      "product_id": cartId,
+      "cart_id": cartId,
+      "product_id": productId,
       "variation_id": variationId,
-      "district_id": districtId,
     };
 
     final body = json.encode(binding);
     try {
       final res = await http.delete(
-        Uri.parse("$_url/api/v1/shopping_cart/item"),
+        Uri.parse("$_url/api/v1/temp_cart/item"),
         headers: headers,
         body: body,
       );
@@ -136,6 +160,7 @@ class CartService implements CartRepositoryInterface {
       if (kDebugMode) {
         print(e);
       }
+
       return e.toString();
     }
   }
@@ -144,13 +169,13 @@ class CartService implements CartRepositoryInterface {
   @override
   Future<dynamic> getShoppingCartTemp({
     required String districtId,
-    required Map<String, String> headers,
+    required Map<String, String> bodyParams,
   }) async {
     try {
-      return await http.get(
-        Uri.parse("$_url/api/v1/shopping_cart?&district_id=$districtId"),
-        headers: headers,
-      );
+      return await http.post(
+          Uri.parse("$_url/api/v1/temp_cart?&district_id=$districtId"),
+          headers: headers,
+          body: jsonEncode(bodyParams));
     } on Exception catch (e) {
       if (kDebugMode) {
         print(e);
@@ -163,11 +188,10 @@ class CartService implements CartRepositoryInterface {
   @override
   Future<dynamic> onSaveShoppingCartTemp({
     required Map<String, dynamic> cart,
-    required String districtId,
   }) async {
     try {
       return await http.put(
-        Uri.parse("$_url/api/v1/shopping_cart"),
+        Uri.parse("$_url/api/v1/temp_cart"),
         headers: headers,
         body: json.encode(cart),
       );
@@ -183,13 +207,13 @@ class CartService implements CartRepositoryInterface {
   // http.response
   @override
   Future<dynamic> updateProductCartTemp({
-    required String districtId,
+    required String cartId,
     required String productId,
     required String variationId,
     required int quantity,
   }) async {
     Map<String, dynamic> binding = {
-      "district_id": districtId,
+      "cart_id": cartId,
       "product_id": productId,
       "variation_id": variationId,
       "quantity": quantity,
@@ -198,13 +222,13 @@ class CartService implements CartRepositoryInterface {
     final body = json.encode(binding);
 
     try {
-      return await http.put(
-        Uri.parse("$_url/api/v1/shopping_cart/set_quantity"),
+      return await http.post(
+        Uri.parse("$_url/api/v1/temp_cart/quantity"),
         headers: headers,
-        body: body,
-      );
-    } on Exception catch (e) {
-      if (kDebugMode) {
+          body: body,
+        );
+      } on Exception catch (e) {
+        if (kDebugMode) {
         print(e);
       }
 
