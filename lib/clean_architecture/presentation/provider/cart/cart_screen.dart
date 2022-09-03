@@ -51,253 +51,272 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final mainBloc = context.watch<MainBloc>();
     final cartBloc = context.watch<CartBloc>();
-
-    return LoaderOverlay(
-      child: Stack(
-        children: [
-          RefreshIndicator(
-            notificationPredicate: (notification) => true,
-            triggerMode: RefreshIndicatorTriggerMode.onEdge,
-            onRefresh: () async {
-              dynamic response;
-              mainBloc.cartStatus.value = LoadStatus.loading;
-              if (mainBloc.sessionAccount.value == Session.active) {
-                response = await mainBloc.getShoppingCart(
-                  districtId: mainBloc.residence.districtId!,
-                  headers: mainBloc.headers,
-                );
-              } else {
-                response = await mainBloc.getShoppingCartTemp(
-                    districtId: mainBloc.residence.districtId!,
-                    carId: mainBloc.shoppingCartId);
-              }
-
-              if (response is Cart) {
-                mainBloc.informationCart = response;
-                mainBloc.cartLength.value = response.products!.length;
-              }
-
-              mainBloc.cartStatus.value = LoadStatus.normal;
-            },
-            child: ValueListenableBuilder(
-              valueListenable: cartBloc.loadStatus,
-              builder: (context, LoadStatus value, child) {
-                return LoadAny(
-                  status: value,
-                  loadingMsg: 'Cargando... ',
-                  errorMsg: 'Error de carga, haga clic en reintentar ',
-                  finishMsg:
-                      'Seguiremos trabajando para tener los productos que buscas.',
-                  endLoadMore: false,
-                  onLoadMore: () async {
-                    cartBloc.initRelatedProductsPagination(
-                      categories: [],
+    return Stack(
+      children: [
+        Builder(
+          builder: (context) {
+            return LoaderOverlay(
+              child: RefreshIndicator(
+                notificationPredicate: (notification) => true,
+                triggerMode: RefreshIndicatorTriggerMode.onEdge,
+                onRefresh: () async {
+                  dynamic response;
+                  mainBloc.cartStatus.value = LoadStatus.loading;
+                  if (mainBloc.sessionAccount.value == Session.active) {
+                    response = await mainBloc.getShoppingCart(
+                      districtId: mainBloc.residence.districtId!,
+                      headers: mainBloc.headers,
                     );
-                  },
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverAppBar(
-                        pinned: true,
-                        snap: false,
-                        floating: false,
-                        toolbarHeight: 56.0,
-                        backgroundColor: kBackGroundColor,
-                        systemOverlayStyle: const SystemUiOverlayStyle(
-                          statusBarColor: kBackGroundColor,
-                          statusBarIconBrightness: Brightness.dark,
-                        ),
-                        expandedHeight: getProportionateScreenHeight(56.0),
-                        title: ValueListenableBuilder(
-                          valueListenable: mainBloc.cartLength,
-                          builder: (context, int value, child) {
-                            return Text(
-                              "Carrito($value)",
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          },
-                        ),
-                        actions: const [],
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                        sliver: SliverToBoxAdapter(
-                          child: ValueListenableBuilder(
-                            valueListenable: mainBloc.cartStatus,
-                            builder: (context, LoadStatus shoppingCart, child) {
-                              if (shoppingCart == LoadStatus.normal) {
-                                if (mainBloc
-                                    .informationCart!.products!.isEmpty) {
-                                  return Column(
-                                    children: const [
-                                      Icon(
-                                        CommunityMaterialIcons.cart_outline,
-                                        size: 85,
-                                        color: Colors.black26,
-                                      ),
-                                      Text(
-                                        "Aun no has añadido ningun producto a tu carrito.",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.black26,
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }
+                  } else {
+                    mainBloc.handleLoadShoppingCartId();
+                    response = await mainBloc.getShoppingCartTemp(
+                      districtId: mainBloc.residence.districtId!,
+                      carId: mainBloc.shoppingCartId,
+                    );
+                  }
 
-                                return Column(
-                                  children: [
-                                    ListView.separated(
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      scrollDirection: Axis.vertical,
-                                      shrinkWrap: true,
-                                      itemCount: mainBloc
-                                          .informationCart!.products.length,
-                                      separatorBuilder:
-                                          (BuildContext context, int index) {
-                                        return const Divider();
-                                      },
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        final product = mainBloc
-                                            .informationCart!.products[index];
+                  print("Reload Cart");
+                  print(response);
+                  print(mainBloc.shoppingCartId);
 
-                                        if (!product.isFree) {
-                                          return CardItem(product: product);
-                                        }
+                  if (response is Cart) {
+                    print(response.toMap());
+                    if (mainBloc.shoppingCartId.toString().isEmpty ||
+                        mainBloc.shoppingCartId is! String) {
+                      await mainBloc.hiveRepositoryInterface.save(
+                        containerName: "shopping",
+                        key: "cartId",
+                        value: response.id,
+                      );
+                    }
 
-                                        return CardItemFree(
-                                          productName: product.name,
-                                          imageUrl: product.mainImage.src,
-                                        );
-                                      },
-                                    ),
-                                  ],
+                    mainBloc.informationCart = response;
+                    mainBloc.cartLength.value = response.products!.length;
+                  }
+
+                  mainBloc.cartStatus.value = LoadStatus.normal;
+                },
+                child: ValueListenableBuilder(
+                  valueListenable: cartBloc.loadStatus,
+                  builder: (context, LoadStatus value, child) {
+                    return LoadAny(
+                      status: value,
+                      loadingMsg: 'Cargando... ',
+                      errorMsg: 'Error de carga, haga clic en reintentar ',
+                      finishMsg:
+                          'Seguiremos trabajando para tener los productos que buscas.',
+                      endLoadMore: false,
+                      onLoadMore: () async {
+                        cartBloc.initRelatedProductsPagination(
+                          categories: [],
+                        );
+                      },
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverAppBar(
+                            pinned: true,
+                            snap: false,
+                            floating: false,
+                            toolbarHeight: 56.0,
+                            backgroundColor: kBackGroundColor,
+                            systemOverlayStyle: const SystemUiOverlayStyle(
+                              statusBarColor: kBackGroundColor,
+                              statusBarIconBrightness: Brightness.dark,
+                            ),
+                            expandedHeight: getProportionateScreenHeight(56.0),
+                            title: ValueListenableBuilder(
+                              valueListenable: mainBloc.cartLength,
+                              builder: (context, int value, child) {
+                                return Text(
+                                  "Carrito($value)",
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 );
-                              }
-                              return const Center(
-                                child: LottieAnimation(
-                                  source: "assets/lottie/paw.json",
-                                ),
-                              );
-                            },
+                              },
+                            ),
+                            actions: const [],
                           ),
-                        ),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                          vertical: 15.0,
-                        ),
-                        sliver: SliverToBoxAdapter(
-                          child: ValueListenableBuilder(
-                            valueListenable: mainBloc.cartStatus,
-                            builder: (context, LoadStatus shoppingCart, child) {
-                              if (shoppingCart == LoadStatus.normal) {
-                                if (mainBloc
-                                    .informationCart!.products!.isNotEmpty) {
-                                  return InfoCartDetail(
-                                    cart: mainBloc.informationCart!,
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                            sliver: SliverToBoxAdapter(
+                              child: ValueListenableBuilder(
+                                valueListenable: mainBloc.cartStatus,
+                                builder: (context, LoadStatus shoppingCart, child) {
+                                  if (shoppingCart == LoadStatus.normal) {
+                                    if (mainBloc
+                                        .informationCart!.products!.isEmpty) {
+                                      return Column(
+                                        children: const [
+                                          Icon(
+                                            CommunityMaterialIcons.cart_outline,
+                                            size: 85,
+                                            color: Colors.black26,
+                                          ),
+                                          Text(
+                                            "Aun no has añadido ningun producto a tu carrito.",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.black26,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }
+
+                                    return Column(
+                                      children: [
+                                        ListView.separated(
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          scrollDirection: Axis.vertical,
+                                          shrinkWrap: true,
+                                          itemCount: mainBloc
+                                              .informationCart!.products.length,
+                                          separatorBuilder:
+                                              (BuildContext context, int index) {
+                                            return const Divider();
+                                          },
+                                          itemBuilder:
+                                              (BuildContext context, int index) {
+                                            final product = mainBloc
+                                                .informationCart!.products[index];
+
+                                            if (!product.isFree) {
+                                              return CardItem(product: product);
+                                            }
+
+                                            return CardItemFree(
+                                              productName: product.name,
+                                              imageUrl: product.mainImage.src,
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  }
+                                  return const Center(
+                                    child: LottieAnimation(
+                                      source: "assets/lottie/paw.json",
+                                    ),
                                   );
-                                }
-
-                                return const SizedBox.shrink();
-                              }
-
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                          vertical: 15.0,
-                        ),
-                        sliver: SliverToBoxAdapter(
-                          child: ValueListenableBuilder(
-                            valueListenable: mainBloc.cartStatus,
-                            builder: (context, LoadStatus shoppingCart, child) {
-                              if (shoppingCart == LoadStatus.normal) {
-                                if (mainBloc
-                                    .informationCart!.products!.isNotEmpty) {
-                                  return DefaultButton(
-                                    text: "Ir a pagar",
-                                    press: () {},
-                                  );
-                                }
-
-                                return const SizedBox.shrink();
-                              }
-
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ),
-                      ),
-                      MultiSliver(
-                        children: [
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(
-                                    "Te va a encantar",
-                                    style:
-                                        Theme.of(context).textTheme.subtitle2,
-                                    textAlign: TextAlign.start,
-                                  ),
-                                  const SizedBox(height: 5)
-                                ],
+                                },
                               ),
                             ),
                           ),
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 10, right: 10),
-                              child: MasonryGrid(
-                                column: 2,
-                                staggered: false,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                                children: List.generate(
-                                  cartBloc.productsList.length,
-                                  (index) => TrendingItemMain(
-                                    product: cartBloc.productsList[index],
-                                    gradientColors: [
-                                      const Color(0xFFF28767),
-                                      Colors.orange.shade400
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 15.0,
+                              vertical: 15.0,
+                            ),
+                            sliver: SliverToBoxAdapter(
+                              child: ValueListenableBuilder(
+                                valueListenable: mainBloc.cartStatus,
+                                builder: (context, LoadStatus shoppingCart, child) {
+                                  if (shoppingCart == LoadStatus.normal) {
+                                    if (mainBloc
+                                        .informationCart!.products!.isNotEmpty) {
+                                      return InfoCartDetail(
+                                        cart: mainBloc.informationCart!,
+                                      );
+                                    }
+
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  return const SizedBox.shrink();
+                                },
+                              ),
+                            ),
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 15.0,
+                              vertical: 15.0,
+                            ),
+                            sliver: SliverToBoxAdapter(
+                              child: ValueListenableBuilder(
+                                valueListenable: mainBloc.cartStatus,
+                                builder: (context, LoadStatus shoppingCart, child) {
+                                  if (shoppingCart == LoadStatus.normal) {
+                                    if (mainBloc
+                                        .informationCart!.products!.isNotEmpty) {
+                                      return DefaultButton(
+                                        text: "Ir a pagar",
+                                        press: () {},
+                                      );
+                                    }
+
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  return const SizedBox.shrink();
+                                },
+                              ),
+                            ),
+                          ),
+                          MultiSliver(
+                            children: [
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        "Te va a encantar",
+                                        style:
+                                            Theme.of(context).textTheme.subtitle2,
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      const SizedBox(height: 5)
                                     ],
                                   ),
                                 ),
                               ),
-                            ),
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 10, right: 10),
+                                  child: MasonryGrid(
+                                    column: 2,
+                                    staggered: false,
+                                    crossAxisSpacing: 8,
+                                    mainAxisSpacing: 8,
+                                    children: List.generate(
+                                      cartBloc.productsList.length,
+                                      (index) => TrendingItemMain(
+                                        product: cartBloc.productsList[index],
+                                        gradientColors: [
+                                          const Color(0xFFF28767),
+                                          Colors.orange.shade400
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
                           )
                         ],
-                      )
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+                      ),
+                    );
+                  },
+                ),
+              ),
 
-          // : const Positioned.fill(
-          //     child: Center(
-          //       child: LottieAnimation(
-          //         source: "assets/lottie/paw.json",
-          //       ),
-          //     ),
-          //   ),
-        ],
-      ),
+              // : const Positioned.fill(
+              //     child: Center(
+              //       child: LottieAnimation(
+              //         source: "assets/lottie/paw.json",
+              //       ),
+              //     ),
+              //   ),
+            );
+          }
+        ),
+      ],
     );
   }
 }
@@ -457,14 +476,14 @@ class CardItem extends StatelessWidget {
                               );
 
                               if (response is ResponseApi) {
-                                final responseApi =
-                                    await mainBloc.handleFnShoppingCart();
-
-                                GlobalSnackBar.showInfoSnackBarIcon(
+                                await mainBloc.handleFnShoppingCart();
+                                context.loaderOverlay.hide();
+                                await GlobalSnackBar.showInfoSnackBarIcon(
                                   context,
                                   response.message,
                                 );
                               } else {
+                                context.loaderOverlay.hide();
                                 GlobalSnackBar.showErrorSnackBarIcon(
                                   context,
                                   "Tuvimos problemas, vuelva a intentarlo más tarde.",
@@ -531,15 +550,16 @@ class CardItem extends StatelessWidget {
                                     );
 
                                     if (response is ResponseApi) {
-                                      await mainBloc
-                                          .handleFnShoppingCart()
-                                          .then((dd) {
-                                            print("Esta entrando");
-                                        context.loaderOverlay.hide();
-                                      });
+                                      await mainBloc.handleFnShoppingCart(
+                                        enableLoader: false,
+                                      );
+
+                                      context.loaderOverlay.hide();
 
                                       GlobalSnackBar.showInfoSnackBarIcon(
-                                          context, response.message);
+                                        context,
+                                        response.message,
+                                      );
                                     }
                                   }
                                 },

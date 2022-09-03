@@ -44,9 +44,12 @@ class _SignFormState extends State<SignForm> {
             signInBloc.isLoading.value = false;
 
             final response = await mainBloc.changeShoppingCart();
+            print(response);
             if (response is ResponseApi) {
+              print(response.toMap());
               if (response.status == "success") {
-                mainBloc.handleDeleteShoppingCartTemp();
+                await mainBloc.deleteShoppingCartTemp();
+                mainBloc.shoppingCartId = "";
               }
             }
 

@@ -530,8 +530,11 @@ class MainBloc extends ChangeNotifier {
       carId: shoppingCartId,
     ).then(
       (cart) async {
+        print("!!Solicitando carrito de compras temporal!!");
+        print("Shopping cart id es: $shoppingCartId");
         if (cart is Cart) {
           if (shoppingCartId.toString().isEmpty || shoppingCartId is! String) {
+            print("Esta registrando Shopping cart Id");
             await hiveRepositoryInterface.save(
               containerName: "shopping",
               key: "cartId",
@@ -579,6 +582,8 @@ class MainBloc extends ChangeNotifier {
   }
 
   Future<dynamic> changeShoppingCart() async {
+    print("Moviendo carrito");
+    print('Carrito ID $shoppingCartId');
     final response = await cartRepositoryInterface.moveShoppingCart(
       cartId: shoppingCartId,
       headers: headers,
@@ -599,7 +604,7 @@ class MainBloc extends ChangeNotifier {
     return false;
   }
 
-  void handleDeleteShoppingCartTemp() async {
+  Future<void> deleteShoppingCartTemp() async {
     await hiveRepositoryInterface.remove(
       containerName: "shopping",
       key: "cartId",
@@ -650,7 +655,11 @@ class MainBloc extends ChangeNotifier {
     return false;
   }
 
-  Future<dynamic> handleFnShoppingCart() async {
+  Future<void> handleFnShoppingCart({bool enableLoader = false}) async {
+    if (enableLoader) {
+      cartStatus.value = LoadStatus.loading;
+    }
+
     if (sessionAccount.value == Session.active) {
       final cart = await getShoppingCart(
         districtId: residence.districtId!,
@@ -660,8 +669,6 @@ class MainBloc extends ChangeNotifier {
       if (cart is Cart) {
         informationCart = cart;
         cartLength.value = cart.products!.length;
-
-        return true;
       }
     } else {
       final cart = await getShoppingCartTemp(
@@ -680,11 +687,14 @@ class MainBloc extends ChangeNotifier {
 
         cartLength.value = cart.products!.length;
         informationCart = cart;
-        return true;
       }
     }
 
-    return false;
+    if (enableLoader) {
+      cartStatus.value = LoadStatus.normal;
+    }
+
+    return;
   }
 
   Future<dynamic> changeQuantity({

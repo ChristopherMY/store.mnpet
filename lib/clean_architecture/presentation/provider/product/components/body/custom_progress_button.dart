@@ -71,18 +71,21 @@ class CustomProgressButton extends StatelessWidget {
           },
           //onPressed: isDialog! ? onAddDialogCart : onAddCart,
           onPressed: () async {
-            final response =
-                await productBloc.onSaveShoppingCart(headers: mainBloc.headers);
+            final response = await productBloc.onSaveShoppingCart(headers: mainBloc.headers);
 
             if (response is bool) {
               if (response) {
-                GlobalSnackBar.showInfoSnackBarIcon(context,
-                    "Tu producto a sido agregado exitosamente al carrito");
+                GlobalSnackBar.showInfoSnackBarIcon(
+                  context,
+                  "Tu producto a sido agregado exitosamente al carrito",
+                );
 
-                mainBloc.handleFnShoppingCart;
+                mainBloc.handleFnShoppingCart(enableLoader: true);
               } else {
-                GlobalSnackBar.showErrorSnackBarIcon(context,
-                    'Ups, tuvimos un problema. Vuelva a intentarlo más tarde');
+                GlobalSnackBar.showErrorSnackBarIcon(
+                  context,
+                  'Ups, tuvimos un problema. Vuelva a intentarlo más tarde',
+                );
               }
 
               if (buttonComesFromModal) {
