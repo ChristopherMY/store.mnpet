@@ -54,6 +54,8 @@ class _SignFormState extends State<SignForm> {
             }
 
             mainBloc.sessionAccount.value = Session.active;
+            mainBloc.account.value = Account.active;
+
             mainBloc.refreshMainBloc();
             int count = 0;
 
@@ -65,6 +67,7 @@ class _SignFormState extends State<SignForm> {
             context,
             "Tenemos un problema, por favor inténtelo más tarde.",
           );
+
         }
       } else if (response is bool && response == false) {
         GlobalSnackBar.showWarningSnackBar(

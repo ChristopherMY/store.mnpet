@@ -126,6 +126,12 @@ final settingsItemIconStyleToolBarSearch = (Color color) => ParentStyle()
   )
   ..animate(150, Curves.easeOut);
 */
+
+String parseDouble(String value) {
+  final calc = double.parse(value).toStringAsFixed(2);
+  return calc.toString();
+}
+
 const defaultDuration = Duration(milliseconds: 250);
 
 // Form Error

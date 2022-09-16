@@ -3,15 +3,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen._({Key? key}) : super(key: key);
 
   static Widget init(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => SplashBloc(),
-      child: const SplashScreen._(),
+    return ChangeNotifierProvider<HomeBloc>.value(
+      value: Provider.of<HomeBloc>(context),
+      child: ChangeNotifierProvider(
+        create: (context) => SplashBloc(),
+        child: const SplashScreen._(),
+      ),
     );
   }
 
@@ -20,18 +25,24 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   late Timer timer;
 
   void initEventDecrement() {
-    final splashBloc = scaffoldKey.currentState!.context.read<SplashBloc>();
+    final splashBloc = context.read<SplashBloc>();
+
     timer = Timer.periodic(
       const Duration(seconds: 1),
-      (timer) {
+          (timer) {
+        final homeBloc = context.read<HomeBloc>();
+        if (homeBloc.components == LoadStatus.normal) {
+          timer.cancel();
+          Navigator.of(context).pop();
+        }
+
         if (splashBloc.countdown.value == 0) {
           timer.cancel();
 
-          Navigator.of(scaffoldKey.currentState!.context).pop();
+          Navigator.of(context).pop();
           return;
         }
 
@@ -51,6 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initEventDecrement();
     });
@@ -61,7 +73,6 @@ class _SplashScreenState extends State<SplashScreen> {
     final splashBloc = context.watch<SplashBloc>();
 
     return Scaffold(
-      key: scaffoldKey,
       body: Stack(
         children: [
           Container(
@@ -97,7 +108,10 @@ class _SplashScreenState extends State<SplashScreen> {
                     builder: (context, int value, child) {
                       return Text(
                         value.toString(),
-                        style: Theme.of(context).textTheme.bodyText2,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyText2,
                       );
                     },
                   ),

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
@@ -17,9 +20,7 @@ class MainScreen extends StatefulWidget {
     return ChangeNotifierProvider(
       create: (context) => HomeBloc(
         homeRepositoryInterface: context.read<HomeRepositoryInterface>(),
-      )
-        ..loadCategories()
-        ..initPaginationProducts(),
+      )..handleInitComponents(),
       builder: (_, __) => const MainScreen._(),
     );
   }
@@ -28,15 +29,14 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  Future<void> forceLoadingScreen(BuildContext context) async {
+class _MainScreenState extends State<MainScreen> with AfterLayoutMixin<MainScreen>{
+  Future<void> loadingScreen(BuildContext context) async {
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
-        pageBuilder: (context, animation1, animation2) =>
-            SplashScreen.init(context),
-      ),
+        pageBuilder: (_, animation1, animation2) => SplashScreen.init(context),
+      ), 
     );
   }
 
@@ -44,15 +44,10 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     // TODO: implement initStat
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      forceLoadingScreen(context);
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+    //
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   forceLoadingScreen(context);
+    // });
   }
 
   @override
@@ -60,16 +55,6 @@ class _MainScreenState extends State<MainScreen> {
     final mainBloc = context.watch<MainBloc>();
     SizeConfig().init(context);
     return Scaffold(
-      // appBar: AppBar(
-      //   // backgroundColor: kPrimaryColor,
-      //   // systemOverlayStyle: const SystemUiOverlayStyle(
-      //   //   statusBarColor: kPrimaryColor,
-      //   //   //statusBarIconBrightness: Brightness.light,
-      //   // ),
-      //   bottomOpacity: 0,
-      //   shadowColor: Colors.transparent,
-      //   toolbarHeight: 0,
-      // ),
       backgroundColor: kBackGroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -119,4 +104,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+
+  @override
+  FutureOr<void> afterFirstLayout(BuildContext context) => loadingScreen(context);
 }

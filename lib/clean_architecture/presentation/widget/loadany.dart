@@ -104,7 +104,6 @@ class _LoadAnyState extends State<LoadAny> {
       }
     }
 
-    ///返回内置状态
     if (status == LoadStatus.loading) {
       return _buildLoading();
     } else if (status == LoadStatus.error) {
@@ -116,7 +115,6 @@ class _LoadAnyState extends State<LoadAny> {
     }
   }
 
-  ///加载中状态
   Widget _buildLoading() {
     return SizedBox(
       height: widget.footerHeight,
@@ -147,7 +145,6 @@ class _LoadAnyState extends State<LoadAny> {
       behavior: HitTestBehavior.translucent,
       onTap: () {
         widget.onLoadMore();
-//        widget.onLoadFilters();
       },
       child: SizedBox(
         height: widget.footerHeight,
@@ -207,13 +204,13 @@ class _LoadAnyState extends State<LoadAny> {
     );
   }
 
-  ///计算加载更多
+
   bool _handleNotification(ScrollNotification notification) {
-    //当前滚动距离
+
     double currentExtent = notification.metrics.pixels;
-    //最大滚动距离
+
     double maxExtent = notification.metrics.maxScrollExtent;
-    //滚动更新过程中，并且设置非滚动到底部可以触发加载更多
+
     if (notification.metrics.axisDirection == AxisDirection.down &&
         (notification is ScrollUpdateNotification) &&
         !widget.endLoadMore) {
@@ -221,18 +218,15 @@ class _LoadAnyState extends State<LoadAny> {
           (maxExtent - currentExtent <= widget.bottomTriggerDistance));
     }
 
-    //滚动到底部，并且设置滚动到底部才触发加载更多
     if (notification.metrics.axisDirection == AxisDirection.down &&
         (notification is ScrollEndNotification) &&
         widget.endLoadMore) {
-      //滚动到底部并且加载状态为正常时，调用加载更多
       return _checkLoadMore((currentExtent >= maxExtent));
     }
 
     return false;
   }
 
-  ///处理加载更多
   bool _checkLoadMore(bool canLoad) {
     if (canLoad && widget.status == LoadStatus.normal) {
       widget.onLoadMore();

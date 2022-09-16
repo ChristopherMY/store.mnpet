@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class General {
-  whatsappMessage({
+ static whatsappMessage({
     required BuildContext context,
     required String description,
   }) async {

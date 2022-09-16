@@ -1,10 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
@@ -13,6 +16,9 @@ import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/phone/phone_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/custom_progress_button.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/info_attributes.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
@@ -20,6 +26,8 @@ import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_erro
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_button.dart';
 
 class DialogHelper {
+  final String _cloudFront = Environment.API_DAO;
+
   Future<void> showDialogShipping({
     required BuildContext context,
     required Function(BuildContext) onSaveShippingAddress,
@@ -28,12 +36,10 @@ class DialogHelper {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext _) {
-        // Mongo Payground
-
         return ChangeNotifierProvider<MainBloc>.value(
           value: Provider.of<MainBloc>(context, listen: false),
           builder: (context, child) {
-            final mainBloc = Provider.of<MainBloc>(context, listen: true);
+            final mainBloc = Provider.of<MainBloc>(context);
             return AlertDialog(
               title: const Text(
                 'Calcular envío en otra dirección',
@@ -171,18 +177,19 @@ class DialogHelper {
                       child: Row(
                         children: <Widget>[
                           Expanded(
-                              child: ValueListenableBuilder(
-                            valueListenable: mainBloc.districtName,
-                            builder: (context, String value, child) {
-                              return Text(
-                                value,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              );
-                            },
-                          )),
+                            child: ValueListenableBuilder(
+                              valueListenable: mainBloc.districtName,
+                              builder: (context, String districtName, child) {
+                                return Text(
+                                  districtName,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                           const Icon(
                             Icons.arrow_drop_down,
                             color: Colors.black,
@@ -194,7 +201,12 @@ class DialogHelper {
                     const SizedBox(height: 10),
                     DefaultTextStyle(
                       style: const TextStyle(color: Colors.red, fontSize: 15),
-                      child: FormError(errors: mainBloc.errors),
+                      child: ValueListenableBuilder(
+                        valueListenable: mainBloc.errors,
+                        builder: (context, List<String> value, child) {
+                          return FormError(errors: value);
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -1056,8 +1068,7 @@ class DialogHelper {
                                       );
 
                                       final responseUserInformation =
-                                          await mainBloc
-                                              .getUserInformation();
+                                          await mainBloc.getUserInformation();
 
                                       if (responseUserInformation) {
                                         mainBloc.informationUser =
@@ -1346,8 +1357,7 @@ class DialogHelper {
                                       );
 
                                       final responseUserInformation =
-                                          await mainBloc
-                                              .getUserInformation();
+                                          await mainBloc.getUserInformation();
 
                                       if (responseUserInformation) {
                                         mainBloc.informationUser =
@@ -1451,97 +1461,426 @@ class DialogHelper {
       },
     );
   }
-}
 
-Future<void> showDropdownAddressType({
-  required List<Map<String, dynamic>> addressTypes,
-  required BuildContext context,
-  required Function(int) changeAddressType,
-}) {
-  return showModalBottomSheet<void>(
-    context: context,
-    builder: (BuildContext context) {
-      return Container(
-        height: 270.0,
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10.0),
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(
-                        CupertinoIcons.clear,
-                        color: Colors.black45,
-                        size: 16.0,
-                      ),
-                    ),
-                    const SizedBox(width: 10.0),
-                    const Expanded(
-                      child: Text(
-                        "Tipo de dirección",
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w700,
+  Future<void> showDropdownAddressType({
+    required List<Map<String, dynamic>> addressTypes,
+    required BuildContext context,
+    required Function(int) changeAddressType,
+  }) {
+    return showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 270.0,
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: Row(
+                    children: [
+                      InkWell(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          CupertinoIcons.clear,
+                          color: Colors.black45,
+                          size: 16.0,
                         ),
                       ),
-                    )
+                      const SizedBox(width: 10.0),
+                      const Expanded(
+                        child: Text(
+                          "Tipo de dirección",
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                const Divider(
+                  height: 2,
+                  color: Colors.black,
+                ),
+                SizedBox(
+                  height: 200,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    itemCount: addressTypes.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return InkWell(
+                        onTap: () {
+                          changeAddressType(index);
+                        },
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 15.0, bottom: 15.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(addressTypes[index]["name"]),
+                                  ),
+                                  if (addressTypes[index]["checked"])
+                                    const Icon(
+                                      CupertinoIcons.checkmark_alt,
+                                      color: Colors.blueAccent,
+                                      size: 20,
+                                    )
+                                  else
+                                    const SizedBox.shrink()
+                                ],
+                              ),
+                            ),
+                            const Divider(
+                              height: 2,
+                              color: Colors.black,
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> settingModalBottomSheetAttributes({
+    required BuildContext context,
+  }) async {
+    return await showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      context: context,
+      enableDrag: false,
+      isScrollControlled: true,
+      builder: (BuildContext _) {
+        return ChangeNotifierProvider<ProductBloc>.value(
+          value: Provider.of<ProductBloc>(context, listen: false),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.91,
+            minChildSize: 0.2,
+            maxChildSize: 0.91,
+            builder: (__, controller) {
+              final productBloc = __.watch<ProductBloc>();
+
+              return SizedBox(
+                child: Stack(
+                  alignment: AlignmentDirectional.topStart,
+                  children: <Widget>[
+                    Container(
+                      margin: const EdgeInsets.only(top: 50),
+                      color: Colors.transparent,
+                      child: Container(
+                        padding: const EdgeInsets.only(top: 70),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            LimitedBox(
+                              maxHeight: SizeConfig.screenHeight! * 0.69,
+                              child: ValueListenableBuilder(
+                                valueListenable: productBloc.modalAttributes,
+                                builder: (
+                                  BuildContext context,
+                                  List<ProductAttribute> value,
+                                  child,
+                                ) {
+                                  return BuildAttributesSections(
+                                    onIncrementQuantity: () {
+                                      productBloc.onIncrementQuantity();
+                                    },
+                                    onDecrementQuantity: () {
+                                      productBloc.onDecrementQuantity();
+                                    },
+                                    onChangeVariation:
+                                        (attrKey, attrId, termKey, termId) {
+                                      productBloc.onChangeVariation(
+                                        attributeKey: attrKey,
+                                        attributeId: attrId,
+                                        termKey: termKey,
+                                        termId: termId,
+                                      );
+                                    },
+                                    onShowDialogShipping: () async {
+                                      await showDialogShipping(
+                                        context: context,
+                                        onSaveShippingAddress: (_) async {
+                                          final mainBloc =
+                                              context.read<MainBloc>();
+                                          final shippingPrice = await mainBloc
+                                              .onSaveShippingAddress(
+                                            slug: productBloc.product!.slug!,
+                                            quantity:
+                                                productBloc.quantity.value,
+                                          );
+
+                                          if (shippingPrice is double) {
+                                            productBloc.shippingPrice.value =
+                                                shippingPrice;
+
+                                            const snackBar = SnackBar(
+                                              content: Text(
+                                                  'Dirección guardada correctamente'),
+                                              backgroundColor:
+                                                  kPrimaryBackgroundColor,
+                                            );
+
+                                            ScaffoldMessenger.of(_)
+                                                .removeCurrentSnackBar();
+                                            ScaffoldMessenger.of(_)
+                                                .showSnackBar(snackBar);
+
+                                            Navigator.of(_).pop();
+                                          }
+                                        },
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 50.0,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 15.0),
+                                child: CustomProgressButton(
+                                    buttonComesFromModal: true),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 15,
+                      height: 100.0,
+                      width: SizeConfig.screenWidth,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            SizedBox(
+                              child: AspectRatio(
+                                aspectRatio: 487 / 451,
+                                child: ValueListenableBuilder(
+                                  valueListenable: productBloc.variation,
+                                  builder: (context, Variation value, widget) {
+                                    return CachedNetworkImage(
+                                      imageUrl:
+                                          "$_cloudFront/${value.attributes!.first.image!.src!}",
+                                      imageBuilder: (context, imageProvider) {
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                            image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      placeholder: (context, url) {
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                          ),
+                                        );
+                                      },
+                                      errorWidget: (context, url, error) {
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                            image: const DecorationImage(
+                                              image: AssetImage(
+                                                  "assets/no-image.png"),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: SizedBox(
+                                height: 50.0,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 20.0,
+                                    left: 20.0,
+                                  ),
+                                  child: ValueListenableBuilder(
+                                      valueListenable: productBloc.salePrice,
+                                      builder: (context, value, widget) {
+                                        return Text(
+                                          "S/ ${parseDouble(value.toString())}",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .subtitle1,
+                                        );
+                                      }),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 15.0,
+                              child: RawMaterialButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Icon(
+                                  CupertinoIcons.clear,
+                                  size: 18.0,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              const Divider(
-                height: 2,
-                color: Colors.black,
-              ),
-              SizedBox(
-                height: 200,
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(0.0),
-                  itemCount: addressTypes.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return InkWell(
-                      onTap: () {
-                        changeAddressType(index);
-                      },
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                            child: Row(
-                              children: [
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> settingModalBottomSpecs({
+    required BuildContext context,
+  }) async {
+    return showModalBottomSheet<void>(
+      backgroundColor: Colors.transparent,
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext _) {
+        return ChangeNotifierProvider<ProductBloc>.value(
+          value: Provider.of<ProductBloc>(context),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.94,
+            minChildSize: 0.2,
+            maxChildSize: 0.94,
+            builder: (_, controller) {
+              final productBloc = _.watch<ProductBloc>();
+              return Padding(
+                padding: const EdgeInsets.only(top: 0),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                    ),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              children: <Widget>[
                                 Expanded(
-                                  child: Text(addressTypes[index]["name"]),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "Detalles del artículo: ",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                if (addressTypes[index]["checked"])
-                                  const Icon(
-                                    CupertinoIcons.checkmark_alt,
-                                    color: Colors.blueAccent,
-                                    size: 20,
-                                  )
-                                else
-                                  const SizedBox.shrink()
+                                Container(
+                                  alignment: Alignment.center,
+                                  width: 16,
+                                  child: RawMaterialButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Icon(
+                                      CupertinoIcons.clear,
+                                      size: 18,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                )
                               ],
                             ),
-                          ),
-                          const Divider(
-                            height: 2,
-                            color: Colors.black,
-                          )
-                        ],
+                            const Divider(color: kDividerColor),
+                            SingleChildScrollView(
+                              child: Column(
+                                children: productBloc.product!.specifications!
+                                    .map(
+                                      (e) => SizedBox(
+                                        child: Column(
+                                          children: <Widget>[
+                                            Row(
+                                              children: <Widget>[
+                                                Expanded(
+                                                  child: Text(e.header!),
+                                                ),
+                                                Expanded(
+                                                  child: Text(e.body!),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              width: double.infinity,
+                                              child: Divider(
+                                                color: Color(0xE5CBCBCB),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              );
+            },
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
+  }
 }

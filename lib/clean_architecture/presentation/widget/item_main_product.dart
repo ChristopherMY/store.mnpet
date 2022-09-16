@@ -1,13 +1,10 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/star_rating.dart';
 
@@ -26,26 +23,21 @@ class TrendingItemMain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      child: Container(
-        decoration: BoxDecoration(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: Card(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              child: AspectRatio(
+          borderOnForeground: false,
+          elevation: 0.0,
+          child: Column(
+            children: <Widget>[
+              AspectRatio(
                 aspectRatio: product.mainImage!.aspectRatio!,
+                // aspectRatio: doubleInRange(Random(), 0.88, 1.19),
                 child: CachedNetworkImage(
-                  fit: BoxFit.cover,
                   imageUrl: "$_cloudFront/${product.mainImage!.src!}",
-                  imageBuilder: (context, imageProvider) => Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      image: DecorationImage(
-                        image: imageProvider,
-                      ),
-                    ),
+                  imageBuilder: (context, imageProvider) => Image(
+                    image: imageProvider,
                   ),
                   placeholder: (context, url) => Container(
                     decoration: BoxDecoration(
@@ -62,74 +54,21 @@ class TrendingItemMain extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            _productDetails(context)
-          ],
+              _productDetails(context)
+            ],
+          ),
         ),
       ),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ChangeNotifierProvider(
-              create: (context) {
-                return ProductBloc(
-                  productRepositoryInterface:
-                      context.read<ProductRepositoryInterface>(),
-                  cartRepositoryInterface:
-                      context.read<CartRepositoryInterface>(),
-                  localRepositoryInterface:
-                      context.read<LocalRepositoryInterface>(),
-                  hiveRepositoryInterface:
-                      context.read<HiveRepositoryInterface>(),
-                )
-                  ..isLoadingPage = true
-                  ..loadVimeoVideoConfig(galleryVideo: product.galleryVideo!)
-                  ..handleInitProduct(slug: product.slug!)
-                  ..handleInitRelatedProductsPagination(
-                    categories: product.categories!,
-                  )
-                  ..handleRefreshUbigeo(
-                    slug: product.slug!,
-                  );
-              },
-              // ..add(PDProvideEvent(
-              //   slug: product.slug!,
-              //   productId: product.id!,
-              //   categories: product.categories!,
-              // ))
-              // ..isLoadMore = false,
-              builder: (context, child) => ProductScreen(),
-            ),
+            builder: (context) => ProductScreen.init(context, product),
           ),
         );
       },
     );
   }
 
-/*
-  _productImage() {
-    return Stack(
-      children: <Widget>[
-        AspectRatio(
-          aspectRatio: 407 / 371,
-          child: Container(
-            color: Colors.white,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: FadeInImage(
-                image: NetworkImage(
-                    "$_url${product.mainImage}"),
-                fit: BoxFit.fill,
-                fadeInDuration: Duration(milliseconds: 50),
-                placeholder: AssetImage("assets/no-image.png"),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-*/
   _productDetails(context) {
     double rating = product.rating! * 0.05;
     return Padding(
@@ -181,25 +120,11 @@ class TrendingItemMain extends StatelessWidget {
               StarRating(rating: rating, size: 13),
             ],
           ),
-
-          //SizedBox(height: 2),
-          //Row(
-          //children: [
-          //Expanded(child: StarRating(rating: rating, size: 13)),
-          // SizedBox(width: 3),
-          // Text(
-          //   "${product.totalPurchased} vendido(s)",
-          //   style: TextStyle(fontSize: 12),
-          // )
-          //],
-          //)
         ],
       ),
     );
   }
 
-  String parseDouble(String value) {
-    final calc = double.parse(value).toStringAsFixed(2);
-    return calc.toString();
-  }
+  double doubleInRange(Random source, num start, num end) =>
+      source.nextDouble() * (end - start) + start;
 }

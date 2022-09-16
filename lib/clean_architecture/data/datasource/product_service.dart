@@ -70,7 +70,7 @@ class ProductService implements ProductRepositoryInterface {
       if (kDebugMode) {
         print(e);
       }
-      return null;
+      return e.toString();
     }
   }
 

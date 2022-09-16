@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/category.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
@@ -12,123 +14,97 @@ class HomeBloc extends ChangeNotifier {
 
   HomeBloc({required this.homeRepositoryInterface});
 
-  List<MasterCategory> categoriesList = <MasterCategory>[];
+  ValueNotifier<List<MasterCategory>> categoriesList =
+      ValueNotifier(<MasterCategory>[]);
 
-  int initialRange = 1;
-  int finalRange = 20;
-  bool isFetching = false;
+  static int _initialRange = 1;
+  static int _finalRange = 20;
+  static bool isFetching = false;
+  static const _pageSize = 19;
   bool reloadPagination = false;
 
-  ValueNotifier<List<Product>> products = ValueNotifier([]);
-  ValueNotifier<LoadStatus> loadStatus = ValueNotifier(LoadStatus.loading);
+  List<Product> products = <Product>[];
+  LoadStatus components = LoadStatus.loading;
 
-  Future<List<Product>> paginationProducts() async {
-    loadStatus.value = LoadStatus.loading;
+  final PagingController<int, Product> pagingController =
+      PagingController(firstPageKey: 0);
 
+  Future<void> fetchPage(int pageKey) async {
     if (reloadPagination) {
-      initialRange = 1;
-      finalRange = 20;
+      _initialRange = 1;
+      _finalRange = 20;
+      reloadPagination = !reloadPagination;
     }
 
     final response = await homeRepositoryInterface.getPaginationProduct(
-      initialRange: initialRange,
-      finalRange: finalRange,
+      initialRange: _initialRange,
+      finalRange: _finalRange,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final values = jsonDecode(response.body) as List;
-        if (values.isNotEmpty) {
-          if (reloadPagination) {
-            products.value.clear();
-            reloadPagination = false;
-          }
-
-          initialRange += 20;
-          finalRange += 20;
-
-          loadStatus.value = LoadStatus.normal;
-
-          return values
-              .map((product) => Product.fromMap(product))
-              .toList()
-              .cast();
-
-        } else {
-          loadStatus.value = LoadStatus.completed;
-          return [];
-        }
-      } else {
-        loadStatus.value = LoadStatus.error;
-        return [];
-      }
-    } else if (response is String) {
+    if (response is String) {
       if (kDebugMode) {
         print(response);
       }
-      loadStatus.value = LoadStatus.error;
-      return [];
-    } else {
-      loadStatus.value = LoadStatus.error;
-      return [];
+      pagingController.error = response;
     }
-  }
-
-  void initPaginationProducts() async {
-    loadStatus.value = LoadStatus.loading;
-
-    final response = await homeRepositoryInterface.getPaginationProduct(
-      initialRange: initialRange,
-      finalRange: finalRange,
-    );
 
     if (response is http.Response) {
       if (response.statusCode == 200) {
         final values = jsonDecode(response.body) as List;
         if (values.isNotEmpty) {
-          initialRange += 20;
-          finalRange += 20;
+          _initialRange += 20;
+          _finalRange += 20;
 
-          products.value.clear();
-          loadStatus.value = LoadStatus.normal;
-          products.value =
+          List<Product> newItems =
               values.map((product) => Product.fromMap(product)).toList().cast();
-        } else {
-          loadStatus.value = LoadStatus.completed;
-          products.value = [];
-        }
-      } else {
-        loadStatus.value = LoadStatus.error;
-        products.value = [];
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-      loadStatus.value = LoadStatus.error;
-      products.value = [];
-    }
-  }
 
-  void loadCategories() async {
-    final response = await homeRepositoryInterface.getCategoriesHome();
-
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final categories = jsonDecode(response.body) as List;
-        if (categories.isNotEmpty) {
-          categoriesList = categories
-              .map((category) => MasterCategory.fromMap(category))
-              .toList()
-              .cast();
+          final isLastPage = newItems.length < _pageSize;
+          if (isLastPage) {
+            pagingController.appendLastPage(newItems);
+          } else {
+            final nextPageKey = pageKey + newItems.length;
+            pagingController.appendPage(newItems, nextPageKey);
+          }
         }
       }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
     }
+
+    components = LoadStatus.normal;
   }
 
-  void refreshAccount() {}
+  void handleInitComponents() async {
+    final collection =
+        await Future.wait([homeRepositoryInterface.getCategoriesHome()]);
+
+    collection.forEachIndexed(
+      (index, response) {
+        switch (index) {
+          case 0:
+            {
+              if (response is String) {
+                if (kDebugMode) {
+                  print(response);
+                }
+              }
+
+              if (response is http.Response) {
+                if (response.statusCode == 200) {
+                  final categories = jsonDecode(response.body) as List;
+                  if (categories.isNotEmpty) {
+                    categoriesList.value = categories
+                        .map((category) => MasterCategory.fromMap(category))
+                        .toList()
+                        .cast();
+                  }
+                }
+              }
+            }
+            break;
+          default:
+        }
+      },
+    );
+  }
+
+  void refresh() {}
 }

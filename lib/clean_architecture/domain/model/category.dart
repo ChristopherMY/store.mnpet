@@ -30,6 +30,8 @@ class MasterCategory {
   final String? shortName;
   final ImageCategory? image;
 
+
+
   factory MasterCategory.fromMap(Map<String, dynamic> json) => MasterCategory(
         id: json["_id"] == null ? null : json["_id"],
         name: json["name"] == null ? null : json["name"],
@@ -65,6 +67,28 @@ class MasterCategory {
         "short_name": shortName == null ? null : shortName,
         "image": image == null ? null : image!.toMap(),
       };
+
+  MasterCategory copyWith({
+    String? id,
+    String? name,
+    String? description,
+    List<Relation>? relations,
+    String? slug,
+    String? hexa,
+    String? shortName,
+    ImageCategory? image,
+  }) {
+    return MasterCategory(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      relations: relations ?? this.relations,
+      slug: slug ?? this.slug,
+      hexa: hexa ?? this.hexa,
+      shortName: shortName ?? this.shortName,
+      image: image ?? this.image,
+    );
+  }
 }
 
 class Relation {
@@ -82,7 +106,7 @@ class Relation {
         name: json["name"] == null ? null : json["name"],
         relations: json["relations"] == null
             ? null
-            : List<dynamic>.from(json["relations"].map((x) => x)),
+            : List<dynamic>.from(json["relations"].map((x)  => x)),
         slug: json["slug"] == null ? null : json["slug"],
       );
 

@@ -8,17 +8,18 @@ import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
+
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 
 import '../../../domain/repository/user_repository.dart';
 
 class ShipmentBloc extends ChangeNotifier {
-  RegionRepositoryInterface regionRepositoryInterface;
+  LocalRepositoryInterface localRepositoryInterface;
   UserRepositoryInterface userRepositoryInterface;
 
   ShipmentBloc({
-    required this.regionRepositoryInterface,
+    required this.localRepositoryInterface,
     required this.userRepositoryInterface,
   });
 
@@ -163,7 +164,7 @@ class ShipmentBloc extends ChangeNotifier {
 
     address.ubigeo!.departmentId = regions[index].id.toString();
 
-    final response = await regionRepositoryInterface.getProvinces(
+    final response = await localRepositoryInterface.getProvinces(
       departmentId: regions[index].regionId!,
     );
 
@@ -209,7 +210,7 @@ class ShipmentBloc extends ChangeNotifier {
 
     address.ubigeo!.provinceId = provinces[index].id.toString();
 
-    final response = await regionRepositoryInterface.getDistricts(
+    final response = await localRepositoryInterface.getDistricts(
       provinceId: provinces[index].provinceId!,
     );
 

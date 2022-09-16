@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_in/sign_in_screen.dart';
 
@@ -9,18 +10,33 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackGroundColor,
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.black),
-        backgroundColor: Colors.transparent,
         bottomOpacity: 0.0,
         elevation: 0.0,
+        backgroundColor: kBackGroundColor,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: kBackGroundColor,
+          statusBarIconBrightness: Brightness.dark,
+        ),
         leading: GestureDetector(
-          onTap: (() => Navigator.of(context).pop()),
-          child: const Icon(
-            CupertinoIcons.clear,
-            color: Colors.black,
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: const Padding(
+            padding: EdgeInsets.only(left: 15.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.black12,
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.black,
+                size: 20.0,
+              ),
+            ),
           ),
         ),
+        leadingWidth: 50.0,
       ),
       body: SafeArea(
         child: Padding(
@@ -91,8 +107,7 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
         ),
-      )
-      ,
+      ),
     );
   }
 }

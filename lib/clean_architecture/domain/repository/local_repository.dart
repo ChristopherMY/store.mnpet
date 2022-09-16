@@ -1,4 +1,4 @@
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information_local.dart';
+
 
 abstract class LocalRepositoryInterface{
   const LocalRepositoryInterface();
@@ -9,4 +9,15 @@ abstract class LocalRepositoryInterface{
 
   Future<void> clearAllData();
 
+  // List<Region>
+  Future<dynamic> getRegions();
+
+  // List<Province>
+  Future<dynamic> getProvinces({required String departmentId});
+
+  // List<District>
+  Future<dynamic> getDistricts({required String provinceId});
+
+  // List<Keyword>
+  Future<dynamic> getKeywords();
 }

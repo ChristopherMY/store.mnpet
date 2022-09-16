@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
@@ -20,56 +21,52 @@ class CartBloc extends ChangeNotifier {
     required this.productRepositoryInterface,
   });
 
-  int initialRange = 1;
-  int finalRange = 20;
+  static int _initialRange = 1;
+  static int _finalRange = 20;
+  static const _pageSize = 19;
 
-  bool isCartLoaded = true;
-  bool isSessionEnable = true;
+  final PagingController<int, Product> pagingController =
+      PagingController(firstPageKey: 0);
 
-  List<Product> productsList = <Product>[];
-
-  LoadStatus loginState = LoadStatus.normal;
-  ValueNotifier<LoadStatus> loadStatus = ValueNotifier(LoadStatus.loading);
-
-  // ValueNotifier<LoadStatus> cartStatus = ValueNotifier(LoadStatus.loading);
-
-  void initRelatedProductsPagination({required List<Brand> categories}) async {
-    loadStatus.value = LoadStatus.loading;
+  Future<void> fetchPage({
+    required List<Brand> categories,
+    required int pageKey,
+  }) async {
 
     final response =
         await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
-      finalRange: finalRange,
-      initialRange: initialRange,
+      finalRange: _finalRange,
+      initialRange: _initialRange,
     );
+
+    if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+
+      pagingController.error = response;
+    }
 
     if (response is http.Response) {
       if (response.statusCode == 200) {
         final products = jsonDecode(response.body) as List;
         if (products.isNotEmpty) {
-          productsList.addAll(
-            products.map((e) => Product.fromMap(e)).toList().cast(),
-          );
+          List<Product> newItems =
+              products.map((e) => Product.fromMap(e)).toList().cast();
 
-          initialRange += 20;
-          finalRange += 20;
+          _initialRange += 20;
+          _finalRange += 20;
 
-          loadStatus.value = LoadStatus.normal;
-          return;
+          final isLastPage = newItems.length < _pageSize;
+          if (isLastPage) {
+            pagingController.appendLastPage(newItems);
+          } else {
+            final nextPageKey = pageKey + newItems.length;
+            pagingController.appendPage(newItems, nextPageKey);
+          }
         }
-
-        loadStatus.value = LoadStatus.completed;
-        return;
-      }
-
-      loadStatus.value = LoadStatus.error;
-      return;
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
       }
     }
-
-    loadStatus.value = LoadStatus.error;
   }
 }

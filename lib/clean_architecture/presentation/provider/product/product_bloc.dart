@@ -5,7 +5,9 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:progress_state_button/progress_button.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
@@ -17,6 +19,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_reposi
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/photoview_wrapper.dart';
 
 import '../../widget/vimeo_player.dart';
 
@@ -36,8 +39,13 @@ class ProductBloc extends ChangeNotifier {
   ValueNotifier<LoadStatus> loadStatus = ValueNotifier(LoadStatus.loading);
   Product? product;
 
-  int initialRange = 1;
-  int finalRange = 20;
+  static int _initialRange = 1;
+  static int _finalRange = 20;
+  static const _pageSize = 19;
+
+  final PagingController<int, Product> pagingController =
+      PagingController(firstPageKey: 0);
+
   int indexPhotoViewer = 0;
   ValueNotifier<int> quantity = ValueNotifier(1);
 
@@ -57,7 +65,6 @@ class ProductBloc extends ChangeNotifier {
   ValueNotifier<ButtonState> stateOnlyCustomIndicatorText =
       ValueNotifier(ButtonState.idle);
 
-  List<Product> productsList = <Product>[];
   List<MainImage> galleryHeaderList = <MainImage>[];
 
   List<Widget> headerContent = <Widget>[];
@@ -67,29 +74,47 @@ class ProductBloc extends ChangeNotifier {
   bool isLoadingPage = true;
 
   //TODO: !important
-  bool _disposed = false;
+  static bool _disposed = false;
   final SwiperController swiperController = SwiperController();
+
+  void init() {
+    pagingController.addPageRequestListener((pageKey) async {
+      await fetchRelatedProductsPagination(
+        categories: product!.categories!,
+        pageKey: pageKey,
+      );
+
+    });
+  }
 
   @override
   void dispose() {
-    _disposed = true;
+    // _disposed = true;
+    pagingController.dispose();
     super.dispose();
   }
 
-  @override
-  void notifyListeners() {
-    if (!_disposed) {
-      super.notifyListeners();
-    }
-  }
+  // @override
+  // void notifyListeners() {
+  //   if (!_disposed) {
+  //     super.notifyListeners();
+  //   }
+  // }
 
   void handleInitProduct({required String slug}) async {
     final response =
         await productRepositoryInterface.getProductSlug(slug: slug);
+
+    if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+    }
+
     if (response is http.Response) {
       if (response.statusCode == 200) {
         product = productFromMap(response.body);
-
+        print(product!.toMap());
         if (product!.general != "simple_product") {
           handleInitVariation(product: product!);
           handleLoadVariableComponents(product: product!);
@@ -100,57 +125,60 @@ class ProductBloc extends ChangeNotifier {
 
         handleBuildHeaderContent(product: product!);
       }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
     }
 
     if (product!.galleryVideo!.isEmpty) {
       isLoadingPage = false;
       notifyListeners();
+      print("Entro a actualizar");
+    } else {
+      print("NO!! Entro a actualizar");
     }
   }
 
-  void handleInitRelatedProductsPagination(
-      {required List<Brand> categories}) async {
-    loadStatus.value = LoadStatus.loading;
-
+  Future<void> fetchRelatedProductsPagination({
+    required List<Brand> categories,
+    required int pageKey,
+  }) async {
     final response =
         await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
-      finalRange: finalRange,
-      initialRange: initialRange,
+      finalRange: _finalRange,
+      initialRange: _initialRange,
     );
+
+    if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+
+      pagingController.error = response;
+    }
 
     if (response is http.Response) {
       if (response.statusCode == 200) {
         final products = jsonDecode(response.body) as List;
         if (products.isNotEmpty) {
-          productsList.addAll(
-            products.map((e) => Product.fromMap(e)).toList().cast(),
-          );
+          List<Product> newItems =
+              products.map((e) => Product.fromMap(e)).toList().cast();
 
-          initialRange += 20;
-          finalRange += 20;
+          _initialRange += 20;
+          _finalRange += 20;
 
-          loadStatus.value = LoadStatus.normal;
-          return;
+          final isLastPage = newItems.length < _pageSize;
+          if (isLastPage) {
+            pagingController.appendLastPage(newItems);
+          } else {
+            final nextPageKey = pageKey + newItems.length;
+            pagingController.appendPage(newItems, nextPageKey);
+          }
         }
 
-        loadStatus.value = LoadStatus.completed;
         return;
-      }
-
-      loadStatus.value = LoadStatus.error;
-      return;
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
       }
     }
 
-    loadStatus.value = LoadStatus.error;
+    pagingController.error = response;
   }
 
   void handleInitVariation({required Product product}) {
@@ -212,11 +240,6 @@ class ProductBloc extends ChangeNotifier {
   }
 
   void handleBuildVariationAttributesContent({required Product product}) {
-    // final imageId = variation!.attributes!
-    //     .firstWhere((element) => element.name == "Color")
-    //     .image!
-    //     .id;
-
     for (var attr in variation.value.attributes!) {
       final indexOfAttribute = product.modalAttributes!
           .indexWhere((element) => element.attributeId == attr.id);
@@ -330,15 +353,19 @@ class ProductBloc extends ChangeNotifier {
       quantity: quantity.value,
     );
 
+    if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+
+      shippingPrice.value = 0.00;
+      return;
+    }
+
     if (response is http.Response) {
       if (response.statusCode == 200) {
         shippingPrice.value = double.parse(response.body.replaceAll('"', ""));
-      } else {
-        shippingPrice.value = 0.00;
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print("Problem on increment quantity of product");
+        return;
       }
 
       shippingPrice.value = 0.00;
@@ -360,15 +387,18 @@ class ProductBloc extends ChangeNotifier {
       quantity: quantity.value,
     );
 
+    if (response is String) {
+      if (kDebugMode) {
+        print("Problem on decrement quantity of product");
+      }
+      shippingPrice.value = 0.00;
+      return;
+    }
+
     if (response is http.Response) {
       if (response.statusCode == 200) {
         shippingPrice.value = double.parse(response.body.replaceAll('"', ""));
-      } else {
-        shippingPrice.value = 0.00;
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print("Problem on decrement quantity of product");
+        return;
       }
 
       shippingPrice.value = 0.00;
@@ -396,16 +426,20 @@ class ProductBloc extends ChangeNotifier {
     )
         .then(
       (response) {
+        if (response is String) {
+          if (kDebugMode) {
+            print("Problem on decrement quantity of product");
+          }
+
+          shippingPrice.value = 0.00;
+          return;
+        }
+
         if (response is http.Response) {
           if (response.statusCode == 200) {
             shippingPrice.value =
                 double.parse(response.body.replaceAll('"', ""));
-          } else {
-            shippingPrice.value = 0.00;
-          }
-        } else if (response is String) {
-          if (kDebugMode) {
-            print("Problem on decrement quantity of product");
+            return;
           }
 
           shippingPrice.value = 0.00;
@@ -433,10 +467,12 @@ class ProductBloc extends ChangeNotifier {
       if (index > 0) {
         indexPhotoViewer = index - 1;
       }
-    } else {
-      showSwiperPagination.value = true;
-      indexPhotoViewer = index;
+
+      return;
     }
+
+    showSwiperPagination.value = true;
+    indexPhotoViewer = index;
   }
 
   void onChangedPhotoPage(int index) {
@@ -594,5 +630,41 @@ class ProductBloc extends ChangeNotifier {
       showSwiperPagination.value = galleryVideo.isNotEmpty;
       notifyListeners();
     }
+  }
+
+  void onOpenGallery({
+    required BuildContext context,
+    required bool isAppBar,
+    required ManagerTypePhotoViewer managerTypePhotoViewer,
+  }) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 600),
+        reverseTransitionDuration: const Duration(milliseconds: 600),
+        barrierDismissible: false,
+        opaque: true,
+        transitionsBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        pageBuilder: (_, __, ___) {
+          return ChangeNotifierProvider<ProductBloc>.value(
+            value: Provider.of<ProductBloc>(context),
+            child: GalleryPhotoViewWrapper(
+              managerTypePhotoViewer: managerTypePhotoViewer,
+              backgroundDecoration: const BoxDecoration(
+                color: Colors.black,
+              ),
+              isAppBar: isAppBar,
+              scrollDirection: Axis.horizontal,
+            ),
+          );
+        },
+      ),
+    );
   }
 }

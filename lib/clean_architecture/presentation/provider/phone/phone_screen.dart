@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:roundcheckbox/roundcheckbox.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/region_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
+
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
@@ -19,7 +20,7 @@ class PhonesDetail extends StatelessWidget {
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => PhoneBloc(
-        regionRepositoryInterface: context.read<RegionRepositoryInterface>(),
+        localRepositoryInterface: context.read<LocalRepositoryInterface>(),
         userRepositoryInterface: context.read<UserRepositoryInterface>(),
       ),
       builder: (context, child) => const PhonesDetail._(),

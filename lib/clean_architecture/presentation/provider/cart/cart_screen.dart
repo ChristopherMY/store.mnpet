@@ -3,10 +3,9 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:masonry_grid/masonry_grid.dart';
 import 'package:provider/provider.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
@@ -21,12 +20,12 @@ import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/ca
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
 import '../../widget/item_main_product.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   const CartScreen._({Key? key}) : super(key: key);
 
   static Widget init(BuildContext context) {
@@ -35,288 +34,282 @@ class CartScreen extends StatelessWidget {
         cartRepositoryInterface: context.read<CartRepositoryInterface>(),
         hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
         productRepositoryInterface: context.read<ProductRepositoryInterface>(),
-      )..initRelatedProductsPagination(
+      ),
+      builder: (_, __) => const CartScreen._(),
+    );
+  }
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  @override
+  void initState() {
+    final cartBloc = context.read<CartBloc>();
+
+    cartBloc.pagingController.addPageRequestListener(
+      (pageKey) {
+        cartBloc.fetchPage(
+          pageKey: pageKey,
           categories: [
             Brand(
               id: "621f9beeb5ab45b8097f3454",
               slug: "accesorios-para-mascotas",
             )
           ],
-        ),
-      builder: (_, __) => const CartScreen._(),
+        );
+      },
     );
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    final cartBloc = context.read<CartBloc>();
+    cartBloc.pagingController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final mainBloc = context.watch<MainBloc>();
     final cartBloc = context.watch<CartBloc>();
-    return Stack(
-      children: [
-        Builder(
-          builder: (context) {
-            return LoaderOverlay(
-              child: RefreshIndicator(
-                notificationPredicate: (notification) => true,
-                triggerMode: RefreshIndicatorTriggerMode.onEdge,
-                onRefresh: () async {
-                  dynamic response;
-                  mainBloc.cartStatus.value = LoadStatus.loading;
-                  if (mainBloc.sessionAccount.value == Session.active) {
-                    response = await mainBloc.getShoppingCart(
-                      districtId: mainBloc.residence.districtId!,
-                      headers: mainBloc.headers,
-                    );
-                  } else {
-                    mainBloc.handleLoadShoppingCartId();
-                    response = await mainBloc.getShoppingCartTemp(
-                      districtId: mainBloc.residence.districtId!,
-                      carId: mainBloc.shoppingCartId,
+
+    return Material(
+      color: kBackGroundColor,
+      child: Stack(
+        children: [
+          LoaderOverlay(
+            child: RefreshIndicator(
+              notificationPredicate: (notification) => true,
+              triggerMode: RefreshIndicatorTriggerMode.onEdge,
+              onRefresh: () async {
+                dynamic response;
+                if (mainBloc.sessionAccount.value == Session.active) {
+                  response = await mainBloc.getShoppingCart(
+                    districtId: mainBloc.residence.districtId!,
+                    headers: mainBloc.headers,
+                  );
+                } else {
+                  mainBloc.handleLoadShoppingCartId();
+                  response = await mainBloc.getShoppingCartTemp(
+                    districtId: mainBloc.residence.districtId!,
+                    carId: mainBloc.shoppingCartId,
+                  );
+                }
+
+                print("Reload Cart");
+                print(response);
+                print(mainBloc.shoppingCartId);
+
+                if (response is Cart) {
+                  print(response.toMap());
+                  if (mainBloc.shoppingCartId.toString().isEmpty ||
+                      mainBloc.shoppingCartId is! String) {
+                    await mainBloc.hiveRepositoryInterface.save(
+                      containerName: "shopping",
+                      key: "cartId",
+                      value: response.id,
                     );
                   }
 
-                  print("Reload Cart");
-                  print(response);
-                  print(mainBloc.shoppingCartId);
-
-                  if (response is Cart) {
-                    print(response.toMap());
-                    if (mainBloc.shoppingCartId.toString().isEmpty ||
-                        mainBloc.shoppingCartId is! String) {
-                      await mainBloc.hiveRepositoryInterface.save(
-                        containerName: "shopping",
-                        key: "cartId",
-                        value: response.id,
-                      );
-                    }
-
-                    mainBloc.informationCart = response;
-                    mainBloc.cartLength.value = response.products!.length;
-                  }
-
-                  mainBloc.cartStatus.value = LoadStatus.normal;
-                },
-                child: ValueListenableBuilder(
-                  valueListenable: cartBloc.loadStatus,
-                  builder: (context, LoadStatus value, child) {
-                    return LoadAny(
-                      status: value,
-                      loadingMsg: 'Cargando... ',
-                      errorMsg: 'Error de carga, haga clic en reintentar ',
-                      finishMsg:
-                          'Seguiremos trabajando para tener los productos que buscas.',
-                      endLoadMore: false,
-                      onLoadMore: () async {
-                        cartBloc.initRelatedProductsPagination(
-                          categories: [],
+                  mainBloc.informationCart.value = response;
+                  mainBloc.cartLength.value = response.products!.length;
+                }
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    snap: false,
+                    floating: false,
+                    toolbarHeight: 56.0,
+                    iconTheme: const IconThemeData(color: Colors.black),
+                    backgroundColor: kBackGroundColor,
+                    systemOverlayStyle: const SystemUiOverlayStyle(
+                      statusBarColor: kBackGroundColor,
+                      statusBarIconBrightness: Brightness.dark,
+                    ),
+                    expandedHeight: getProportionateScreenHeight(56.0),
+                    title: ValueListenableBuilder(
+                      valueListenable: mainBloc.cartLength,
+                      builder: (context, int value, child) {
+                        return Text(
+                          "Carrito($value)",
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         );
                       },
-                      child: CustomScrollView(
-                        slivers: [
-                          SliverAppBar(
-                            pinned: true,
-                            snap: false,
-                            floating: false,
-                            toolbarHeight: 56.0,
-                            backgroundColor: kBackGroundColor,
-                            systemOverlayStyle: const SystemUiOverlayStyle(
-                              statusBarColor: kBackGroundColor,
-                              statusBarIconBrightness: Brightness.dark,
-                            ),
-                            expandedHeight: getProportionateScreenHeight(56.0),
-                            title: ValueListenableBuilder(
-                              valueListenable: mainBloc.cartLength,
-                              builder: (context, int value, child) {
-                                return Text(
-                                  "Carrito($value)",
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
+                    ),
+                    actions: const [],
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    sliver: SliverToBoxAdapter(
+                      child: ValueListenableBuilder(
+                        valueListenable: mainBloc.informationCart,
+                        builder: (context, shoppingCart, child) {
+                          if (shoppingCart is Cart) {
+                            if (shoppingCart.products!.isEmpty) {
+                              return Column(
+                                children: const [
+                                  Icon(
+                                    CommunityMaterialIcons.cart_outline,
+                                    size: 85,
+                                    color: Colors.black26,
                                   ),
-                                );
-                              },
-                            ),
-                            actions: const [],
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                            sliver: SliverToBoxAdapter(
-                              child: ValueListenableBuilder(
-                                valueListenable: mainBloc.cartStatus,
-                                builder: (context, LoadStatus shoppingCart, child) {
-                                  if (shoppingCart == LoadStatus.normal) {
-                                    if (mainBloc
-                                        .informationCart!.products!.isEmpty) {
-                                      return Column(
-                                        children: const [
-                                          Icon(
-                                            CommunityMaterialIcons.cart_outline,
-                                            size: 85,
-                                            color: Colors.black26,
-                                          ),
-                                          Text(
-                                            "Aun no has añadido ningun producto a tu carrito.",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.black26,
-                                            ),
-                                          ),
-                                        ],
-                                      );
+                                  Text(
+                                    "Aún no has añadido ningún producto a tu carrito.",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black26,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return Column(
+                              children: [
+                                ListView.separated(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  scrollDirection: Axis.vertical,
+                                  shrinkWrap: true,
+                                  itemCount: shoppingCart.products!.length,
+                                  separatorBuilder:
+                                      (BuildContext context, int index) {
+                                    return const Divider();
+                                  },
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    final product =
+                                        shoppingCart.products![index];
+
+                                    if (!product.isFree!) {
+                                      return CardItem(product: product);
                                     }
 
-                                    return Column(
-                                      children: [
-                                        ListView.separated(
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          scrollDirection: Axis.vertical,
-                                          shrinkWrap: true,
-                                          itemCount: mainBloc
-                                              .informationCart!.products.length,
-                                          separatorBuilder:
-                                              (BuildContext context, int index) {
-                                            return const Divider();
-                                          },
-                                          itemBuilder:
-                                              (BuildContext context, int index) {
-                                            final product = mainBloc
-                                                .informationCart!.products[index];
-
-                                            if (!product.isFree) {
-                                              return CardItem(product: product);
-                                            }
-
-                                            return CardItemFree(
-                                              productName: product.name,
-                                              imageUrl: product.mainImage.src,
-                                            );
-                                          },
-                                        ),
-                                      ],
+                                    return CardItemFree(
+                                      productName: product.name!,
+                                      imageUrl: product.mainImage!.src!,
                                     );
-                                  }
-                                  return const Center(
-                                    child: LottieAnimation(
-                                      source: "assets/lottie/paw.json",
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 15.0,
-                              vertical: 15.0,
-                            ),
-                            sliver: SliverToBoxAdapter(
-                              child: ValueListenableBuilder(
-                                valueListenable: mainBloc.cartStatus,
-                                builder: (context, LoadStatus shoppingCart, child) {
-                                  if (shoppingCart == LoadStatus.normal) {
-                                    if (mainBloc
-                                        .informationCart!.products!.isNotEmpty) {
-                                      return InfoCartDetail(
-                                        cart: mainBloc.informationCart!,
-                                      );
-                                    }
-
-                                    return const SizedBox.shrink();
-                                  }
-
-                                  return const SizedBox.shrink();
-                                },
-                              ),
-                            ),
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 15.0,
-                              vertical: 15.0,
-                            ),
-                            sliver: SliverToBoxAdapter(
-                              child: ValueListenableBuilder(
-                                valueListenable: mainBloc.cartStatus,
-                                builder: (context, LoadStatus shoppingCart, child) {
-                                  if (shoppingCart == LoadStatus.normal) {
-                                    if (mainBloc
-                                        .informationCart!.products!.isNotEmpty) {
-                                      return DefaultButton(
-                                        text: "Ir a pagar",
-                                        press: () {},
-                                      );
-                                    }
-
-                                    return const SizedBox.shrink();
-                                  }
-
-                                  return const SizedBox.shrink();
-                                },
-                              ),
-                            ),
-                          ),
-                          MultiSliver(
-                            children: [
-                              SliverToBoxAdapter(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        "Te va a encantar",
-                                        style:
-                                            Theme.of(context).textTheme.subtitle2,
-                                        textAlign: TextAlign.start,
-                                      ),
-                                      const SizedBox(height: 5)
-                                    ],
-                                  ),
+                                  },
                                 ),
-                              ),
-                              SliverToBoxAdapter(
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 10, right: 10),
-                                  child: MasonryGrid(
-                                    column: 2,
-                                    staggered: false,
-                                    crossAxisSpacing: 8,
-                                    mainAxisSpacing: 8,
-                                    children: List.generate(
-                                      cartBloc.productsList.length,
-                                      (index) => TrendingItemMain(
-                                        product: cartBloc.productsList[index],
-                                        gradientColors: [
-                                          const Color(0xFFF28767),
-                                          Colors.orange.shade400
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
+                              ],
+                            );
+                          }
+                          return const Center(
+                            child: LottieAnimation(
+                              source: "assets/lottie/paw.json",
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0,
+                      vertical: 15.0,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: ValueListenableBuilder(
+                        valueListenable: mainBloc.informationCart,
+                        builder: (context, shoppingCart, child) {
+                          if (shoppingCart is Cart) {
+                            if (shoppingCart.products!.isNotEmpty) {
+                              return InfoCartDetail(
+                                cart: shoppingCart,
+                              );
+                            }
+
+                            return const SizedBox.shrink();
+                          }
+
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0,
+                      vertical: 15.0,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: ValueListenableBuilder(
+                        valueListenable: mainBloc.informationCart,
+                        builder: (context, shoppingCart, child) {
+                          if (shoppingCart is Cart) {
+                            if (shoppingCart.products!.isNotEmpty) {
+                              return DefaultButton(
+                                text: "Ir a pagar",
+                                press: () {},
+                              );
+                            }
+
+                            return const SizedBox.shrink();
+                          }
+
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            "Te va a encantar",
+                            style: Theme.of(context).textTheme.subtitle2,
+                            textAlign: TextAlign.start,
+                          ),
+                          const SizedBox(height: 5)
                         ],
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.only(left: 10, right: 10),
+                    sliver: PagedSliverMasonryGrid(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 2,
+                      mainAxisSpacing: 2,
+                      pagingController: cartBloc.pagingController,
+                      builderDelegate: PagedChildBuilderDelegate<Product>(
+                        itemBuilder: (context, item, index) {
+                          return TrendingItemMain(
+                            product: item,
+                            gradientColors: const [
+                              Color(0xFFF28767),
+                              Color(0xFFFFA726),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
+            ),
 
-              // : const Positioned.fill(
-              //     child: Center(
-              //       child: LottieAnimation(
-              //         source: "assets/lottie/paw.json",
-              //       ),
-              //     ),
-              //   ),
-            );
-          }
-        ),
-      ],
+            // : const Positioned.fill(
+            //     child: Center(
+            //       child: LottieAnimation(
+            //         source: "assets/lottie/paw.json",
+            //       ),
+            //     ),
+            //   ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -464,7 +457,6 @@ class CardItem extends StatelessWidget {
                               final mainBloc =
                                   Provider.of<MainBloc>(context, listen: false);
                               context.loaderOverlay.show();
-                              mainBloc.cartStatus.value = LoadStatus.loading;
 
                               final response =
                                   await mainBloc.deleteItemShoppingCart(
@@ -489,8 +481,6 @@ class CardItem extends StatelessWidget {
                                   "Tuvimos problemas, vuelva a intentarlo más tarde.",
                                 );
                               }
-
-                              mainBloc.cartStatus.value = LoadStatus.normal;
                             },
                           )
                         ],
@@ -511,10 +501,13 @@ class CardItem extends StatelessWidget {
                             children: <Widget>[
                               GestureDetector(
                                 child: const Icon(Icons.remove_circle_outline),
-                                onTap: () {
+                                onTap: () async {
+                                  context.loaderOverlay.show();
                                   final mainBloc = context.read<MainBloc>();
+
                                   if (product.quantity! > 0) {
-                                    mainBloc.changeQuantity(
+                                    final response =
+                                        await mainBloc.changeQuantity(
                                       productId: product.id!,
                                       quantity: product.quantity! - 1,
                                       variationId:
@@ -522,6 +515,19 @@ class CardItem extends StatelessWidget {
                                               ? product.variation!.id!
                                               : "",
                                     );
+
+                                    if (response is ResponseApi) {
+                                      await mainBloc.handleFnShoppingCart(
+                                        enableLoader: false,
+                                      );
+
+                                      context.loaderOverlay.hide();
+
+                                      GlobalSnackBar.showInfoSnackBarIcon(
+                                        context,
+                                        response.message,
+                                      );
+                                    }
                                   }
                                 },
                               ),
@@ -538,6 +544,7 @@ class CardItem extends StatelessWidget {
                                 onTap: () async {
                                   context.loaderOverlay.show();
                                   final mainBloc = context.read<MainBloc>();
+
                                   if (product.quantity! > 0) {
                                     final response =
                                         await mainBloc.changeQuantity(
@@ -639,7 +646,7 @@ class CardItemFree extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           mainAxisSize: MainAxisSize.max,
                           children: <Widget>[
-                            Container(
+                            SizedBox(
                               width: 120.0,
                               child: Text(
                                 productName,

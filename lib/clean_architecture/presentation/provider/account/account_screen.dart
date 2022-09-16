@@ -50,14 +50,14 @@ class _AccountScreenState extends State<AccountScreen> {
     final mainBloc = context.watch<MainBloc>();
 
     return ValueListenableBuilder(
-      valueListenable: mainBloc.sessionAccount,
-      builder: (context, Session sessionAccount, child) {
+      valueListenable: mainBloc.account,
+      builder: (context, Account account, child) {
         return Stack(
           children: [
             // sessionAccount == Session.normal
             //     ?
             RefreshIndicator(
-              notificationPredicate: (_) => sessionAccount == Session.active,
+              notificationPredicate: (_) => account == Session.active,
               triggerMode: RefreshIndicatorTriggerMode.onEdge,
               onRefresh: () async {
                 if (mainBloc.informationUser is UserInformation) {
@@ -87,7 +87,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                     expandedHeight: getProportionateScreenHeight(56.0),
                     actions: [
-                      mainBloc.informationUser is UserInformation
+                      account == Account.active
                           ? Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
@@ -109,11 +109,13 @@ class _AccountScreenState extends State<AccountScreen> {
                           : const SizedBox.shrink(),
                     ],
                   ),
-                  const SliverToBoxAdapter(
-                    child: HeaderInformation(),
+                  SliverToBoxAdapter(
+                    child: HeaderInformation(
+                      accountActive: account == Account.active,
+                    ),
                   ),
                   SliverVisibility(
-                    visible: mainBloc.informationUser is UserInformation,
+                    visible: account == Account.active,
                     sliver: const SliverPadding(
                       padding: EdgeInsets.symmetric(
                         vertical: 20.0,
@@ -131,7 +133,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ),
                   SliverVisibility(
-                    visible: mainBloc.informationUser is UserInformation,
+                    visible: account == Account.active,
                     sliver: SliverToBoxAdapter(
                       child: TargetOption(
                         title: "Mis Direcciones",
@@ -148,7 +150,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ),
                   SliverVisibility(
-                    visible: mainBloc.informationUser is UserInformation,
+                    visible: account == Account.active,
                     sliver: SliverToBoxAdapter(
                       child: TargetOption(
                         title: "Mis órdenes",
@@ -208,7 +210,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ),
                   SliverVisibility(
-                    visible: mainBloc.informationUser is UserInformation,
+                    visible: account == Account.active,
                     sliver: SliverToBoxAdapter(
                       child: TargetOption(
                         title: "Cerrar sesión",
@@ -230,22 +232,6 @@ class _AccountScreenState extends State<AccountScreen> {
                       child: const CopyRight(),
                     ),
                   ),
-                  // SliverFillRemaining(
-                  //   child: ValueListenableBuilder(
-                  //     valueListenable: mainBloc.isLoadingProfileScreen,
-                  //     builder: (context, bool value, child) {
-                  //       if (value) {
-                  //         return const Center(
-                  //           child: LottieAnimation(
-                  //             source: "assets/lottie/paw.json",
-                  //           ),
-                  //         );
-                  //       }
-                  //
-                  //       return const SizedBox.shrink();
-                  //     },
-                  //   ),
-                  // )
                 ],
               ),
             )
@@ -276,7 +262,12 @@ class _AccountScreenState extends State<AccountScreen> {
 }
 
 class HeaderInformation extends StatelessWidget {
-  const HeaderInformation({Key? key}) : super(key: key);
+  const HeaderInformation({
+    Key? key,
+    required this.accountActive,
+  }) : super(key: key);
+
+  final bool accountActive;
 
   @override
   Widget build(BuildContext context) {
@@ -290,162 +281,155 @@ class HeaderInformation extends StatelessWidget {
           vertical: 20.0,
           horizontal: 15.0,
         ),
-        child: ValueListenableBuilder(
-          valueListenable: mainBloc.sessionAccount,
-          builder: (context, Session sessionAccount, child) {
-            return Column(
+        child: Column(
+          children: <Widget>[
+            Row(
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: 70.0,
-                      height: 70.0,
-                      child: sessionAccount == Session.active
-                          ? CachedNetworkImage(
-                              imageUrl: mainBloc.informationUser.image!.src
-                                  .toString(),
-                              imageBuilder: (context, imageProvider) =>
-                                  Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(35.0),
-                                  image: DecorationImage(
-                                    image: imageProvider,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
+                SizedBox(
+                  width: 70.0,
+                  height: 70.0,
+                  child: accountActive
+                      ? CachedNetworkImage(
+                          imageUrl:
+                              mainBloc.informationUser.image!.src.toString(),
+                          imageBuilder: (context, imageProvider) => Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(35.0),
+                              image: DecorationImage(
+                                image: imageProvider,
+                                fit: BoxFit.cover,
                               ),
-                              placeholder: (context, url) => Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.rectangle,
-                                  borderRadius: BorderRadius.circular(35.0),
-                                ),
-                              ),
-                              errorWidget: (context, url, error) => const Icon(
-                                // FontAwesomeIcons.circleUser,0
-                                CupertinoIcons.person_circle,
-                                // Icons.account_circle_outlined,
-                                size: 70.0,
-                                color: kPrimaryColor,
-                              ),
-                            )
-                          : const Icon(
-                              CupertinoIcons.person_circle,
-                              size: 70.0,
-                              color: kPrimaryColor,
                             ),
-                    ),
-                    const SizedBox(width: 10.0),
-                    Expanded(
-                      child: sessionAccount == Session.active
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${mainBloc.informationUser.name} ${mainBloc.informationUser.lastname}",
-                                  maxLines: 1,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 5.0),
-                                Text(
-                                  "# Codigo de referido",
-                                  style: Theme.of(context).textTheme.bodyText2,
-                                ),
-                              ],
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text(
-                                  'No tenemos registro de su cuenta',
-                                  maxLines: 1,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                SizedBox(height: 5.0),
-                                Text(
-                                  'Accedar para visualizar su información',
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ],
+                          ),
+                          placeholder: (context, url) => Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(35.0),
                             ),
-                    ),
-                  ],
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            // FontAwesomeIcons.circleUser,0
+                            CupertinoIcons.person_circle,
+                            // Icons.account_circle_outlined,
+                            size: 70.0,
+                            color: kPrimaryColor,
+                          ),
+                        )
+                      : const Icon(
+                          CupertinoIcons.person_circle,
+                          size: 70.0,
+                          color: kPrimaryColor,
+                        ),
                 ),
-                sessionAccount == Session.active
-                    ? const SizedBox.shrink()
-                    : Column(
-                        children: [
-                          const SizedBox(height: 17.0),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ValueListenableBuilder(
-                                  valueListenable: accountBloc.pressed,
-                                  builder: (context, bool value, child) {
-                                    return FlatButton(
-                                      color: Colors.white,
-                                      splashColor: kPrimaryColor,
-                                      textColor:
-                                          value ? Colors.white : kPrimaryColor,
-                                      shape: RoundedRectangleBorder(
-                                        side: const BorderSide(
-                                            color: kPrimaryColor, width: 1),
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      height: 45.0,
-                                      onHighlightChanged:
-                                          accountBloc.onHighlightChanged,
-                                      onPressed: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                SignUpScreen.init(context),
-                                          ),
-                                        );
-                                      },
-                                      child: const Text(
-                                        "Crear cuenta",
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    );
-                                  },
-                                ),
+                const SizedBox(width: 10.0),
+                Expanded(
+                  child: accountActive
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${mainBloc.informationUser.name} ${mainBloc.informationUser.lastname}",
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
                               ),
-                              const SizedBox(width: 30.0),
-                              Expanded(
-                                child: FlatButton(
-                                  color: kPrimaryColor,
+                            ),
+                            const SizedBox(height: 5.0),
+                            Text(
+                              "# Codigo de referido",
+                              style: Theme.of(context).textTheme.bodyText2,
+                            ),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'No tenemos registro de su cuenta',
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(height: 5.0),
+                            Text(
+                              'Accedar para visualizar su información',
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                ),
+              ],
+            ),
+            accountActive
+                ? const SizedBox.shrink()
+                : Column(
+                    children: [
+                      const SizedBox(height: 17.0),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ValueListenableBuilder(
+                              valueListenable: accountBloc.pressed,
+                              builder: (context, bool value, child) {
+                                return FlatButton(
+                                  color: Colors.white,
+                                  splashColor: kPrimaryColor,
+                                  textColor:
+                                      value ? Colors.white : kPrimaryColor,
                                   shape: RoundedRectangleBorder(
                                     side: const BorderSide(
                                         color: kPrimaryColor, width: 1),
                                     borderRadius: BorderRadius.circular(15.0),
                                   ),
                                   height: 45.0,
+                                  onHighlightChanged:
+                                      accountBloc.onHighlightChanged,
                                   onPressed: () {
-                                    mainBloc.requestAccess(context);
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            SignUpScreen.init(context),
+                                      ),
+                                    );
                                   },
                                   child: const Text(
-                                    "Iniciar sesión",
+                                    "Crear cuenta",
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
                                   ),
-                                ),
-                              )
-                            ],
+                                );
+                              },
+                            ),
                           ),
+                          const SizedBox(width: 30.0),
+                          Expanded(
+                            child: FlatButton(
+                              color: kPrimaryColor,
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                    color: kPrimaryColor, width: 1),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              height: 45.0,
+                              onPressed: () {
+                                mainBloc.requestAccess(context);
+                              },
+                              child: const Text(
+                                "Iniciar sesión",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          )
                         ],
-                      )
-              ],
-            );
-          },
+                      ),
+                    ],
+                  )
+          ],
         ),
       ),
     );
