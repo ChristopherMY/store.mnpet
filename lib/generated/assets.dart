@@ -3,11 +3,8 @@ class Assets {
   Assets._();
 
   static const String assetsDiscover = 'assets/discover.png';
-  static const String assetsEmpty-cart = 'assets/empty-cart.png';
-  static const String assetsLogo-mn = 'assets/logo-mn.png';
   static const String assetsMastercard = 'assets/mastercard.png';
   static const String assetsNavCart = 'assets/nav_cart.png';
-  static const String assetsNavContact = 'assets/nav_contact.png';
   static const String assetsNavHome = 'assets/nav_home.png';
   static const String assetsNavUser = 'assets/nav_user.png';
   static const String assetsNo-image = 'assets/no-image.png';
@@ -42,24 +39,12 @@ class Assets {
   static const String iconsPhone = 'assets/icons/Phone.svg';
   static const String iconsTwitter = 'assets/icons/twitter.svg';
   static const String iconsUser = 'assets/icons/User.svg';
-  static const String imagesArmchair = 'assets/images/armchair.png';
-  static const String imagesBaby = 'assets/images/baby.png';
-  static const String imagesBook = 'assets/images/book.png';
   static const String imagesCall-center-agent = 'assets/images/call-center-agent.png';
-  static const String imagesDiamond = 'assets/images/diamond.png';
-  static const String imagesLipstick = 'assets/images/lipstick.png';
-  static const String imagesLoading = 'assets/images/loading.gif';
   static const String imagesLogo-mn = 'assets/images/logo-mn.png';
   static const String imagesLogo-small = 'assets/images/logo-small.png';
   static const String imagesMenu = 'assets/images/menu.png';
   static const String imagesMundo-negocio = 'assets/images/mundo-negocio.png';
   static const String imagesMundo-pet = 'assets/images/mundo-pet.png';
-  static const String imagesSolo-hoy = 'assets/images/solo-hoy.png';
-  static const String imagesSplash1 = 'assets/images/splash_1.png';
-  static const String imagesSplash2 = 'assets/images/splash_2.png';
-  static const String imagesSplash3 = 'assets/images/splash_3.png';
-  static const String imagesSuccess = 'assets/images/success.png';
-  static const String imagesTelephone = 'assets/images/telephone.png';
   static const String lottieLonely-404 = 'assets/lottie/lonely-404.json';
   static const String lottieOnline-shopping-pay-online-secure-payment = 'assets/lottie/online-shopping-pay-online-secure-payment.json';
   static const String lottiePaw = 'assets/lottie/paw.json';

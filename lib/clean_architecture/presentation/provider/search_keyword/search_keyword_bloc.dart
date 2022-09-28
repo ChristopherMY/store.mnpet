@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/model/keyword.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 
 class SearchKeywordBloc extends ChangeNotifier {
   LocalRepositoryInterface localRepositoryInterface;
@@ -39,24 +41,25 @@ class SearchKeywordBloc extends ChangeNotifier {
     required String searchText,
   }) {
     if (searchText.isNotEmpty) {
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(
-      //     builder: (context) => MainProductList(
-      //       categorySlug: "",
-      //       title: searchText,
-      //       search: searchText,
-      //       keywordSlug: "",
-      //       relations: [],
-      //     ),
-      //   ),
-      // );
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            return SearchDetailScreen.init(
+              context: context,
+              search: searchText,
+              isSearch: true,
+            );
+          },
+        ),
+      );
     }
   }
 
   void onSearchTextChanged({required String text}) {
-    searchText = text;
+    searchText = text.toLowerCase();
     List<Keyword> values = List.from(searchResults.value);
     values.clear();
+
     if (text.isEmpty || text == "") {
       return;
     }

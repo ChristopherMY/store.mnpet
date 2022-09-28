@@ -19,6 +19,7 @@ class MasterCategory {
     this.hexa,
     this.shortName,
     this.image,
+
   });
 
   final String? id;
@@ -29,8 +30,6 @@ class MasterCategory {
   final String? hexa;
   final String? shortName;
   final ImageCategory? image;
-
-
 
   factory MasterCategory.fromMap(Map<String, dynamic> json) => MasterCategory(
         id: json["_id"] == null ? null : json["_id"],
@@ -53,6 +52,7 @@ class MasterCategory {
                 "aspectRatio": 1.25,
               })
             : ImageCategory.fromMap(json["image"]),
+
       );
 
   Map<String, dynamic> toMap() => {
@@ -66,6 +66,7 @@ class MasterCategory {
         "hexa": hexa == null ? null : hexa,
         "short_name": shortName == null ? null : shortName,
         "image": image == null ? null : image!.toMap(),
+
       };
 
   MasterCategory copyWith({
@@ -106,7 +107,7 @@ class Relation {
         name: json["name"] == null ? null : json["name"],
         relations: json["relations"] == null
             ? null
-            : List<dynamic>.from(json["relations"].map((x)  => x)),
+            : List<dynamic>.from(json["relations"].map((x) => x)),
         slug: json["slug"] == null ? null : json["slug"],
       );
 

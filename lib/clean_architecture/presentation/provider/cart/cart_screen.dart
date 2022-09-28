@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/cart_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/checkout_info/checkout_info_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
@@ -63,13 +65,6 @@ class _CartScreenState extends State<CartScreen> {
     );
 
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    final cartBloc = context.read<CartBloc>();
-    cartBloc.pagingController.dispose();
-    super.dispose();
   }
 
   @override
@@ -178,6 +173,7 @@ class _CartScreenState extends State<CartScreen> {
                                 ListView.separated(
                                   physics: const NeverScrollableScrollPhysics(),
                                   scrollDirection: Axis.vertical,
+                                  padding: EdgeInsets.zero,
                                   shrinkWrap: true,
                                   itemCount: shoppingCart.products!.length,
                                   separatorBuilder:
@@ -243,12 +239,20 @@ class _CartScreenState extends State<CartScreen> {
                     sliver: SliverToBoxAdapter(
                       child: ValueListenableBuilder(
                         valueListenable: mainBloc.informationCart,
-                        builder: (context, shoppingCart, child) {
+                        builder: (_, shoppingCart, child) {
                           if (shoppingCart is Cart) {
                             if (shoppingCart.products!.isNotEmpty) {
                               return DefaultButton(
                                 text: "Ir a pagar",
-                                press: () {},
+                                press: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (__) {
+                                        return CheckoutInfoScreen.init(context);
+                                      },
+                                    ),
+                                  );
+                                },
                               );
                             }
 
@@ -392,21 +396,15 @@ class CardItem extends StatelessWidget {
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.circular(10.0), // Image border
-              child: CachedNetworkImage(
-                height: 100.0,
-                width: 100.0,
-                imageUrl: "$url/${product.mainImage!.src!}",
-                imageBuilder: (context, imageProvider) =>
-                    Image(image: imageProvider),
-                placeholder: (context, url) => Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.rectangle,
-                  ),
-                ),
-                errorWidget: (context, url, error) => Image.asset(
-                  "assets/no-image.png",
-                  fit: BoxFit.contain,
-                ),
+              child: ExtendedImage.network(
+                "$url/${product.mainImage!.src!}",
+                fit: BoxFit.fill,
+                cache: true,
+                height: 100,
+                width: 100,
+                timeLimit: const Duration(seconds: 10),
+                enableMemoryCache: true,
+                enableLoadState: false,
               ),
             ),
             Expanded(

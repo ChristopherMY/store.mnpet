@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:community_material_icon/community_material_icon.dart';
@@ -13,7 +14,6 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repos
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/general.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/cart_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/bottom_navigation_bar.dart';
@@ -21,9 +21,11 @@ import 'package:store_mundo_pet/clean_architecture/presentation/provider/product
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/info_shipment.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/product_price.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/dotted_swiper.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/photoview_wrapper.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/star_rating.dart';
@@ -42,11 +44,8 @@ class ProductScreen extends StatefulWidget {
           hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
         )
           ..isLoadingPage = true
-          ..loadVimeoVideoConfig(galleryVideo: product.galleryVideo!)
-          ..handleInitProduct(slug: product.slug!)
-          ..handleRefreshUbigeo(
-            slug: product.slug!,
-          );
+          ..initProductState(
+              slug: product.slug!, galleryVideo: product.galleryVideo!);
       },
       builder: (context, child) => const ProductScreen._(),
     );
@@ -71,102 +70,100 @@ class _ProductScreenState extends State<ProductScreen> {
       return const Placeholder();
     } else {
       final product = productBloc.product!;
-      return Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Column(
-            children: [
-              SizedBox(
-                height: SizeConfig.screenHeight! - 87,
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    const BuildAppBar(),
-                    //const CustomAppBar(),
-                    _buildInfo(context: context, product: product),
-                    /*
-                            _lineBreakSliver(),
-                            _buildRatings(context: _scaffoldKey.currentContext, product: product),
-                            _lineBreakSliver(),
-                            _buildComments(context: _scaffoldKey.currentContext),
-                          */
-                    _lineBreakSliver(),
-                    product.galleryDescription!.isNotEmpty ||
-                            product.galleryDescription!.isNotEmpty
-                        ? const BuildDescription()
-                        : const SliverToBoxAdapter(
-                            child: SizedBox(),
-                          ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              "Seguro que te gusta",
-                              style: Theme.of(context).textTheme.subtitle2,
-                              textAlign: TextAlign.start,
-                            ),
-                            const SizedBox(height: 5)
-                          ],
-                        ),
-                      ),
+      return SafeArea(
+        child: Scaffold(
+          backgroundColor: kBackGroundColor,
+          body: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              const BuildAppBar(),
+              //const CustomAppBar(),
+              _buildInfo(context: context, product: product),
+              /*
+                              _lineBreakSliver(),
+                              _buildRatings(context: _scaffoldKey.currentContext, product: product),
+                              _lineBreakSliver(),
+                              _buildComments(context: _scaffoldKey.currentContext),
+                            */
+              _lineBreakSliver(),
+              product.galleryDescription!.isNotEmpty ||
+                      product.galleryDescription!.isNotEmpty
+                  ? const BuildDescription()
+                  : const SliverToBoxAdapter(
+                      child: SizedBox(),
                     ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0,
-                        vertical: 10.0,
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "Seguro que te gusta",
+                        style: Theme.of(context).textTheme.subtitle2,
+                        textAlign: TextAlign.start,
                       ),
-                      sliver: PagedSliverMasonryGrid(
-                        crossAxisCount: 2,
-                        pagingController: productBloc.pagingController,
-                        builderDelegate: PagedChildBuilderDelegate<Product>(
-                          itemBuilder: (context, item, index) {
-                            return TrendingItemMain(
-                              product: item,
-                              gradientColors: const [
-                                Color(0xFFF28767),
-                                Color(0xFFFFA726),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    /*
-                            SliverVisibility(
-                              visible: _show,
-                              sliver: SliverPersistentHeader(
-                                delegate: DelegateTabHeader(
-                                  TabBar(
-                                    isScrollable: true,
-                                    controller: _tabController,
-                                    tabs: [
-                                      Tab(child: Text("Qué es")),
-                                      Tab(child: Text("Descripción")),
-                                      Tab(child: Text("Valoraciones")),
-                                      /*Tab(child: Text("Recomendados")),*/
-                                      Tab(child: Text("Recomendados"))
-                                    ],
-                                    labelColor: Colors.redAccent,
-                                    indicatorColor: Colors.red,
-                                    unselectedLabelColor: Colors.black,
-                                  ),
-                                ),
-                                floating: false,
-                                pinned: true,
-                              ),
-                            ),
-                        */
-                  ],
+                      const SizedBox(height: 5)
+                    ],
+                  ),
                 ),
               ),
-              const CustomBottomNavigationBar()
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 10.0,
+                ),
+                sliver: PagedSliverMasonryGrid(
+                  crossAxisCount: 2,
+                  pagingController: productBloc.pagingController,
+                  builderDelegate: PagedChildBuilderDelegate<Product>(
+                    firstPageErrorIndicatorBuilder: (context) {
+                      return const LottieAnimation(
+                          source: "assets/lottie/lonely-404.json");
+                    },
+                    itemBuilder: (context, item, index) {
+                      return TrendingItemMain(
+                        product: item,
+                        gradientColors: const [
+                          Color(0xFFF28767),
+                          Color(0xFFFFA726),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+              /*
+                              SliverVisibility(
+                                visible: _show,
+                                sliver: SliverPersistentHeader(
+                                  delegate: DelegateTabHeader(
+                                    TabBar(
+                                      isScrollable: true,
+                                      controller: _tabController,
+                                      tabs: [
+                                        Tab(child: Text("Qué es")),
+                                        Tab(child: Text("Descripción")),
+                                        Tab(child: Text("Valoraciones")),
+                                        /*Tab(child: Text("Recomendados")),*/
+                                        Tab(child: Text("Recomendados"))
+                                      ],
+                                      labelColor: Colors.redAccent,
+                                      indicatorColor: Colors.red,
+                                      unselectedLabelColor: Colors.black,
+                                    ),
+                                  ),
+                                  floating: false,
+                                  pinned: true,
+                                ),
+                              ),
+                          */
             ],
           ),
+          bottomNavigationBar: const CustomBottomNavigationBar(),
         ),
       );
+      // );
     }
   }
 
@@ -174,37 +171,34 @@ class _ProductScreenState extends State<ProductScreen> {
     return SliverToBoxAdapter(
       child: Container(
         height: 10,
-        color: kDividerColor,
+        color: kBackGroundColor,
       ),
     );
   }
 
   _buildInfo({required BuildContext context, required Product product}) {
     return SliverToBoxAdapter(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          /* _containerPromo(context),*/
-          const BuildNoPromotion(),
-          const BuildInformation(),
-          const Divider(
-            color: kDividerColor,
-            thickness: 1,
-          ),
-          const InfoAttributes(),
-          const Divider(
-            color: kDividerColor,
-            thickness: 1,
-          ),
-          const BuildSpecifications(),
-          _lineBreakLarge(),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 7.0),
-            child: InfoShipment(),
-          ),
-          _lineBreakLarge(),
-          _buildWhatsapp(context: context, description: product.name!),
-        ],
+      child: Material(
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            /* _containerPromo(context),*/
+            const BuildNoPromotion(),
+            const BuildInformation(),
+            _lineBreak1px(),
+            const InfoAttributes(),
+            _lineBreak1px(),
+            const BuildSpecifications(),
+            _lineBreak10px(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 7.0),
+              child: InfoShipment(),
+            ),
+            _lineBreak10px(),
+            _buildWhatsapp(context: context, description: product.name!),
+          ],
+        ),
       ),
     );
   }
@@ -220,13 +214,13 @@ class _ProductScreenState extends State<ProductScreen> {
       child: Container(
         height: 70,
         decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              spreadRadius: 0.3,
-              blurRadius: 8.0,
-            )
-          ],
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.black.withOpacity(0.3),
+          //     spreadRadius: 0.3,
+          //     blurRadius: 8.0,
+          //   )
+          // ],
           color: const Color(0xFF22c15e),
         ),
         child: Row(
@@ -263,14 +257,19 @@ class _ProductScreenState extends State<ProductScreen> {
     );
   }
 
-  _lineBreakLarge() {
-    return Container(
-      width: double.infinity,
-      color: kDividerColor,
-      child: const Divider(
-        height: 10,
-        color: kDividerColor,
-      ),
+  _lineBreak10px() {
+    return const Divider(
+      color: kBackGroundColor,
+      thickness: 10,
+      height: 10,
+    );
+  }
+
+  _lineBreak1px() {
+    return const Divider(
+      color: kBackGroundColor,
+      thickness: 1,
+      height: 1,
     );
   }
 }
@@ -283,27 +282,30 @@ class BuildAppBar extends StatelessWidget {
     final productBloc = context.read<ProductBloc>();
     final mainBloc = context.read<MainBloc>();
     return SliverAppBar(
-      // iconTheme: const IconThemeData(
-      //   color: Colors.black,
-      // ).copyWith(color: Colors.white),
-      leading: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 7.0),
-        child: CircleAvatar(
-          maxRadius: 10,
-          backgroundColor: kBackGroundColor,
-          child: Icon(
-            Icons.add_a_photo,
-            size: 20,
-            color: Colors.black,
+      leading: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 7.0),
+          child: CircleAvatar(
+            maxRadius: 10,
+            backgroundColor: kBackGroundColor,
+            child: Icon(
+              Icons.arrow_back,
+              size: 20,
+              color: Colors.black,
+            ),
           ),
         ),
       ),
       backgroundColor: Colors.white,
       systemOverlayStyle: const SystemUiOverlayStyle(
-        statusBarColor: kBackGroundColor,
+        // statusBarColor: kBackGroundColor,
+        statusBarColor: Colors.white,
         statusBarIconBrightness: Brightness.dark,
       ),
-      expandedHeight: 393,
+      expandedHeight: 411,
       floating: false,
       pinned: true,
       snap: false,
@@ -324,9 +326,7 @@ class BuildAppBar extends StatelessWidget {
               isAppBar: true,
               managerTypePhotoViewer: ManagerTypePhotoViewer.navigation,
             ),
-            onIndexChanged: (index) {
-              productBloc.onChangedIndex(index: index);
-            },
+            onIndexChanged: productBloc.onChangedIndex,
             pagination: const SwiperPagination(
               alignment: Alignment.bottomCenter,
               builder: DotCustomSwiperPaginationBuilder(
@@ -337,19 +337,16 @@ class BuildAppBar extends StatelessWidget {
           ),
         ),
       ),
-
       actions: <Widget>[
         GestureDetector(
-          onTap: () => {
-            /*
-            Navigator.push(
-              context!,
-              PageTransition(
-                type: PageTransitionType.leftToRightWithFade,
-                child: SearchScreen(),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) {
+                  return SearchKeywordScreen.init(context);
+                },
               ),
-            )
-            */
+            );
           },
           child: const CircleAvatar(
             maxRadius: 20,
@@ -361,18 +358,27 @@ class BuildAppBar extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 10.0),
-        Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            CircleAvatar(
-              maxRadius: 20,
-              backgroundColor: kBackGroundColor,
-              child: IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined),
-                color: Colors.black,
-                iconSize: 20,
-                onPressed: () => {
+        const SizedBox(width: 10.0),
+        ValueListenableBuilder(
+          valueListenable: mainBloc.cartLength,
+          builder: (context, int value, child) {
+            return Badge(
+              position: const BadgePosition(
+                top: 3,
+                isCenter: false,
+                end: 0,
+              ),
+              badgeContent: Text(
+                "$value",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: GestureDetector(
+                onTap: () => {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -380,30 +386,18 @@ class BuildAppBar extends StatelessWidget {
                     ),
                   )
                 },
-              ),
-            ),
-            Positioned(
-              top: 6.0,
-              right: 6.0,
-              child: Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: ValueListenableBuilder(
-                  valueListenable: mainBloc.cartLength,
-                  builder: (context, int value, child) {
-                    return Text(
-                      "$value",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    );
-                  },
+                child: const CircleAvatar(
+                  maxRadius: 20,
+                  backgroundColor: kBackGroundColor,
+                  child: Icon(
+                    Icons.shopping_cart_outlined,
+                    color: Colors.black,
+                    size: 20,
+                  ),
                 ),
               ),
-            )
-          ],
+            );
+          },
         ),
       ],
     );
@@ -429,7 +423,12 @@ class BuildInformation extends StatelessWidget {
   Widget build(BuildContext context) {
     final productBloc = context.read<ProductBloc>();
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
+      padding: const EdgeInsets.only(
+        top: 5.0,
+        bottom: 15.0,
+        left: 15.0,
+        right: 15.0,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -444,26 +443,16 @@ class BuildInformation extends StatelessWidget {
           const SizedBox(height: 5.0),
           SizedBox(
             child: DefaultTextStyle(
-              style: const TextStyle(fontSize: 12, color: Colors.black),
+              style: const TextStyle(fontSize: 12.0, color: Colors.black),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   StarRating(
                     rating: productBloc.product!.rating! * 0.05,
-                    size: 17,
+                    size: 17.0,
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 5.0),
                   Text("${productBloc.product!.rating! * 0.05}"),
-                  /*
-                        Container(
-                          height: 15,
-                          width: 10,
-                          child: VerticalDivider(
-                              color: Colors.black, thickness: 1),
-                        ),
-                        Text(
-                            "${this.widget.product.totalPurchased} Vendidos"),
-                         */
                 ],
               ),
             ),
@@ -541,8 +530,9 @@ class BuildDescription extends StatelessWidget {
                       ),
                       const SizedBox(height: 15),
                       const Divider(
-                        color: kDividerColor,
+                        color: kBackGroundColor,
                         thickness: 1,
+                        height: 1,
                       ),
                     ],
                   ),
@@ -570,7 +560,7 @@ class BuildTechnicalBanners extends StatelessWidget {
           final product = productBloc.product!.galleryDescription![index];
           return GestureDetector(
             onTap: () {
-              productBloc.onChangedIndex(index: index);
+              productBloc.onChangedIndex(index);
               productBloc.onOpenGallery(
                 context: context,
                 isAppBar: false,
@@ -627,7 +617,7 @@ class BuildSpecifications extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        DialogHelper().settingModalBottomSpecs(
+        DialogHelper.settingModalBottomSpecs(
           context: context,
         );
       },

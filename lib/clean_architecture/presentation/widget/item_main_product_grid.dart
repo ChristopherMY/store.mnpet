@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
@@ -6,47 +6,20 @@ import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_screen.dart';
 
+const _url = Environment.CLOUD_FRONT;
+
 class TrendingItemMainGrid extends StatelessWidget {
-  final _url = Environment.CLOUD_FRONT;
+  const TrendingItemMainGrid({
+    required this.product,
+    required this.gradientColors,
+  });
+
   final Product product;
   final List<Color> gradientColors;
-
-  const TrendingItemMainGrid(
-      {required this.product, required this.gradientColors});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              constraints: const BoxConstraints(
-                maxHeight: 155,
-                minHeight: 155,
-                minWidth: 150,
-                maxWidth: 150,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                image: DecorationImage(
-                  image: CachedNetworkImageProvider(
-                    "$_url/${product.mainImage!.src!}",
-                  ),
-                ),
-              ),
-            ),
-            //_productImage(),
-            _productDetails(context)
-          ],
-        ),
-      ),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -54,13 +27,48 @@ class TrendingItemMainGrid extends StatelessWidget {
           ),
         );
       },
+      child: Card(
+        color: Colors.white,
+        borderOnForeground: false,
+        elevation: 0.1,
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 1,
+              child: AspectRatio(
+                aspectRatio: product.mainImage!.aspectRatio!,
+                child: ExtendedImage(
+                  fit: BoxFit.cover,
+                  clearMemoryCacheIfFailed: true,
+                  enableMemoryCache: true,
+                  image: ExtendedResizeImage(
+                    ExtendedNetworkImageProvider(
+                      "$_url/${product.mainImage!.src!}",
+                      cache: true,
+                      timeLimit: const Duration(seconds: 3),
+                    ),
+                    compressionRatio: 0.75,
+                    maxBytes: 50,
+                    width: null,
+                    height: null,
+                  ),
+                ),
+              ),
+            ),
+            _productDetails(context)
+          ],
+        ),
+      ),
     );
   }
 
   _productDetails(context) {
-    double rating = product.rating! * 0.05;
-
     return Expanded(
+      flex: 2,
       child: Padding(
         padding: EdgeInsets.all(getProportionateScreenHeight(8.0)),
         child: Column(
@@ -69,18 +77,14 @@ class TrendingItemMainGrid extends StatelessWidget {
           children: <Widget>[
             Text(
               product.categories![0].name!.trim(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 13, color: Colors.black45),
             ),
-            const SizedBox(height: 3.0),
+            const SizedBox(height: 5.0),
             Text(
               product.name!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyText2,
             ),
-            const SizedBox(height: 3.0),
+            const SizedBox(height: 5.0),
             Row(
               children: <Widget>[
                 Text(
@@ -91,7 +95,7 @@ class TrendingItemMainGrid extends StatelessWidget {
                     color: Colors.red,
                   ),
                 ),
-                const SizedBox(width: 3.0),
+                const SizedBox(width: 5.0),
                 Text(
                   parseDouble(product.price!.regular!),
                   style: const TextStyle(
@@ -102,17 +106,6 @@ class TrendingItemMainGrid extends StatelessWidget {
                 )
               ],
             ),
-            /*SizedBox(height: 3),
-            Row(
-              children: [
-                Expanded(child: StarRating(rating: rating, size: 14)),
-                  SizedBox(width: 3),
-                  Text(
-                    "${product.totalPurchased} vendido(s)",
-                    style: TextStyle(fontSize: 14),
-                )
-              ],
-            ),*/
           ],
         ),
       ),

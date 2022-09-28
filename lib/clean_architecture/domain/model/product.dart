@@ -234,6 +234,7 @@ class ProductAttribute {
     this.pluralName,
     this.terms,
     this.checkedName,
+    this.termsSelected,
   });
 
   final String? id;
@@ -243,20 +244,8 @@ class ProductAttribute {
   final String? description;
   final String? pluralName;
   List<Term>? terms;
+  List<Term>? termsSelected;
   String? checkedName;
-
-  factory ProductAttribute.clone(ProductAttribute source) {
-    return ProductAttribute(
-      attributeId: source.attributeId,
-      terms: source.terms,
-      slug: source.slug,
-      id: source.id,
-      pluralName: source.pluralName,
-      name: source.name,
-      description: source.description,
-      checkedName: source.checkedName,
-    );
-  }
 
   factory ProductAttribute.fromMap(Map<String, dynamic> json) =>
       ProductAttribute(
@@ -270,6 +259,10 @@ class ProductAttribute {
         terms: json["terms"] == null
             ? null
             : List<Term>.from(json["terms"].map((x) => Term.fromMap(x))),
+        termsSelected: json["terms_selected"] == null
+            ? []
+            : List<Term>.from(
+                json["terms_selected"].map((x) => Term.fromMap(x))),
       );
 
   Map<String, dynamic> toMap() => {
@@ -283,7 +276,34 @@ class ProductAttribute {
         "terms": terms == null
             ? null
             : List<dynamic>.from(terms!.map((x) => x.toMap())),
+        "terms_selected": termsSelected == null
+            ? []
+            : List<dynamic>.from(termsSelected!.map((x) => x.toMap())),
       };
+
+  ProductAttribute copyWith({
+    String? id,
+    String? attributeId,
+    String? name,
+    String? slug,
+    String? description,
+    String? pluralName,
+    List<Term>? terms,
+    String? checkedName,
+    List<Term>? termsSelected,
+  }) {
+    return ProductAttribute(
+      id: id ?? this.id,
+      attributeId: attributeId ?? this.attributeId,
+      name: name ?? this.name,
+      slug: slug ?? this.slug,
+      description: description ?? this.description,
+      pluralName: pluralName ?? this.pluralName,
+      terms: terms ?? this.terms,
+      checkedName: checkedName ?? this.checkedName,
+      termsSelected: terms ?? this.termsSelected,
+    );
+  }
 }
 
 class Term {
@@ -295,6 +315,8 @@ class Term {
     this.id,
     this.image,
     this.hasBorder,
+    this.checked,
+    this.count,
   });
 
   final String? value;
@@ -304,6 +326,8 @@ class Term {
   final String? id;
   final MainImage? image;
   bool? hasBorder;
+  bool? checked;
+  int? count;
 
   factory Term.fromMap(Map<String, dynamic> json) => Term(
         value: json["value"] == null ? null : json["value"],
@@ -313,6 +337,8 @@ class Term {
         id: json["_id"] == null ? null : json["_id"],
         hasBorder: json["has_border"] ?? false,
         image: json["image"] == null ? null : MainImage.fromMap(json["image"]),
+        checked: json["checked"] ?? false,
+        count: json["count"] ?? 0,
       );
 
   Map<String, dynamic> toMap() => {
@@ -323,7 +349,33 @@ class Term {
         "_id": id == null ? null : id,
         "has_border": hasBorder ?? false,
         "image": image == null ? null : image!.toMap(),
+        "checked": checked ?? false,
+        "count": count ?? 0,
       };
+
+  Term copyWith({
+    String? value,
+    String? label,
+    String? slug,
+    String? hexa,
+    String? id,
+    MainImage? image,
+    bool? hasBorder,
+    bool? checked,
+    int? count,
+  }) {
+    return Term(
+      value: value ?? this.value,
+      label: label ?? this.label,
+      slug: slug ?? this.slug,
+      hexa: hexa ?? this.hexa,
+      id: id ?? this.id,
+      image: image ?? this.image,
+      hasBorder: hasBorder ?? this.hasBorder,
+      checked: checked ?? this.checked,
+      count: count ?? this.count,
+    );
+  }
 }
 
 class MainImage {
@@ -400,18 +452,24 @@ class Brand {
     this.name,
     this.slug,
     this.image,
+    this.checked,
+    this.count,
   });
 
   final String? id;
   final String? name;
   final String? slug;
   final MainImage? image;
+  final bool? checked;
+  final int? count;
 
   factory Brand.fromMap(Map<String, dynamic> json) => Brand(
         id: json["_id"] == null ? null : json["_id"],
         name: json["name"] == null ? null : json["name"],
         slug: json["slug"] == null ? null : json["slug"],
         image: json["image"] == null ? null : MainImage.fromMap(json["image"]),
+        checked: json["checked"] ?? false,
+        count: json["count"] ?? 0,
       );
 
   Map<String, dynamic> toMap() => {
@@ -419,7 +477,27 @@ class Brand {
         "name": name == null ? null : name,
         "slug": slug == null ? null : slug,
         "image": image == null ? null : image!.toMap(),
+        "checked": checked ?? false,
+        "count": count ?? 0,
       };
+
+  Brand copyWith({
+    String? id,
+    String? name,
+    String? slug,
+    MainImage? image,
+    bool? checked,
+    int? count,
+  }) {
+    return Brand(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      slug: slug ?? this.slug,
+      image: image ?? this.image,
+      checked: checked ?? this.checked,
+      count: count ?? this.count,
+    );
+  }
 }
 
 class GalleryVideo {

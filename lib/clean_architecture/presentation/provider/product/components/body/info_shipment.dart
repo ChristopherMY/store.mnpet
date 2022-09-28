@@ -18,8 +18,7 @@ class InfoShipment extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        final DialogHelper dialogHelper = DialogHelper();
-        dialogHelper.showDialogShipping(
+        DialogHelper.showDialogShipping(
           context: context,
           onSaveShippingAddress: (_) async {
             final mainBloc = context.read<MainBloc>();
@@ -30,7 +29,7 @@ class InfoShipment extends StatelessWidget {
 
             if (shippingPrice is double) {
               productBloc.shippingPrice.value = shippingPrice;
-              productBloc.handleRefreshUbigeo(slug: productBloc.product!.slug!);
+              productBloc.refreshUbigeo(slug: productBloc.product!.slug!);
 
               const snackBar = SnackBar(
                 content: Text('Dirección guardada correctamente'),

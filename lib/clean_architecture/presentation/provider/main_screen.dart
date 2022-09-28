@@ -29,14 +29,15 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with AfterLayoutMixin<MainScreen>{
+class _MainScreenState extends State<MainScreen>
+    with AfterLayoutMixin<MainScreen> {
   Future<void> loadingScreen(BuildContext context) async {
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
         pageBuilder: (_, animation1, animation2) => SplashScreen.init(context),
-      ), 
+      ),
     );
   }
 
@@ -106,5 +107,6 @@ class _MainScreenState extends State<MainScreen> with AfterLayoutMixin<MainScree
   }
 
   @override
-  FutureOr<void> afterFirstLayout(BuildContext context) => loadingScreen(context);
+  FutureOr<void> afterFirstLayout(BuildContext context) =>
+      loadingScreen(context);
 }

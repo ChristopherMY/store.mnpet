@@ -19,7 +19,6 @@ class HomeBloc extends ChangeNotifier {
 
   static int _initialRange = 1;
   static int _finalRange = 20;
-  static bool isFetching = false;
   static const _pageSize = 19;
   bool reloadPagination = false;
 
@@ -28,6 +27,12 @@ class HomeBloc extends ChangeNotifier {
 
   final PagingController<int, Product> pagingController =
       PagingController(firstPageKey: 0);
+
+  @override
+  void dispose() {
+    pagingController.dispose();
+    super.dispose();
+  }
 
   Future<void> fetchPage(int pageKey) async {
     if (reloadPagination) {
@@ -65,7 +70,11 @@ class HomeBloc extends ChangeNotifier {
             final nextPageKey = pageKey + newItems.length;
             pagingController.appendPage(newItems, nextPageKey);
           }
+
+          return;
         }
+
+        pagingController.error = "dwdw";
       }
     }
 

@@ -12,6 +12,7 @@ import 'package:store_mundo_pet/clean_architecture/presentation/widget/categorie
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/header.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -33,12 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    final homeBloc = context.read<HomeBloc>();
-    homeBloc.pagingController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2,
                   pagingController: homeBloc.pagingController,
                   builderDelegate: PagedChildBuilderDelegate<Product>(
+                    firstPageErrorIndicatorBuilder: (context){
+                      return const LottieAnimation(source: "assets/lottie/lonely-404.json");
+                    },
                     itemBuilder: (context, item, index) {
                       return TrendingItemMain(
                         product: item,

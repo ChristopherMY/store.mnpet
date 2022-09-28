@@ -6,7 +6,6 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
 import '../../../domain/repository/product_repository.dart';
 
@@ -28,11 +27,16 @@ class CartBloc extends ChangeNotifier {
   final PagingController<int, Product> pagingController =
       PagingController(firstPageKey: 0);
 
+  @override
+  void dispose() {
+    pagingController.dispose();
+    super.dispose();
+  }
+
   Future<void> fetchPage({
     required List<Brand> categories,
     required int pageKey,
   }) async {
-
     final response =
         await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
@@ -52,8 +56,7 @@ class CartBloc extends ChangeNotifier {
       if (response.statusCode == 200) {
         final products = jsonDecode(response.body) as List;
         if (products.isNotEmpty) {
-          List<Product> newItems =
-              products.map((e) => Product.fromMap(e)).toList().cast();
+          List<Product> newItems = products.map((e) => Product.fromMap(e)).toList().cast();
 
           _initialRange += 20;
           _finalRange += 20;

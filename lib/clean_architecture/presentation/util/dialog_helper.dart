@@ -11,6 +11,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/sort_option.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
@@ -19,16 +20,19 @@ import 'package:store_mundo_pet/clean_architecture/presentation/provider/phone/p
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/custom_progress_button.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/info_attributes.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_button.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/sort_option.dart'
+    as sort_option;
 
 class DialogHelper {
-  final String _cloudFront = Environment.API_DAO;
+  static const String _cloudFront = Environment.API_DAO;
 
-  Future<void> showDialogShipping({
+  static Future<void> showDialogShipping({
     required BuildContext context,
     required Function(BuildContext) onSaveShippingAddress,
   }) {
@@ -279,7 +283,7 @@ class DialogHelper {
     );
   }
 
-  Future<void> showDropdownRegions({
+  static Future<void> showDropdownRegions({
     required BuildContext context,
     required List<Region> regions,
     required Function(int, StateSetter, BuildContext) onChangeRegion,
@@ -380,7 +384,7 @@ class DialogHelper {
     );
   }
 
-  Future<void> showDropdownProvinces({
+  static Future<void> showDropdownProvinces({
     required BuildContext context,
     required List<Province> provinces,
     required Function(int, StateSetter, BuildContext) onChangeProvince,
@@ -482,7 +486,7 @@ class DialogHelper {
     );
   }
 
-  Future<void> showDropdownDistricts({
+  static Future<void> showDropdownDistricts({
     required BuildContext context,
     required List<District> districts,
     required Function(int, StateSetter, BuildContext) onChangeDistrict,
@@ -584,7 +588,7 @@ class DialogHelper {
     );
   }
 
-  Future<void> showAddressDialog({
+  static Future<void> showAddressDialog({
     required BuildContext context,
   }) {
     return showModalBottomSheet<void>(
@@ -1211,7 +1215,7 @@ class DialogHelper {
     );
   }
 
-  Future<void> showPhonesDialog({
+  static Future<void> showPhonesDialog({
     required BuildContext context,
   }) {
     return showModalBottomSheet<void>(
@@ -1462,7 +1466,7 @@ class DialogHelper {
     );
   }
 
-  Future<void> showDropdownAddressType({
+  static Future<void> showDropdownAddressType({
     required List<Map<String, dynamic>> addressTypes,
     required BuildContext context,
     required Function(int) changeAddressType,
@@ -1555,7 +1559,7 @@ class DialogHelper {
     );
   }
 
-  Future<void> settingModalBottomSheetAttributes({
+  static Future<void> settingModalBottomSheetAttributes({
     required BuildContext context,
   }) async {
     return await showModalBottomSheet(
@@ -1661,7 +1665,8 @@ class DialogHelper {
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 15.0),
                                 child: CustomProgressButton(
-                                    buttonComesFromModal: true),
+                                  buttonComesFromModal: true,
+                                ),
                               ),
                             ),
                           ],
@@ -1775,7 +1780,7 @@ class DialogHelper {
     );
   }
 
-  Future<void> settingModalBottomSpecs({
+  static Future<void> settingModalBottomSpecs({
     required BuildContext context,
   }) async {
     return showModalBottomSheet<void>(
@@ -1879,6 +1884,67 @@ class DialogHelper {
               );
             },
           ),
+        );
+      },
+    );
+  }
+
+  static Future<void> showSortOptions(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(34.0),
+          topRight: Radius.circular(34.0),
+        ),
+      ),
+      backgroundColor: Colors.white,
+      builder: (_) {
+        return ChangeNotifierProvider<SearchDetailBloc>.value(
+          value: Provider.of<SearchDetailBloc>(context),
+          builder: (_, __) {
+            final searchDetailBloc = context.watch<SearchDetailBloc>();
+            return Column(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Container(
+                    width: 60.0,
+                    height: 6.0,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF979797),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+                const Text(
+                  'Ordenar por',
+                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w700),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 15.0),
+                ),
+                ValueListenableBuilder(
+                  valueListenable: searchDetailBloc.sort,
+                  builder: (context, List<SortOption> elements, child) {
+                    return Column(
+                      children: List.generate(
+                        elements.length,
+                        (index) => sort_option.SortOption(
+                          onChange: () {
+                            searchDetailBloc.handleChangeOptionSort(index);
+                            Navigator.pop(context);
+                          },
+                          title: elements[index].title!,
+                          isChecked: elements[index].isChecked!,
+                        ),
+                      ).toList().cast(),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );

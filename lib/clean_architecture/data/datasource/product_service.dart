@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/comment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../domain/repository/product_repository.dart';
 
 class ProductService implements ProductRepositoryInterface {
   final _url = Environment.API_DAO;
@@ -146,13 +147,53 @@ class ProductService implements ProductRepositoryInterface {
 
   // VimeoVideoConfig
   @override
-  Future<dynamic> vimeoVideoConfigFromUrl({required String vimeoVideoId}) async {
+  Future<dynamic> vimeoVideoConfigFromUrl(
+      {required String vimeoVideoId}) async {
     try {
       return await http.get(
         Uri.parse('https://player.vimeo.com/video/$vimeoVideoId/config'),
       );
-
     } on Exception catch (e) {
+      return e.toString();
+    }
+  }
+
+  @override
+  Future<dynamic> getFiltersProductDetails(
+      {required Map<String, dynamic> bindings}) async {
+    try {
+      final encodeBody = json.encode(bindings);
+
+      return await http.post(
+        Uri.parse("$_url/api/v1/search/filters"),
+        headers: headers,
+        body: encodeBody,
+      );
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return e.toString();
+    }
+  }
+
+  @override
+  Future<dynamic> getSearchProductDetails(
+      {required Map<String, dynamic> bindings}) async {
+    try {
+      final encodeBody = json.encode(bindings);
+
+      return await http.post(
+        Uri.parse("$_url/api/v1/search/"),
+        headers: headers,
+        body: encodeBody,
+      );
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
       return e.toString();
     }
   }

@@ -60,7 +60,7 @@ class PhonesDetail extends StatelessWidget {
                         phoneBloc.isUpdate = true;
                         phoneBloc.phone = phone;
 
-                        await DialogHelper().showPhonesDialog(context: context);
+                        await DialogHelper.showPhonesDialog(context: context);
                       },
                       child: ItemPhone(
                         phone: phone,
@@ -75,7 +75,7 @@ class PhonesDetail extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     phoneBloc.isUpdate = false;
-                    await DialogHelper().showPhonesDialog(context: context);
+                    await DialogHelper.showPhonesDialog(context: context);
                   },
                   child: Row(
                     children: const [

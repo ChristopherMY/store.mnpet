@@ -13,7 +13,6 @@ import 'package:store_mundo_pet/clean_architecture/presentation/provider/product
 import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
 
 String cloudFront = Environment.API_DAO;
-final DialogHelper _dialogHelper = DialogHelper();
 
 class InfoAttributes extends StatelessWidget {
   const InfoAttributes({Key? key}) : super(key: key);
@@ -31,7 +30,7 @@ class InfoAttributes extends StatelessWidget {
           children: <Widget>[
             GestureDetector(
               onTap: () {
-                _dialogHelper.settingModalBottomSheetAttributes(
+                DialogHelper.settingModalBottomSheetAttributes(
                   context: context,
                 );
               },
@@ -162,7 +161,7 @@ class InfoAttributes extends StatelessWidget {
             list.add(
               GestureDetector(
                 onTap: () {
-                 DialogHelper().settingModalBottomSheetAttributes(context: context);
+                 DialogHelper.settingModalBottomSheetAttributes(context: context);
                 },
                 child: SizedBox(
                   width: 77.0,
@@ -492,15 +491,15 @@ class BuildAttributesSections extends StatelessWidget {
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Container(
+          const SliverToBoxAdapter(
+            child: Divider(
+              thickness: 10,
               height: 10,
-              color: kDividerColor,
+              color: kBackGroundColor,
             ),
           ),
           SliverPadding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+            padding:const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
             sliver: SliverToBoxAdapter(
               child: InkWell(
                 onTap: onShowDialogShipping,

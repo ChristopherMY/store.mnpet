@@ -151,8 +151,7 @@ class AddressesDetail extends StatelessWidget {
                         shipmentBloc.isUpdate = true;
                         shipmentBloc.address = address;
 
-                        await DialogHelper()
-                            .showAddressDialog(context: context);
+                        await DialogHelper.showAddressDialog(context: context);
                       },
                       child: ItemAddress(
                         address: address,
@@ -167,7 +166,7 @@ class AddressesDetail extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     shipmentBloc.isUpdate = false;
-                    await DialogHelper().showAddressDialog(context: context);
+                    await DialogHelper.showAddressDialog(context: context);
                   },
                   child: Row(
                     children: const [

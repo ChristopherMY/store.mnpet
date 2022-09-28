@@ -130,6 +130,10 @@ class MyApp extends StatelessWidget {
                               height: 1,
                               color: Colors.blueAccent,
                             ),
+                            headline5: const TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 12,
+                            ),
                           )
                           .apply(bodyColor: Colors.black, fontFamily: 'roboto'),
                     ),

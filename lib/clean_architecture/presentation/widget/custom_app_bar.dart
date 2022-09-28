@@ -59,7 +59,7 @@ class CustomSliverPersistentHeaderDelegate
               managerTypePhotoViewer: ManagerTypePhotoViewer.navigation,
             ),
             onIndexChanged: (index) {
-              productBloc.onChangedIndex(index: index);
+              // productBloc.onChangedIndex(index: index);
             },
             pagination: const SwiperPagination(
               alignment: Alignment.bottomCenter,

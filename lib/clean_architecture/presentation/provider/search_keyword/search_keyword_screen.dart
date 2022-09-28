@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/keyword.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_keyword/search_keyword_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/header.dart';
 
@@ -64,11 +65,19 @@ class SearchKeywordScreen extends StatelessWidget {
                       itemCount: value.length,
                       itemBuilder: (context, index) => InkWell(
                         onTap: () {
-                          // launchKeywordSearch(
-                          //   context: context,
-                          //   title: _searchResult[index].name,
-                          //   keywordSlug: _searchResult[index].slug,
-                          // );
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return SearchDetailScreen.init(
+                                  context: context,
+                                  search: "",
+                                  // keywords: [value[index].slug!],
+                                  keywords: value[index],
+                                  isSearch: false,
+                                );
+                              },
+                            ),
+                          );
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(

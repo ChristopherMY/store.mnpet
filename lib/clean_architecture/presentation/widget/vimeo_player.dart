@@ -1,12 +1,6 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:better_video_player/better_video_player.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/vimeo_video_config.dart';
 
 class VimeoVideoPlayer extends StatefulWidget {
   const VimeoVideoPlayer({
@@ -27,7 +21,6 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
   final BetterVideoPlayerController controllerBetterVideo =
       BetterVideoPlayerController();
   late BetterVideoPlayerConfiguration betterVideoPlayerConfiguration;
-
 
   double videoContainerRatio = 0.5;
 
@@ -63,7 +56,6 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
         }
       });
     */
-
   }
 
   @override
@@ -77,6 +69,8 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
     /// disposing the controllers
     controllerBetterVideo.pause();
     controllerBetterVideo.dispose();
+    controllerBetterVideo.removeListener(() { });
+
     //playerEventSubscription.cancel();
 
     super.dispose();
@@ -100,32 +94,13 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
         allowedScreenSleep: false,
         // controls: _CustomControls(isFullScreen: false),
         // fullScreenControls: _CustomControls(isFullScreen: false),
-        placeholder: CachedNetworkImage(
-          imageUrl: widget.defaultImage,
-          fit: BoxFit.cover,
-          imageBuilder: (context, imageProvider) => Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: imageProvider,
-              ),
-            ),
-          ),
-          placeholder: (context, url) => Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-          ),
-          errorWidget: (context, url, error) => Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5.0),
-              image: const DecorationImage(
-                image: AssetImage("assets/no-image.png"),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+        placeholder: ExtendedImage.network(
+          widget.defaultImage,
+          fit: BoxFit.fill,
+          cache: true,
+          timeLimit: const Duration(seconds: 10),
+          enableMemoryCache: true,
+          enableLoadState: false,
         ),
       ),
       dataSource: BetterVideoPlayerDataSource(

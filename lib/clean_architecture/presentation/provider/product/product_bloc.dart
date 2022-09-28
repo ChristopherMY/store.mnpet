@@ -73,8 +73,6 @@ class ProductBloc extends ChangeNotifier {
   bool isExpanded = false;
   bool isLoadingPage = true;
 
-  //TODO: !important
-  static bool _disposed = false;
   final SwiperController swiperController = SwiperController();
 
   void init() {
@@ -83,27 +81,17 @@ class ProductBloc extends ChangeNotifier {
         categories: product!.categories!,
         pageKey: pageKey,
       );
-
     });
   }
 
   @override
   void dispose() {
-    // _disposed = true;
     pagingController.dispose();
     super.dispose();
   }
 
-  // @override
-  // void notifyListeners() {
-  //   if (!_disposed) {
-  //     super.notifyListeners();
-  //   }
-  // }
-
-  void handleInitProduct({required String slug}) async {
-    final response =
-        await productRepositoryInterface.getProductSlug(slug: slug);
+  Future<void> loadProductDetails({required String slug}) async {
+    final response = await productRepositoryInterface.getProductSlug(slug: slug);
 
     if (response is String) {
       if (kDebugMode) {
@@ -114,7 +102,6 @@ class ProductBloc extends ChangeNotifier {
     if (response is http.Response) {
       if (response.statusCode == 200) {
         product = productFromMap(response.body);
-        print(product!.toMap());
         if (product!.general != "simple_product") {
           handleInitVariation(product: product!);
           handleLoadVariableComponents(product: product!);
@@ -126,22 +113,13 @@ class ProductBloc extends ChangeNotifier {
         handleBuildHeaderContent(product: product!);
       }
     }
-
-    if (product!.galleryVideo!.isEmpty) {
-      isLoadingPage = false;
-      notifyListeners();
-      print("Entro a actualizar");
-    } else {
-      print("NO!! Entro a actualizar");
-    }
   }
 
   Future<void> fetchRelatedProductsPagination({
     required List<Brand> categories,
     required int pageKey,
   }) async {
-    final response =
-        await productRepositoryInterface.getRelatedProductsPagination(
+    final response = await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
       finalRange: _finalRange,
       initialRange: _initialRange,
@@ -159,8 +137,7 @@ class ProductBloc extends ChangeNotifier {
       if (response.statusCode == 200) {
         final products = jsonDecode(response.body) as List;
         if (products.isNotEmpty) {
-          List<Product> newItems =
-              products.map((e) => Product.fromMap(e)).toList().cast();
+          List<Product> newItems = products.map((e) => Product.fromMap(e)).toList().cast();
 
           _initialRange += 20;
           _finalRange += 20;
@@ -172,21 +149,20 @@ class ProductBloc extends ChangeNotifier {
             final nextPageKey = pageKey + newItems.length;
             pagingController.appendPage(newItems, nextPageKey);
           }
+          return;
         }
 
-        return;
+        pagingController.error = "No cargo";
       }
     }
-
-    pagingController.error = response;
   }
 
   void handleInitVariation({required Product product}) {
     List<Variation> variations = [...product.variations!];
-    int position =
-        variations.indexWhere((element) => element.variationDefault == true);
+    int position = variations.indexWhere((element) => element.variationDefault == true);
 
     if (position != -1) {
+      /// Here
       variation.value = variations[position];
     } else {
       // TODO: Cuando el producto es variable pero no tiene seleccionado una variacion por defecto.
@@ -211,24 +187,22 @@ class ProductBloc extends ChangeNotifier {
     if (product.galleryHeader!.isNotEmpty) {
       headerContent.addAll(
         product.galleryHeader!.map(
-          (image) => Material(
-            child: Hero(
-              tag: image.id!,
-              child: CachedNetworkImage(
-                fit: BoxFit.cover,
-                imageUrl: "$cloudFront/${image.src}",
-                imageBuilder: (context, imageProvider) => Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: imageProvider,
-                      //fit: BoxFit.cover,
-                    ),
+          (image) => Hero(
+            tag: image.id!,
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              imageUrl: "$cloudFront/${image.src}",
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    //fit: BoxFit.cover,
                   ),
                 ),
-                placeholder: (context, url) => const SizedBox.shrink(),
-                errorWidget: (context, url, error) =>
-                    Image.asset("assets/no-image.png"),
               ),
+              placeholder: (context, url) => const SizedBox.shrink(),
+              errorWidget: (context, url, error) =>
+                  Image.asset("assets/no-image.png"),
             ),
           ),
         ),
@@ -241,8 +215,7 @@ class ProductBloc extends ChangeNotifier {
 
   void handleBuildVariationAttributesContent({required Product product}) {
     for (var attr in variation.value.attributes!) {
-      final indexOfAttribute = product.modalAttributes!
-          .indexWhere((element) => element.attributeId == attr.id);
+      final indexOfAttribute = product.modalAttributes!.indexWhere((element) => element.attributeId == attr.id);
 
       if (indexOfAttribute != -1) {
         product.modalAttributes![indexOfAttribute].checkedName = attr.name;
@@ -253,8 +226,7 @@ class ProductBloc extends ChangeNotifier {
 
     for (var coincidence in variation.value.coincidence!) {
       for (var attr in product.attributes!) {
-        final indexOfTerm =
-            attr.terms!.indexWhere((term) => term.label == coincidence);
+        final indexOfTerm = attr.terms!.indexWhere((term) => term.label == coincidence);
 
         if (indexOfTerm != -1) {
           attr.terms![indexOfTerm].hasBorder = true;
@@ -264,8 +236,7 @@ class ProductBloc extends ChangeNotifier {
       }
 
       for (var attr in product.modalAttributes!) {
-        final indexOfTerm =
-            attr.terms!.indexWhere((term) => term.label == coincidence);
+        final indexOfTerm = attr.terms!.indexWhere((term) => term.label == coincidence);
 
         if (indexOfTerm != -1) {
           attr.terms![indexOfTerm].hasBorder = true;
@@ -405,7 +376,7 @@ class ProductBloc extends ChangeNotifier {
     }
   }
 
-  void handleRefreshUbigeo({required String slug}) async {
+  Future<void> refreshUbigeo({required String slug}) async {
     informationLocal.value = UserInformationLocal.fromMap(
       await hiveRepositoryInterface.read(
               containerName: "shipment", key: "residence") ??
@@ -452,17 +423,11 @@ class ProductBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onChangedIndex({
-    required int index,
-  }) {
+  void onChangedIndex(index) {
     if (product!.galleryVideo!.isNotEmpty) {
       final length = product!.galleryVideo!.length;
 
-      if (index >= length) {
-        showSwiperPagination.value = true;
-      } else {
-        showSwiperPagination.value = false;
-      }
+      showSwiperPagination.value = index >= length;
 
       if (index > 0) {
         indexPhotoViewer = index - 1;
@@ -565,70 +530,91 @@ class ProductBloc extends ChangeNotifier {
     return false;
   }
 
-  void loadVimeoVideoConfig({required List<GalleryVideo> galleryVideo}) async {
+  void initProductState({
+    required String slug,
+    required List<GalleryVideo> galleryVideo,
+  }) async {
+    await Future.wait(
+      [
+        loadVimeoVideoConfig(galleryVideo: galleryVideo),
+        loadProductDetails(slug: slug),
+        refreshUbigeo(slug: slug)
+      ],
+    );
+
+    isLoadingPage = false;
+    notifyListeners();
+  }
+
+  Future<void> loadVimeoVideoConfig({
+    required List<GalleryVideo> galleryVideo,
+  }) async {
     List<Widget> copyGalleryVideo = List.from(headerContent);
 
+    showSwiperPagination.value = !galleryVideo.isNotEmpty;
+
     if (galleryVideo.isNotEmpty) {
-      await Future.forEach(galleryVideo, (GalleryVideo videoInformation) async {
-        if (videoInformation.src is String &&
-            videoInformation.src!.isNotEmpty) {
-          var regExp = RegExp(
-            r"^((https?):\/\/)?(www.)?vimeo\.com\/([0-9]+).*$",
-            caseSensitive: false,
-            multiLine: false,
-          );
+      await Future.forEach(
+        galleryVideo,
+        (GalleryVideo videoInformation) async {
+          if (videoInformation.src is String &&
+              videoInformation.src!.isNotEmpty) {
+            var regExp = RegExp(
+              r"^((https?):\/\/)?(www.)?vimeo\.com\/([0-9]+).*$",
+              caseSensitive: false,
+              multiLine: false,
+            );
 
-          final match = regExp.firstMatch(videoInformation.src!);
-          if (match != null && match.groupCount >= 1) {
-            final url = videoInformation.src!.trim();
-            var vimeoVideoId = '';
-            var videoIdGroup = 4;
-            var vimeoMp4Video = '';
+            final match = regExp.firstMatch(videoInformation.src!);
+            if (match != null && match.groupCount >= 1) {
+              final url = videoInformation.src!.trim();
+              var vimeoVideoId = '';
+              var videoIdGroup = 4;
+              var vimeoMp4Video = '';
 
-            for (var exp in [
-              RegExp(r"^((https?):\/\/)?(www.)?vimeo\.com\/([0-9]+).*$"),
-            ]) {
-              RegExpMatch? match = exp.firstMatch(url);
-              if (match != null && match.groupCount >= 1) {
-                vimeoVideoId = match.group(videoIdGroup) ?? '';
+              for (var exp in [
+                RegExp(r"^((https?):\/\/)?(www.)?vimeo\.com\/([0-9]+).*$"),
+              ]) {
+                RegExpMatch? match = exp.firstMatch(url);
+                if (match != null && match.groupCount >= 1) {
+                  vimeoVideoId = match.group(videoIdGroup) ?? '';
+                }
               }
-            }
 
-            final response = await productRepositoryInterface
-                .vimeoVideoConfigFromUrl(vimeoVideoId: vimeoVideoId);
+              final response = await productRepositoryInterface
+                  .vimeoVideoConfigFromUrl(vimeoVideoId: vimeoVideoId);
 
-            if (response is http.Response) {
-              if (response.statusCode == 200) {
-                final decodeResponse = jsonDecode(response.body);
-                final vimeoVideo = VimeoVideoConfig.fromMap(decodeResponse);
-                vimeoMp4Video =
-                    vimeoVideo.request?.files?.progressive![0].url ?? '';
-
-                copyGalleryVideo.add(
-                  VimeoVideoPlayer(
-                    url: vimeoMp4Video,
-                    defaultImage: videoInformation.thumb!,
-                  ),
-                );
+              if (response is String) {
+                if (kDebugMode) {
+                  print(response);
+                }
               }
-            } else if (response is String) {
-              if (kDebugMode) {
-                print(response);
+
+              if (response is http.Response) {
+                if (response.statusCode == 200) {
+                  final decodeResponse = jsonDecode(response.body);
+                  final vimeoVideo = VimeoVideoConfig.fromMap(decodeResponse);
+                  vimeoMp4Video =
+                      vimeoVideo.request?.files?.progressive![0].url ?? '';
+
+                  copyGalleryVideo.add(
+                    VimeoVideoPlayer(
+                      url: vimeoMp4Video,
+                      defaultImage: videoInformation.thumb!,
+                    ),
+                  );
+                }
               }
             }
           }
-        }
-      });
+        },
+      );
 
       if (headerContent.isNotEmpty && copyGalleryVideo.isNotEmpty) {
         headerContent = [...copyGalleryVideo, ...headerContent];
       } else {
         headerContent.addAll(copyGalleryVideo);
       }
-
-      isLoadingPage = false;
-      showSwiperPagination.value = galleryVideo.isNotEmpty;
-      notifyListeners();
     }
   }
 
@@ -643,6 +629,7 @@ class ProductBloc extends ChangeNotifier {
         reverseTransitionDuration: const Duration(milliseconds: 600),
         barrierDismissible: false,
         opaque: true,
+        //barrierColor: Colors.white,
         transitionsBuilder: (
           BuildContext context,
           Animation<double> animation,

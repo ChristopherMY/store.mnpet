@@ -121,7 +121,7 @@ class CartService implements CartRepositoryInterface {
 
     try {
       return await http.put(
-        Uri.parse("$_url/api/v1/shopping_cart/set_quantity"),
+        Uri.parse("$_url/api/v1/shopping_cart/quantity"),
         headers: headers,
         body: body,
       );

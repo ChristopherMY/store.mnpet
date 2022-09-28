@@ -29,4 +29,10 @@ abstract class ProductRepositoryInterface {
 
   // VimeoVideoConfig
   Future<dynamic> vimeoVideoConfigFromUrl({required String vimeoVideoId});
+
+  Future<dynamic> getSearchProductDetails(
+      {required Map<String, dynamic> bindings});
+
+  Future<dynamic> getFiltersProductDetails(
+      {required Map<String, dynamic> bindings});
 }

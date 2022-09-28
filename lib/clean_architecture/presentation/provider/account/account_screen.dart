@@ -1,5 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -289,32 +289,40 @@ class HeaderInformation extends StatelessWidget {
                   width: 70.0,
                   height: 70.0,
                   child: accountActive
-                      ? CachedNetworkImage(
-                          imageUrl:
-                              mainBloc.informationUser.image!.src.toString(),
-                          imageBuilder: (context, imageProvider) => Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(35.0),
-                              image: DecorationImage(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          placeholder: (context, url) => Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              borderRadius: BorderRadius.circular(35.0),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(
-                            // FontAwesomeIcons.circleUser,0
-                            CupertinoIcons.person_circle,
-                            // Icons.account_circle_outlined,
-                            size: 70.0,
-                            color: kPrimaryColor,
-                          ),
+                      ? ExtendedImage.network(
+                          mainBloc.informationUser.image!.src!,
+                          fit: BoxFit.fill,
+                          cache: true,
+                          timeLimit: const Duration(seconds: 10),
+                          enableMemoryCache: true,
+                          enableLoadState: false,
                         )
+                      // CachedNetworkImage(
+                      //         imageUrl:
+                      //             mainBloc.informationUser.image!.src.toString(),
+                      //         imageBuilder: (context, imageProvider) => Container(
+                      //           decoration: BoxDecoration(
+                      //             borderRadius: BorderRadius.circular(35.0),
+                      //             image: DecorationImage(
+                      //               image: imageProvider,
+                      //               fit: BoxFit.cover,
+                      //             ),
+                      //           ),
+                      //         ),
+                      //         placeholder: (context, url) => Container(
+                      //           decoration: BoxDecoration(
+                      //             shape: BoxShape.rectangle,
+                      //             borderRadius: BorderRadius.circular(35.0),
+                      //           ),
+                      //         ),
+                      //         errorWidget: (context, url, error) => const Icon(
+                      //           // FontAwesomeIcons.circleUser,0
+                      //           CupertinoIcons.person_circle,
+                      //           // Icons.account_circle_outlined,
+                      //           size: 70.0,
+                      //           color: kPrimaryColor,
+                      //         ),
+                      //       )
                       : const Icon(
                           CupertinoIcons.person_circle,
                           size: 70.0,
