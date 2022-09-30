@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ValueListenableBuilder(
                   valueListenable: homeBloc.categoriesList,
                   builder: (context, List<MasterCategory> categories, child) {
-                    return CategoriesList(
+                    return Categories(
                       categories: categories,
                       status: LoadStatus.normal,
                     );

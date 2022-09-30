@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/model/keyword.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 
 class SearchKeywordBloc extends ChangeNotifier {
@@ -47,7 +48,7 @@ class SearchKeywordBloc extends ChangeNotifier {
             return SearchDetailScreen.init(
               context: context,
               search: searchText,
-              isSearch: true,
+              typeFilter: TypeFilter.search,
             );
           },
         ),

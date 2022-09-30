@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/keyword.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_keyword/search_keyword_bloc.dart';
@@ -70,10 +71,9 @@ class SearchKeywordScreen extends StatelessWidget {
                               builder: (context) {
                                 return SearchDetailScreen.init(
                                   context: context,
-                                  search: "",
-                                  // keywords: [value[index].slug!],
                                   keywords: value[index],
-                                  isSearch: false,
+                                  typeFilter: TypeFilter.keyword,
+                                  search: "",
                                 );
                               },
                             ),

@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/category.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/keyword.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/components/search_detail_filter.dart';
@@ -18,32 +20,42 @@ import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sli
 class SearchDetailScreen extends StatefulWidget {
   const SearchDetailScreen._({
     Key? key,
+    required this.typeFilter,
     this.search,
-    this.keywords,
-    required this.isSearch,
+    this.keyword,
+    this.category,
   }) : super(key: key);
 
   final String? search;
-  final Keyword? keywords;
-  final bool isSearch;
+  final Keyword? keyword;
+  final TypeFilter typeFilter;
+  final MasterCategory? category;
 
   static Widget init({
     required BuildContext context,
+    required TypeFilter typeFilter,
     String? search,
     Keyword? keywords,
-    required bool isSearch,
+    MasterCategory? category,
   }) {
+    print("typeFilter: $typeFilter");
     return ChangeNotifierProvider<SearchDetailBloc>(
-      create: (context) => SearchDetailBloc(
+      create: (context) =>
+      SearchDetailBloc(
         productRepositoryInterface: context.read<ProductRepositoryInterface>(),
       )
-        ..bindingSearch.keywords = isSearch ? [] : [keywords!.slug!]
-        ..bindingSearch.search = search!,
-      builder: (_, __) => SearchDetailScreen._(
-        isSearch: isSearch,
-        keywords: keywords,
-        search: search,
-      ),
+        ..bindingSearch.keywords =
+        typeFilter == TypeFilter.keyword ? [keywords!.slug!] : []
+        ..bindingSearch.search = typeFilter == TypeFilter.search ? search! : ""
+        ..bindingSearch.categories =
+        typeFilter == TypeFilter.category ? [category!.slug!] : [],
+      builder: (_, __) =>
+          SearchDetailScreen._(
+            typeFilter: typeFilter,
+            keyword: keywords,
+            search: search,
+            category: category,
+          ),
     );
   }
 
@@ -70,7 +82,7 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final searchDetailBloc = context.watch<SearchDetailBloc>();
-
+    print(widget.typeFilter);
     return SafeArea(
       child: LoaderOverlay(
         child: Scaffold(
@@ -89,7 +101,12 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   statusBarIconBrightness: Brightness.dark,
                 ),
                 title: Text(
-                  widget.isSearch ? widget.search! : widget.keywords!.name!,
+                  widget.typeFilter == TypeFilter.search
+                      ? widget.search!
+                      : (widget.typeFilter == TypeFilter.category
+                      ? widget.category!.name!
+                      : widget.keyword!.name!),
+
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -158,7 +175,7 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                                 },
                                 child: Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: const <Widget>[
                                     Icon(Icons.import_export),
                                     Text("Ordenar"),
@@ -176,6 +193,7 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                             ],
                           ),
                         ),
+
                       )
                     ],
                   ),

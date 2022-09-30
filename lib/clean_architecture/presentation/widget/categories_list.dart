@@ -2,16 +2,18 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/category.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
-class CategoriesList extends StatelessWidget {
+class Categories extends StatelessWidget {
   final List<MasterCategory> categories;
   final LoadStatus status;
   final _cloudFront = Environment.CLOUD_FRONT;
 
-  const CategoriesList({
+  const Categories({
     Key? key,
     required this.categories,
     required this.status,
@@ -25,7 +27,9 @@ class CategoriesList extends StatelessWidget {
         color: kPrimaryColor,
         child: Padding(
           padding: EdgeInsets.symmetric(
-              vertical: getProportionateScreenHeight(15.0), horizontal: 15.0),
+            vertical: getProportionateScreenHeight(15.0),
+            horizontal: 15.0,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -47,19 +51,21 @@ class CategoriesList extends StatelessWidget {
                     spacing: getProportionateScreenWidth(12.0),
                     runSpacing: getProportionateScreenWidth(8.0),
                     children: categories.map(
-                      (element) {
+                      (MasterCategory element) {
                         return GestureDetector(
                           onTap: () {
-                            //       Navigator.of(context).push(
-                            //   MaterialPageRoute(
-                            //     builder: (context) => MainProductList(
-                            //       categorySlug: element.slug,
-                            //       title: element.name,
-                            //       keywordSlug: "",
-                            //       relations: element.relations,
-                            //     ),
-                            //   ),
-                            // );
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) {
+                                  return SearchDetailScreen.init(
+                                    context: context,
+                                    typeFilter: TypeFilter.category,
+                                    category: element,
+                                    search: "",
+                                  );
+                                },
+                              ),
+                            );
                           },
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
@@ -71,11 +77,11 @@ class CategoriesList extends StatelessWidget {
                                     getProportionateScreenWidth(5.0),
                                   ),
                                   decoration: BoxDecoration(
-                                    color:
-                                        Color(int.parse("0xFF${element.hexa}")),
-                                    shape: BoxShape.rectangle,
-                                    borderRadius: BorderRadius.circular(15.0)
-                                  ),
+                                      color: Color(
+                                          int.parse("0xFF${element.hexa}")),
+                                      shape: BoxShape.rectangle,
+                                      borderRadius:
+                                          BorderRadius.circular(15.0)),
                                   child: _buildImage(
                                     src: element.image!.src!,
                                   ),
