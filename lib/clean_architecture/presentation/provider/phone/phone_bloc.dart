@@ -63,7 +63,7 @@ class PhoneBloc extends ChangeNotifier {
       removeError(error: kPhoneNumberNullError);
     }
 
-    if(value.length == 9){
+    if (value.length == 9) {
       removeError(error: kPhoneNumberLostNullError);
     }
 
@@ -76,7 +76,7 @@ class PhoneBloc extends ChangeNotifier {
       return "";
     }
 
-    if(value.length < 9){
+    if (value.length < 9) {
       addError(error: kPhoneNumberLostNullError);
       return "";
     }
@@ -138,7 +138,6 @@ class PhoneBloc extends ChangeNotifier {
     return false;
   }
 
-
   Future<dynamic> onSave({required Map<String, String> headers}) async {
     if (isUpdate) {
       final response = await userRepositoryInterface.updateUserPhone(
@@ -178,4 +177,5 @@ class PhoneBloc extends ChangeNotifier {
 
     return false;
   }
+
 }

@@ -232,13 +232,16 @@ class SearchDetailBloc extends ChangeNotifier {
   void onSubmittedSearchAttr(String? value) {}
 
   void onApplyFilters() async {
-    bindingSearch.attributesTerm = attributes.value
-        .map(
-          (e) => e.termsSelected!.map((e) => e.slug!).toList(),
-        )
-        .toList()
-        .cast()
-        .first;
+    final existsAttributes = attributes.value.isNotEmpty;
+    if (existsAttributes) {
+      bindingSearch.attributesTerm = attributes.value
+          .map(
+            (e) => e.termsSelected!.map((e) => e.slug!).toList(),
+          )
+          .toList()
+          .cast()
+          .first;
+    }
 
     bindingSearch.categories = category.value
         .where((element) => element.checked == true)

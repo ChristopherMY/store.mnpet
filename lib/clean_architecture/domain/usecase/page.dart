@@ -9,3 +9,11 @@ enum ShoppingCart { active, inactive }
 enum Home { active, inactive }
 
 enum TypeFilter {category, keyword, search}
+
+enum CardType {
+  otherBrand,
+  mastercard,
+  visa,
+  americanExpress,
+  discover,
+}

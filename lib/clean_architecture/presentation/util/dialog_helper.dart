@@ -1165,7 +1165,7 @@ class DialogHelper {
                                               await mainBloc
                                                   .getUserInformation();
 
-                                          if (responseUserInformation) {
+                                          if (responseUserInformation is UserInformation) {
                                             mainBloc.informationUser =
                                                 responseUserInformation;
                                             mainBloc.refreshMainBloc();
@@ -1233,6 +1233,7 @@ class DialogHelper {
             builder: (__, controller) {
               final phoneBloc = Provider.of<PhoneBloc>(__);
               final mainBloc = Provider.of<MainBloc>(__);
+
               return Container(
                 height: SizeConfig.screenHeight,
                 margin: const EdgeInsets.only(top: 50.0),
@@ -1363,14 +1364,13 @@ class DialogHelper {
                                       final responseUserInformation =
                                           await mainBloc.getUserInformation();
 
-                                      if (responseUserInformation) {
-                                        mainBloc.informationUser =
-                                            responseUserInformation;
+                                      if (responseUserInformation is UserInformation) {
+                                        mainBloc.informationUser = responseUserInformation;
                                         mainBloc.refreshMainBloc();
+
                                         context.loaderOverlay.hide();
 
-                                        await GlobalSnackBar
-                                            .showInfoSnackBarIcon(
+                                        await GlobalSnackBar.showInfoSnackBarIcon(
                                           context,
                                           response.message,
                                         );
@@ -1416,10 +1416,12 @@ class DialogHelper {
                                               await mainBloc
                                                   .getUserInformation();
 
-                                          if (responseUserInformation) {
+                                          if (responseUserInformation
+                                              is UserInformation) {
                                             mainBloc.informationUser =
                                                 responseUserInformation;
                                             mainBloc.refreshMainBloc();
+
                                             context.loaderOverlay.hide();
 
                                             if (response.status == "success") {

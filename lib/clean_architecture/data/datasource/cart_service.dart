@@ -24,7 +24,7 @@ class CartService implements CartRepositoryInterface {
     final body = json.encode(binding);
     try {
       final res = await http.delete(
-        Uri.parse("$_url/api/v1/shopping_cart/item"),
+        Uri.parse("$_url/api/v1/cart/item"),
         headers: headers,
         body: body,
       );
@@ -46,7 +46,7 @@ class CartService implements CartRepositoryInterface {
   }) async {
     try {
       return await http.get(
-        Uri.parse("$_url/api/v1/shopping_cart?&district_id=$districtId"),
+        Uri.parse("$_url/api/v1/cart?&district_id=$districtId"),
         headers: headers,
       );
     } on Exception catch (e) {
@@ -65,7 +65,7 @@ class CartService implements CartRepositoryInterface {
   }) async {
     try {
       return await http.put(
-        Uri.parse("$_url/api/v1/shopping_cart"),
+        Uri.parse("$_url/api/v1/cart"),
         headers: headers,
         body: json.encode(cart),
       );
@@ -90,7 +90,7 @@ class CartService implements CartRepositoryInterface {
 
     try {
       return await http.put(
-        Uri.parse("$_url/api/v1/shopping_cart/move"),
+        Uri.parse("$_url/api/v1/cart/move"),
         headers: headers,
         body: body,
       );
@@ -121,7 +121,7 @@ class CartService implements CartRepositoryInterface {
 
     try {
       return await http.put(
-        Uri.parse("$_url/api/v1/shopping_cart/quantity"),
+        Uri.parse("$_url/api/v1/cart/quantity"),
         headers: headers,
         body: body,
       );
@@ -150,7 +150,7 @@ class CartService implements CartRepositoryInterface {
     final body = json.encode(binding);
     try {
       final res = await http.delete(
-        Uri.parse("$_url/api/v1/temp_cart/item"),
+        Uri.parse("$_url/api/v1/cart/temporal/item"),
         headers: headers,
         body: body,
       );
@@ -173,9 +173,10 @@ class CartService implements CartRepositoryInterface {
   }) async {
     try {
       return await http.post(
-          Uri.parse("$_url/api/v1/temp_cart?&district_id=$districtId"),
-          headers: headers,
-          body: jsonEncode(bodyParams));
+        Uri.parse("$_url/api/v1/cart/temporal?&district_id=$districtId"),
+        headers: headers,
+        body: jsonEncode(bodyParams),
+      );
     } on Exception catch (e) {
       if (kDebugMode) {
         print(e);
@@ -191,7 +192,7 @@ class CartService implements CartRepositoryInterface {
   }) async {
     try {
       return await http.put(
-        Uri.parse("$_url/api/v1/temp_cart"),
+        Uri.parse("$_url/api/v1/cart/temporal"),
         headers: headers,
         body: json.encode(cart),
       );
@@ -223,16 +224,18 @@ class CartService implements CartRepositoryInterface {
 
     try {
       return await http.post(
-        Uri.parse("$_url/api/v1/temp_cart/quantity"),
+        Uri.parse("$_url/api/v1/cart/temporal/quantity"),
         headers: headers,
-          body: body,
-        );
-      } on Exception catch (e) {
-        if (kDebugMode) {
+        body: body,
+      );
+    } on Exception catch (e) {
+      if (kDebugMode) {
         print(e);
       }
 
       return e.toString();
     }
   }
+
+
 }

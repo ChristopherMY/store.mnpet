@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/order.dart'
-    as order;
+import 'package:store_mundo_pet/clean_architecture/domain/model/order.dart' as order;
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
@@ -21,7 +20,8 @@ class UserService implements UserRepositoryInterface {
     try {
       return await http.put(
         Uri.parse(
-          "$_url/api/v1/ecommerce_users/addresses/main?address_id=$addressId",
+          "$_url/api/v1/users/ecommerce"
+              "/addresses/main?address_id=$addressId",
         ),
         headers: headers,
       );
@@ -44,7 +44,7 @@ class UserService implements UserRepositoryInterface {
       String bodyParams = addressToMap(address);
 
       return await http.post(
-        Uri.parse("$_url/api/v1/ecommerce_users/addresses"),
+        Uri.parse("$_url/api/v1/users/ecommerce/addresses"),
         headers: headers,
         body: bodyParams,
       );
@@ -65,7 +65,7 @@ class UserService implements UserRepositoryInterface {
     try {
       return await http.delete(
         Uri.parse(
-          "$_url/api/v1/ecommerce_users/addresses?address_id=$addressId",
+          "$_url/api/v1/users/ecommerce/addresses?address_id=$addressId",
         ),
         headers: headers,
       );
@@ -73,6 +73,7 @@ class UserService implements UserRepositoryInterface {
       if (kDebugMode) {
         print(e);
       }
+
       return e.toString();
     }
   }
@@ -81,7 +82,7 @@ class UserService implements UserRepositoryInterface {
   @override
   Future<dynamic> getAddressMain() async {
     final res = await http.get(
-        Uri.parse("$_url/api/v1/ecommerce_users/addresses/main"),
+        Uri.parse("$_url/api/v1/users/ecommerce/addresses/main"),
         headers: headers);
     try {
       if (res.statusCode == 200) {
@@ -105,7 +106,7 @@ class UserService implements UserRepositoryInterface {
       {required Map<String, String> headers}) async {
     try {
       return await http.get(
-        Uri.parse("$_url/api/v1/ecommerce_users/user"),
+        Uri.parse("$_url/api/v1/users/ecommerce/user"),
         headers: headers,
       );
     } catch (e) {
@@ -126,8 +127,10 @@ class UserService implements UserRepositoryInterface {
         headers: headers,
       );
 
-      if (res.statusCode == 200)
+      if (res.statusCode == 200){
+
         return order.Order.fromMap(jsonDecode(res.body));
+      }
 
       return null;
     } catch (e) {
@@ -198,7 +201,7 @@ class UserService implements UserRepositoryInterface {
 
       final response = await http.put(
         Uri.parse(
-          "$_url/api/v1/ecommerce_users/addresses?address_id=${address.id}",
+          "$_url/api/v1/users/ecommerce/addresses?address_id=${address.id}",
         ),
         headers: headers,
         body: bodyParams,
@@ -221,7 +224,7 @@ class UserService implements UserRepositoryInterface {
     try {
       return await http.put(
         Uri.parse(
-          "$_url/api/v1/ecommerce_users/phones/main?phone_id=$phoneId",
+          "$_url/api/v1/users/ecommerce/phones/main?phone_id=$phoneId",
         ),
         headers: headers,
       );
@@ -243,7 +246,7 @@ class UserService implements UserRepositoryInterface {
       String bodyParams = phoneToMap(phone);
 
       return await http.post(
-        Uri.parse("$_url/api/v1/ecommerce_users/phones"),
+        Uri.parse("$_url/api/v1/users/ecommerce/phones"),
         headers: headers,
         body: bodyParams,
       );
@@ -262,7 +265,7 @@ class UserService implements UserRepositoryInterface {
     try {
       return await http.delete(
         Uri.parse(
-          "$_url/api/v1/ecommerce_users/phones?phone_id=$phoneId",
+          "$_url/api/v1/users/ecommerce/phones?phone_id=$phoneId",
         ),
         headers: headers,
       );
@@ -284,7 +287,7 @@ class UserService implements UserRepositoryInterface {
 
       return await http.put(
         Uri.parse(
-          "$_url/api/v1/ecommerce_users/phones?phone_id=${phone.id}",
+          "$_url/api/v1/users/ecommerce/phones?phone_id=${phone.id}",
         ),
         headers: headers,
         body: bodyParams,

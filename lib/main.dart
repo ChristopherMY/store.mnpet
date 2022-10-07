@@ -133,9 +133,13 @@ class MyApp extends StatelessWidget {
                             headline5: const TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 12,
+                              fontFamily: ''
                             ),
                           )
-                          .apply(bodyColor: Colors.black, fontFamily: 'roboto'),
+                          .apply(
+                            bodyColor: Colors.black,
+                             fontFamily: 'Roboto',
+                          ),
                     ),
                     home: MainScreen.init(context),
                   );
