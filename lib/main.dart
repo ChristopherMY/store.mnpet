@@ -7,6 +7,7 @@ import 'package:store_mundo_pet/clean_architecture/data/datasource/cart_service.
 import 'package:store_mundo_pet/clean_architecture/data/datasource/hive_service.dart';
 import 'package:store_mundo_pet/clean_architecture/data/datasource/home_service.dart';
 import 'package:store_mundo_pet/clean_architecture/data/datasource/local_service.dart';
+import 'package:store_mundo_pet/clean_architecture/data/datasource/payment_service.dart';
 import 'package:store_mundo_pet/clean_architecture/data/datasource/product_service.dart';
 import 'package:store_mundo_pet/clean_architecture/data/datasource/user_service.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
@@ -14,6 +15,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_reposi
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
@@ -51,6 +53,8 @@ class MyApp extends StatelessWidget {
         ),
         Provider<AuthRepositoryInterface>(
           create: (context) => AuthService(),
+        ),Provider<PaymentRepository>(
+          create: (context) => PaymentService(),
         ),
       ],
       builder: (context, child) {

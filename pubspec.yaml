@@ -94,16 +94,13 @@ flutter:
   assets:
     - assets/
     - assets/font/
-    - assets/menu/
     - assets/icons/
     - assets/icons/svg/
     - assets/icons/other/
     - assets/images/
     - assets/lottie/
     - assets/player/
-    - assets/banners/
     - assets/response/
-    - assets/presentation/
     - assets/banks/
 
   # An image asset can refer to one or more resolution-specific "variants", see

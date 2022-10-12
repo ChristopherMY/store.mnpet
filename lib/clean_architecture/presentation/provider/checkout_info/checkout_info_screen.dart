@@ -1,12 +1,18 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
@@ -35,9 +41,11 @@ class CheckoutInfoScreen extends StatefulWidget {
 
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider<CartBloc>.value(
-      value: context.read<CartBloc>(),
+      value: Provider.of<CartBloc>(context, listen: false),
       child: ChangeNotifierProvider<CheckOutInfoBloc>(
-        create: (context) => CheckOutInfoBloc(paymentRepository: context.read<PaymentRepository>()),
+        create: (context) => CheckOutInfoBloc(
+            paymentRepository: context.read<PaymentRepository>())
+          ..getIdentificationTypes(),
         builder: (_, __) => const CheckoutInfoScreen._(),
       ),
     );
@@ -290,6 +298,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
             color: Colors.white,
             colorText: Colors.black,
             press: () async {
+
               dynamic existsDefaultAddress;
               dynamic existsDefaultPhone;
 
@@ -334,8 +343,94 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                       );
                     }
                     break;
-                  case 1: {
-                       checkoutInfoBloc.handlePayment(identificationNumber: userInfo.document!.value!);
+                  case 1:
+                    {
+
+                      if (mainBloc.informationCart.value is Cart) {
+                        final response = await checkoutInfoBloc.handlePayment(
+                          cartInformation: mainBloc.informationCart.value,
+                          userInformation: mainBloc.informationUser,
+                          // identificationNumber: userInfo.document!.value!,
+                          // amount: double.parse(cart.total!),
+                        );
+
+                        if (response is! http.Response) {
+                          if (kDebugMode) {
+                            print("response  NO PERTENECE A http.Response");
+                          }
+
+                          return;
+                        }
+                        if (response is String) {
+                          if (kDebugMode) {
+                            print(response);
+                          }
+
+                          return;
+                        }
+
+                        final decode = json.decode(response.body);
+
+                        if (!mounted) return;
+
+                        if (response.statusCode == 501) {
+                          print("data Error");
+                          print(response);
+
+
+                          if (decode['error']['status'] == 400) {
+                            final errorText = checkoutInfoBloc.badRequestProcess(response);
+
+
+                            GlobalSnackBar.showErrorSnackBarIcon(context, errorText);
+                            return;
+                          }
+
+                          if(checkoutInfoBloc.installmentsDetail is! MercadoPagoPaymentMethodInstallments){
+
+                            GlobalSnackBar.showWarningSnackBar(context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+                            return;
+                          }
+
+                          final errorText = checkoutInfoBloc.badTokenProcess(
+                            status: decode['status'],
+                            installments: checkoutInfoBloc.installmentsDetail,
+                          );
+
+                          GlobalSnackBar.showErrorSnackBarIcon(context, errorText);
+
+                          print("PROBLEMAS AL REALIZAR EL PAGO ERROR CODE: ${response.statusCode}");
+
+                          return;
+                        }
+
+                        if (response.statusCode != 201) {
+                          if (kDebugMode) {
+                            print(
+                                "response.statusCode status code fail is != 201 and contain ${response.statusCode}");
+                          }
+
+                          return;
+                        }
+
+                        MercadoPagoPayment infoPayment =
+                            MercadoPagoPayment.fromJsonMap(decode);
+
+
+                        print("!!!!!!!!Pagooooo!!!!!!!!!!");
+
+                        // Navigator.pushAndRemoveUntil(
+                        //   context,
+                        //    PageTransition(
+                        //     type: PageTransitionType.fade,
+                        //     child:  ConfirmationTransferScreen(
+                        //       isSuccess: info.statusDetail == "accredited",
+                        //     ),
+                        //   ),
+                        //       (route) => false,
+                        // );
+
+                      }
                     }
                     break;
                   default:

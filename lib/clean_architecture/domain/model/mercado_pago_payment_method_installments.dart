@@ -21,13 +21,13 @@ class MercadoPagoPaymentMethodInstallments {
   MercadoPagoPaymentMethodInstallments();
 
   MercadoPagoPaymentMethodInstallments.fromJsonList(List<dynamic> jsonList) {
-    if (jsonList == null) {
+    if (jsonList.isEmpty) {
       return;
     }
-    jsonList.forEach((item) {
+    for (var item in jsonList) {
       final chat = MercadoPagoPaymentMethodInstallments.fromJsonMap(item);
       installmentList!.add(chat);
-    });
+    }
   }
 
   MercadoPagoPaymentMethodInstallments.fromJsonMap(Map<String, dynamic> json) {

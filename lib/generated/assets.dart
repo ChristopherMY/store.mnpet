@@ -2,8 +2,6 @@
 class Assets {
   Assets._();
 
-  static const String assetsDiscover = 'assets/discover.png';
-  static const String assetsMastercard = 'assets/mastercard.png';
   static const String assetsNavCart = 'assets/nav_cart.png';
   static const String assetsNavHome = 'assets/nav_home.png';
   static const String assetsNavUser = 'assets/nav_user.png';
@@ -13,11 +11,10 @@ class Assets {
   static const String assetsPx-mn-pet-default-rosa = 'assets/px-mn-pet-default-rosa.png';
   static const String assetsPx-mn-white = 'assets/px-mn-white.png';
   static const String assetsPx-mt-pet-rosa = 'assets/px-mt-pet-rosa.png';
-  static const String assetsVisa = 'assets/visa.png';
-  static const String assetsVisa2 = 'assets/visa2.png';
-  static const String bannersBanner-scaled = 'assets/banners/banner-scaled.jpg';
-  static const String bannersBanner-web-1 = 'assets/banners/banner-web-1.jpg';
-  static const String bannersBanner-web-scaled = 'assets/banners/banner-web-scaled.jpg';
+  static const String banksChip = 'assets/banks/chip.png';
+  static const String banksDiscover = 'assets/banks/discover.png';
+  static const String banksMastercard = 'assets/banks/mastercard.png';
+  static const String banksVisa = 'assets/banks/visa.png';
   static const String fontArial-Bold = 'assets/font/Arial-Bold.ttf';
   static const String fontArial-Light = 'assets/font/Arial-Light.ttf';
   static const String fontArial-Regular = 'assets/font/Arial-Regular.ttf';
@@ -27,9 +24,6 @@ class Assets {
   static const String fontOpenSans-Light = 'assets/font/OpenSans-Light.ttf';
   static const String fontOpenSans-Regular = 'assets/font/OpenSans-Regular.ttf';
   static const String fontOpenSans-SemiBold = 'assets/font/OpenSans-SemiBold.ttf';
-  static const String fontPoppins-Bold = 'assets/font/Poppins-Bold.ttf';
-  static const String fontPoppins-Light = 'assets/font/Poppins-Light.ttf';
-  static const String fontPoppins-Regular = 'assets/font/Poppins-Regular.ttf';
   static const String iconsAdvertencia = 'assets/icons/advertencia.png';
   static const String iconsFacebook-2 = 'assets/icons/facebook-2.svg';
   static const String iconsGoogle-icon = 'assets/icons/google-icon.svg';
@@ -51,17 +45,6 @@ class Assets {
   static const String lottieSearchingImage = 'assets/lottie/searching_image.json';
   static const String lottieShake-a-empty-box = 'assets/lottie/shake-a-empty-box.json';
   static const String lottieShopping-cart = 'assets/lottie/shopping-cart.json';
-  static const String menuArenero = 'assets/menu/arenero.png';
-  static const String menuCepillo-para-mascotas = 'assets/menu/cepillo-para-mascotas.png';
-  static const String menuCollar-de-perro = 'assets/menu/collar-de-perro.png';
-  static const String menuComedero-para-mascotas = 'assets/menu/comedero-para-mascotas.png';
-  static const String menuGato = 'assets/menu/gato.png';
-  static const String menuGatoV2 = 'assets/menu/gato_v2.png';
-  static const String menuGuante-de-aseo = 'assets/menu/guante-de-aseo.png';
-  static const String menuJuguete-para-mascotas = 'assets/menu/juguete-para-mascotas.png';
-  static const String menuManta = 'assets/menu/manta.png';
-  static const String menuMochila = 'assets/menu/mochila.png';
-  static const String menuPerro = 'assets/menu/perro.png';
   static const String otherAnswer = 'assets/icons/other/answer.png';
   static const String otherAskQuestion = 'assets/icons/other/ask_question.png';
   static const String otherMarcador-de-posicion = 'assets/icons/other/marcador-de-posicion.png';
@@ -70,12 +53,6 @@ class Assets {
   static const String playerPause = 'assets/player/pause.png';
   static const String playerPlay = 'assets/player/play.png';
   static const String playerReplay = 'assets/player/replay.png';
-  static const String presentationPresentation1 = 'assets/presentation/presentation_1.png';
-  static const String presentationPresentation2 = 'assets/presentation/presentation_2.png';
-  static const String presentationPresentation3 = 'assets/presentation/presentation_3.png';
-  static const String presentationPresentation4 = 'assets/presentation/presentation_4.png';
-  static const String presentationPresentation5 = 'assets/presentation/presentation_5.png';
-  static const String presentationRedes = 'assets/presentation/redes.png';
   static const String responseError = 'assets/response/error.png';
   static const String responseSuccess = 'assets/response/success.png';
   static const String svgImage = 'assets/icons/svg/image.svg';

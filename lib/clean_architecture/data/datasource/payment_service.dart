@@ -1,9 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_document_type.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/payment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
@@ -26,9 +25,7 @@ class PaymentService implements PaymentRepository {
     required String cardHolderName,
   }) async {
     try {
-      final url = Uri.https(_urlMercadoPago, "/v1/card_tokens", {
-        'public_key': _mercadoPagoCredentials.publicKey,
-      });
+      final url = Uri.https(_urlMercadoPago, "/v1/card_tokens");
 
       final body = {
         "security_code": cvv,
@@ -43,9 +40,12 @@ class PaymentService implements PaymentRepository {
           'name': cardHolderName
         }
       };
-
-      // print("body");
-      // print(body);
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Custom-Origin": "app",
+        HttpHeaders.authorizationHeader:
+            "Bearer ${_mercadoPagoCredentials.accessToken}"
+      };
 
       return await http.post(url, body: json.encode(body), headers: headers);
     } catch (e) {
@@ -116,7 +116,7 @@ class PaymentService implements PaymentRepository {
 
   // List<MercadoPagoDocumentType>
   @override
-  Future getIdentificationTypes() async {
+  Future<dynamic> getIdentificationTypes() async {
     try {
       final url = Uri.https(
         _urlMercadoPago,
@@ -126,11 +126,7 @@ class PaymentService implements PaymentRepository {
         },
       );
 
-      final res = await http.get(url, headers: headers);
-      final data = json.decode(res.body);
-      final result = MercadoPagoDocumentType.fromJsonList(data);
-
-      return result.documentTypeList;
+      return await http.get(url, headers: headers);
     } catch (e) {
       return e.toString();
     }
@@ -143,18 +139,17 @@ class PaymentService implements PaymentRepository {
     required double amount,
   }) async {
     try {
-      final url =
-          Uri.https(_urlMercadoPago, "/v1/payment_methods/installments", {
-        'access_token': _mercadoPagoCredentials.accessToken,
-        'bin': bin,
-        'amount': amount.toString(),
-      });
+      final url = Uri.https(
+        _urlMercadoPago,
+        "/v1/payment_methods/installments",
+        {
+          'access_token': _mercadoPagoCredentials.accessToken,
+          'bin': bin,
+          'amount': amount.toString(),
+        },
+      );
 
-      final res = await http.get(url, headers: headers);
-      final data = json.decode(res.body);
-
-      final result = MercadoPagoPaymentMethodInstallments.fromJsonList(data);
-      return result.installmentList!.first;
+      return await http.get(url, headers: headers);
     } catch (e) {
       return e.toString();
     }

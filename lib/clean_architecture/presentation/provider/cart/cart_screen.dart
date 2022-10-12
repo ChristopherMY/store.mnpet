@@ -95,9 +95,9 @@ class _CartScreenState extends State<CartScreen> {
                   );
                 }
 
-                print("Reload Cart");
-                print(response);
-                print(mainBloc.shoppingCartId);
+                // print("Reload Cart");
+                // print(response);
+                // print(mainBloc.shoppingCartId);
 
                 if (response is Cart) {
                   print(response.toMap());
