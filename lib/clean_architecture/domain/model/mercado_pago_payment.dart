@@ -41,7 +41,7 @@ class MercadoPagoPayment{
   String? externalReference;
   double? transactionAmount;
   double? netAmount;
-  List<MercadoPagoTax>? taxes;
+   List<MercadoPagoTax>? taxes;
   double? transactionAmountRefunded;
   double? couponAmount;
   String? differentialPricingId;
@@ -114,7 +114,7 @@ class MercadoPagoPayment{
     externalReference         = json['external_reference'];
     transactionAmount         = (json['transaction_amount'] != null) ? double.parse(json['transaction_amount'].toString()) : 0;
     netAmount                 = (json['net_amount'] != null) ? double.parse(json['net_amount'].toString()) : 0;
-    taxes                     = json['taxes'] is MercadoPagoTax ? json['taxes'] : MercadoPagoTax.fromJsonList(json['taxes']).taxList;
+    // taxes                     = json['taxes'] is MercadoPagoTax ? json['taxes'] : MercadoPagoTax.fromJsonList(json['taxes']).taxList;
     transactionAmountRefunded = (json['transaction_amount_refunded'] != null) ? double.parse(json['transaction_amount_refunded'].toString()) : 0;
     couponAmount              = (json['coupon_amount'] != null) ? double.parse(json['coupon_amount'].toString()) : 0;
     differentialPricingId     = json['differential_princing_id'];

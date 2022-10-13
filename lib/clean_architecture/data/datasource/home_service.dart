@@ -28,7 +28,7 @@ class HomeService implements HomeRepositoryInterface {
     try {
       return await http.get(
         Uri.parse(
-          "$_url/api/v1/products/loadmore_scroll?skip=$initialRange&limit=$finalRange",
+          "$_url/api/v1/products/loadmore-scroll?skip=$initialRange&limit=$finalRange",
         ),
         headers: headers,
       );

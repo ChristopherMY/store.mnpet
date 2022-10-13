@@ -53,7 +53,8 @@ class MyApp extends StatelessWidget {
         ),
         Provider<AuthRepositoryInterface>(
           create: (context) => AuthService(),
-        ),Provider<PaymentRepository>(
+        ),
+        Provider<PaymentRepositoryInterface>(
           create: (context) => PaymentService(),
         ),
       ],
@@ -135,14 +136,13 @@ class MyApp extends StatelessWidget {
                               color: Colors.blueAccent,
                             ),
                             headline5: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 12,
-                              fontFamily: ''
-                            ),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 12,
+                                fontFamily: ''),
                           )
                           .apply(
                             bodyColor: Colors.black,
-                             fontFamily: 'Roboto',
+                            fontFamily: 'Roboto',
                           ),
                     ),
                     home: MainScreen.init(context),

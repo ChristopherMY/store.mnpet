@@ -7,7 +7,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/model/payment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 
-class PaymentService implements PaymentRepository {
+class PaymentService implements PaymentRepositoryInterface {
   final String _urlMercadoPago = "api.mercadopago.com";
   final _mercadoPagoCredentials = Environment.mercadoPagoCredentials;
   final _url = Environment.API_DAO;
@@ -56,43 +56,44 @@ class PaymentService implements PaymentRepository {
   // http.Response
   @override
   Future<dynamic> createPayment({
-    required String userId,
-    required String addressId,
-    required double shippingCost,
-    required double subTotal,
-    required String additionalInfoMessage, // Optional
-    required String companyName, // Optional
-    required Identification identification,
-    required String paymentTypeId,
-    // required String emailCustomer,
-    // required String identificationType,
-    // required String identificationNumber,
-    // required String firstNameCustomer,
-    // required String lastNameCustomer,
-    required double transactionAmount,
     required String cardToken,
     required int installments,
     required String paymentMethodId,
     required String issuerId,
+    required Map<String, String> headers,
+    // required String userId,
+    // required String addressId,
+    // required double shippingCost,
+    // required double subTotal,
+    required String companyName, // Optional
+    required String additionalInfoMessage, // Optional
+    // required Identification identification,
+    // required String paymentTypeId,
+    // @required String emailCustomer,
+    // @required String identificationType,
+    // @required String identificationNumber,
+    // @required String firstNameCustomer,
+    // @required String lastNameCustomer,
+    // required double transactionAmount,
   }) async {
     try {
-      final url = Uri.parse('$_url/api/v1/paidmarket/process_payment');
+      final url = Uri.parse('$_url/api/v1/checkout/process-payment/app');
 
       final body = Payment(
-        transactionAmount: transactionAmount,
+        token: cardToken,
         installments: installments,
         paymentMethodId: paymentMethodId,
-        token: cardToken,
         issuerId: issuerId,
+
         //paymentTypeId: paymentTypeId,
-        userId: userId,
-        addressId: addressId,
-        shippingCost: shippingCost,
-        subTotal: subTotal,
-        identification: identification,
-        additionalInfoMessage: additionalInfoMessage,
-        // Optional
-        companyName: companyName, // Optional
+        // userId: userId,
+        // addressId: addressId,
+        // shippingCost: shippingCost,
+        // subTotal: subTotal,
+        // transactionAmount: transactionAmount,
+        // identification: identification,
+        companyName: companyName,// Optional
+        additionalInfoMessage: additionalInfoMessage, // Optional
       );
 
       String bodyParams = paymentToMap(body);

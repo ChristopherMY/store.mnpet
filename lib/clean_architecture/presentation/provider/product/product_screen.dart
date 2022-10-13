@@ -45,7 +45,9 @@ class ProductScreen extends StatefulWidget {
         )
           ..isLoadingPage = true
           ..initProductState(
-              slug: product.slug!, galleryVideo: product.galleryVideo!);
+            slug: product.slug!,
+            galleryVideo: product.galleryVideo!,
+          );
       },
       builder: (context, child) => const ProductScreen._(),
     );

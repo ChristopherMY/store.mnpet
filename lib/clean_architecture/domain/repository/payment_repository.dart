@@ -1,6 +1,6 @@
 import 'package:store_mundo_pet/clean_architecture/domain/model/payment.dart';
 
-abstract class PaymentRepository {
+abstract class PaymentRepositoryInterface {
 
   // List<MercadoPagoDocumentType>
   Future<dynamic> getIdentificationTypes();
@@ -24,24 +24,25 @@ abstract class PaymentRepository {
 
   // http.Response
   Future<dynamic> createPayment({
-    required String userId,
-    required String addressId,
-    required double shippingCost,
-    required double subTotal,
-    required String additionalInfoMessage, // Optional
+    required String cardToken,
+    required int installments,
+    required String paymentMethodId,
+    required String issuerId,
+    required Map<String, String> headers,
+    // required String userId,
+    // required String addressId,
+    // required double shippingCost,
+    // required double subTotal,
     required String companyName, // Optional
-    required Identification identification,
-    required String paymentTypeId,
+    required String additionalInfoMessage, // Optional
+    // required Identification identification,
+    // required String paymentTypeId,
     // @required String emailCustomer,
     // @required String identificationType,
     // @required String identificationNumber,
     // @required String firstNameCustomer,
     // @required String lastNameCustomer,
-    required double transactionAmount,
-    required String cardToken,
-    required int installments,
-    required String paymentMethodId,
-    required String issuerId,
+    // required double transactionAmount,
   });
 
 

@@ -8,10 +8,10 @@ class MercadoPagoTax {
   MercadoPagoTax();
 
   MercadoPagoTax.fromJsonList( List<dynamic> jsonList  ){
-    if ( jsonList == null ) {
+    if ( jsonList.isEmpty ) {
       return;
     }
-    jsonList.forEach((item) {
+    for (var item in jsonList) {
       var tax;
       if (item is MercadoPagoTax) {
         tax = item;
@@ -21,7 +21,7 @@ class MercadoPagoTax {
       }
 
       taxList!.add(tax);
-    });
+    }
   }
 
   MercadoPagoTax.fromJsonMap( Map<String, dynamic> json ) {

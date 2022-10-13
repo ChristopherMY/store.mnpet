@@ -97,8 +97,10 @@ class MainBloc extends ChangeNotifier {
             return;
           }
         } else {
-          handleGetShoppingCart();
-          return;
+          if (informationCart.value is! Cart) {
+            handleGetShoppingCart();
+            return;
+          }
         }
       }
 
@@ -554,7 +556,7 @@ class MainBloc extends ChangeNotifier {
     );
   }
 
-  void handleGetShoppingCart() {
+  Future<void> handleGetShoppingCart() async {
     getShoppingCart(
       districtId: residence.districtId!,
       headers: headers,

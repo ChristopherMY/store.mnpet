@@ -119,7 +119,7 @@ class ProductService implements ProductRepositoryInterface {
 
       return await http.post(
         Uri.parse(
-          "$_url/api/v1/products/related_by_category?skip=$initialRange&limit=$finalRange",
+          "$_url/api/v1/products/related-by-category?skip=$initialRange&limit=$finalRange",
         ),
         headers: headers,
         body: json.encode(binding),

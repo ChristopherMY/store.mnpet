@@ -1,17 +1,20 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credit_card_model.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_card_token.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_document_type.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/payment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 
 class CheckOutInfoBloc extends ChangeNotifier {
   String cardNumber = '';
@@ -23,9 +26,13 @@ class CheckOutInfoBloc extends ChangeNotifier {
   int expirationMonth = 0;
   String expirationYear = "";
 
-  PaymentRepository paymentRepository;
+  HiveRepositoryInterface hiveRepositoryInterface;
+  PaymentRepositoryInterface paymentRepositoryInterface;
 
-  CheckOutInfoBloc({required this.paymentRepository});
+  CheckOutInfoBloc({
+    required this.hiveRepositoryInterface,
+    required this.paymentRepositoryInterface,
+  });
 
   final pageController = PageController();
 
@@ -39,6 +46,7 @@ class CheckOutInfoBloc extends ChangeNotifier {
   Future<dynamic> handlePayment({
     required Cart cartInformation,
     required UserInformation userInformation,
+    required BuildContext context,
   }) async {
     if (formKey.currentState!.validate()) {
       if (expiryDate.isEmpty) {
@@ -46,6 +54,7 @@ class CheckOutInfoBloc extends ChangeNotifier {
           print("expiryDate IS VOID");
         }
 
+        GlobalSnackBar.showWarningSnackBar(context, "Fecha de expiración vacía");
         return;
       }
 
@@ -56,6 +65,8 @@ class CheckOutInfoBloc extends ChangeNotifier {
           print("COMPLETAR CAMPO FECHA");
         }
 
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
         return;
       }
 
@@ -64,6 +75,7 @@ class CheckOutInfoBloc extends ChangeNotifier {
 
       final tokenDetail = await getToken(
         identificationNumber: userInformation.document!.value!,
+        userInformation: userInformation,
       );
 
       // print("TOKEN DETAIL");
@@ -74,13 +86,17 @@ class CheckOutInfoBloc extends ChangeNotifier {
           print("tokenDetail NO PERTENECE A MercadoPagoCardToken");
         }
 
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
         return;
       }
 
-      getInstallments(
-        cardToken: cardToken,
-        amount: double.parse(cartInformation.total!),
-      );
+      await Future.microtask(() async {
+        await getInstallments(
+          cardToken: cardToken,
+          amount: double.parse(cartInformation.total!),
+        );
+      });
 
       if (installmentsDetail is! MercadoPagoPaymentMethodInstallments) {
         if (kDebugMode) {
@@ -88,25 +104,18 @@ class CheckOutInfoBloc extends ChangeNotifier {
               "installmentsDetail NO PERTAIN A MercadoPagoPaymentMethodInstallments");
         }
 
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
         return;
       }
-
-      // final installmentsList = installmentsDetail.payerCosts!.first;
-      // final issuer = installmentsDetail.issuer!;
-      //
-      // print("issuer");
-      // print(issuer.toJson());
-
-      Identification identification = Identification(
-        type: documentType.idm,
-        number: userInformation.document!.value!,
-      );
 
       if (userInformation.addresses!.isEmpty) {
         if (kDebugMode) {
           print("userInformation.addresses! ES AVOID, Length is 0");
         }
 
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Registre su dirección de envío para continuar");
         return;
       }
 
@@ -119,25 +128,54 @@ class CheckOutInfoBloc extends ChangeNotifier {
           print("existsDefaultAddress ES NULL, Address no exists");
         }
 
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Seleccione una dirección de envío por defecto");
         return;
       }
 
-      Address address = existsDefaultAddress;
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Custom-Origin": "app",
+      };
 
-      return await paymentRepository.createPayment(
-        userId: userInformation.id!,
-        addressId: address.id!,
-        shippingCost: double.parse(cartInformation.shipment!),
-        subTotal: double.parse(cartInformation.subTotal!),
+      final responseCredentials = await Future.microtask(
+        () async {
+          return CredentialsAuth.fromMap(
+            await hiveRepositoryInterface.read(
+                  containerName: "authentication",
+                  key: "credentials",
+                ) ??
+                {
+                  "email": "",
+                  "email_confirmed": false,
+                  "token": "",
+                },
+          );
+        },
+      );
+
+      if (responseCredentials.token.isEmpty) {
+        if (kDebugMode) {
+          print("responseCredentials IS EMPTY");
+        }
+
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+
+        return;
+      }
+
+      headers[HttpHeaders.authorizationHeader] =
+          "Bearer ${responseCredentials.token}";
+
+      return await paymentRepositoryInterface.createPayment(
         additionalInfoMessage: "N/A",
         companyName: "N/A",
-        identification: identification,
-        paymentTypeId: installmentsDetail.paymentTypeId!,
-        transactionAmount: double.parse(cartInformation.total!),
-        cardToken: cardToken,
+        cardToken: cardToken.id,
         installments: installmentsDetail.payerCosts!.first.installments!,
         paymentMethodId: installmentsDetail.paymentMethodId!,
         issuerId: installmentsDetail.issuer!.id!,
+        headers: headers,
       );
     } else {
       /// TODO: No important;
@@ -156,7 +194,7 @@ class CheckOutInfoBloc extends ChangeNotifier {
   }
 
   void getIdentificationTypes() async {
-    final response = await paymentRepository.getIdentificationTypes();
+    final response = await paymentRepositoryInterface.getIdentificationTypes();
     if (response is String) {
       if (kDebugMode) {
         print(response);
@@ -192,11 +230,13 @@ class CheckOutInfoBloc extends ChangeNotifier {
 
     final result = MercadoPagoDocumentType.fromJsonList(identificationTypes);
     documentType = result.documentTypeList.first;
-    // print(result.documentTypeList.first.toJson());
+
+    print(result.documentTypeList.first.toJson());
   }
 
   Future<dynamic> getToken({
     required String identificationNumber,
+    required UserInformation userInformation,
   }) async {
     if (documentType is! MercadoPagoDocumentType) {
       if (kDebugMode) {
@@ -206,14 +246,14 @@ class CheckOutInfoBloc extends ChangeNotifier {
       return;
     }
 
-    final response = await paymentRepository.createCardToken(
+    final response = await paymentRepositoryInterface.createCardToken(
       cvv: cvvCode,
       expirationYear: expirationYear,
       expirationMonth: expirationMonth,
       cardNumber: cardNumber.replaceAll(' ', '').trim(),
       identificationNumber: identificationNumber,
       identificationId: documentType.id,
-      cardHolderName: cardHolderName,
+      cardHolderName: "${userInformation.name!.trim()} ${userInformation.lastname!.trim()}",
     );
 
     if (response is String) {
@@ -244,11 +284,11 @@ class CheckOutInfoBloc extends ChangeNotifier {
     return cardToken = MercadoPagoCardToken.fromJsonMap(decode);
   }
 
-  void getInstallments({
+  Future<void> getInstallments({
     required MercadoPagoCardToken cardToken,
     required double amount,
   }) async {
-    final response = await paymentRepository.getInstallments(
+    final response = await paymentRepositoryInterface.getInstallments(
       bin: cardToken.firstSixDigits!,
       amount: amount,
     );
