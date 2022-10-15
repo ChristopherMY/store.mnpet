@@ -30,6 +30,8 @@ import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sli
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/photoview_wrapper.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/star_rating.dart';
 
+import '../../../domain/usecase/page.dart';
+
 class ProductScreen extends StatefulWidget {
   const ProductScreen._({Key? key}) : super(key: key);
 
@@ -72,10 +74,10 @@ class _ProductScreenState extends State<ProductScreen> {
       return const Placeholder();
     } else {
       final product = productBloc.product!;
-      return SafeArea(
-        child: Scaffold(
-          backgroundColor: kBackGroundColor,
-          body: CustomScrollView(
+      return Scaffold(
+        backgroundColor: kBackGroundColor,
+        body: SafeArea(
+          child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               const BuildAppBar(),
@@ -162,8 +164,8 @@ class _ProductScreenState extends State<ProductScreen> {
                           */
             ],
           ),
-          bottomNavigationBar: const CustomBottomNavigationBar(),
         ),
+        bottomNavigationBar: const CustomBottomNavigationBar(),
       );
       // );
     }
@@ -291,11 +293,11 @@ class BuildAppBar extends StatelessWidget {
         child: const Padding(
           padding: EdgeInsets.symmetric(vertical: 7.0),
           child: CircleAvatar(
-            maxRadius: 10,
+            maxRadius: 10.0,
             backgroundColor: kBackGroundColor,
             child: Icon(
               Icons.arrow_back,
-              size: 20,
+              size: 20.0,
               color: Colors.black,
             ),
           ),
@@ -323,12 +325,12 @@ class BuildAppBar extends StatelessWidget {
             itemBuilder: (_, index) => productBloc.headerContent[index],
             autoplay: false,
             duration: 3,
+            onIndexChanged: productBloc.onChangedIndex,
             onTap: (index) => productBloc.onOpenGallery(
               context: context,
               isAppBar: true,
               managerTypePhotoViewer: ManagerTypePhotoViewer.navigation,
             ),
-            onIndexChanged: productBloc.onChangedIndex,
             pagination: const SwiperPagination(
               alignment: Alignment.bottomCenter,
               builder: DotCustomSwiperPaginationBuilder(
@@ -401,6 +403,7 @@ class BuildAppBar extends StatelessWidget {
             );
           },
         ),
+        const SizedBox(width: 10.0),
       ],
     );
   }
@@ -562,7 +565,7 @@ class BuildTechnicalBanners extends StatelessWidget {
           final product = productBloc.product!.galleryDescription![index];
           return GestureDetector(
             onTap: () {
-              productBloc.onChangedIndex(index);
+              productBloc.onChangedIndexDescription(index);
               productBloc.onOpenGallery(
                 context: context,
                 isAppBar: false,

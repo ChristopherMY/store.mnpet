@@ -392,21 +392,26 @@ class MainBloc extends ChangeNotifier {
   }
 
 // TODO: Solo se trabajara en el Main Screen
-  void handleLoadSession() async {
-    final responseCredentials = await Future.microtask(() async {
-      return CredentialsAuth.fromMap(
-        await hiveRepositoryInterface.read(
-              containerName: "authentication",
-              key: "credentials",
-            ) ??
-            {"email": "", "email_confirmed": false, "token": ""},
-      );
-    });
+  Future<void> handleLoadSession() async {
+    final responseCredentials = await Future.microtask(
+      () async {
+        return CredentialsAuth.fromMap(
+          await hiveRepositoryInterface.read(
+                containerName: "authentication",
+                key: "credentials",
+              ) ??
+              {
+                "email": "",
+                "email_confirmed": false,
+                "token": "",
+              },
+        );
+      },
+    );
 
     if (responseCredentials.token.isNotEmpty) {
       credentials = responseCredentials;
-      headers[HttpHeaders.authorizationHeader] =
-          "Bearer ${responseCredentials.token}";
+      headers[HttpHeaders.authorizationHeader] = "Bearer ${responseCredentials.token}";
       sessionAccount.value = Session.active;
     }
   }
@@ -435,19 +440,24 @@ class MainBloc extends ChangeNotifier {
       headers: headers,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decodeResponse = json.decode(response.body);
-
-        return UserInformation.fromMap(decodeResponse);
-      }
-    } else if (response is String) {
+    if (response is String) {
       if (kDebugMode) {
         print(response);
       }
+
+      return false;
     }
 
-    return false;
+    if (response is! http.Response) {
+      return false;
+    }
+
+    if (response.statusCode != 200) {
+      return false;
+    }
+
+    final decodeResponse = json.decode(response.body);
+    return UserInformation.fromMap(decodeResponse);
   }
 
   void refreshMainBloc() {
@@ -491,13 +501,16 @@ class MainBloc extends ChangeNotifier {
       return false;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decodeResponse = jsonDecode(response.body);
-
-        return Cart.fromMap(decodeResponse);
-      }
+    if (response is! http.Response) {
+      return false;
     }
+
+    if (response.statusCode != 200) {
+      return false;
+    }
+
+    final decodeResponse = jsonDecode(response.body);
+    return Cart.fromMap(decodeResponse);
   }
 
   Future<dynamic> getShoppingCartTemp({
@@ -515,15 +528,20 @@ class MainBloc extends ChangeNotifier {
       if (kDebugMode) {
         print(response);
       }
+
       return false;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decodeResponse = jsonDecode(response.body);
-        return Cart.fromMap(decodeResponse);
-      }
+    if (response is! http.Response) {
+      return false;
     }
+
+    if (response.statusCode != 200) {
+      return false;
+    }
+
+    final decodeResponse = jsonDecode(response.body);
+    return Cart.fromMap(decodeResponse);
   }
 
   void handleGetShoppingCartNotAccount() async {

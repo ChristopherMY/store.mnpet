@@ -35,7 +35,29 @@ class _MainScreenState extends State<MainScreen>
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
+        reverseTransitionDuration: const Duration(milliseconds: 300),
+        barrierDismissible: false,
+        opaque: true,
+        //barrierColor: Colors.white,
+        transitionsBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          const begin = Offset(0.0, 1.0);
+          const end = Offset.zero;
+          const curve = Curves.decelerate;
+
+          var tween = Tween(begin: begin, end: end)
+              .chain(CurveTween(curve: curve));
+
+          return FadeTransition(
+            opacity: animation,
+            //position: animation.drive(tween),
+            child: child,
+          );
+        },
         pageBuilder: (_, animation1, animation2) => SplashScreen.init(context),
       ),
     );

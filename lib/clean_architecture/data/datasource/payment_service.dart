@@ -69,11 +69,11 @@ class PaymentService implements PaymentRepositoryInterface {
     required String additionalInfoMessage, // Optional
     // required Identification identification,
     // required String paymentTypeId,
-    // @required String emailCustomer,
-    // @required String identificationType,
-    // @required String identificationNumber,
-    // @required String firstNameCustomer,
-    // @required String lastNameCustomer,
+    // required String emailCustomer,
+    // required String identificationType,
+    // required String identificationNumber,
+    // required String firstNameCustomer,
+    // required String lastNameCustomer,
     // required double transactionAmount,
   }) async {
     try {

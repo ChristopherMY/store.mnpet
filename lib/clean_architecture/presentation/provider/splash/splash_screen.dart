@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_bloc.dart';
@@ -63,9 +64,9 @@ class _SplashScreenState extends State<SplashScreen> {
     // TODO: implement initState
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initEventDecrement();
-    });
+    //});
   }
 
   @override
@@ -73,53 +74,59 @@ class _SplashScreenState extends State<SplashScreen> {
     final splashBloc = context.watch<SplashBloc>();
 
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/presentation/presentation_2.png"),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Positioned(
-            right: getProportionateScreenWidth(10),
-            top: getProportionateScreenHeight(70),
-            child: Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white38,
-                    spreadRadius: 3,
-                  )
-                ],
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: CircleAvatar(
-                  radius: 17,
-                  backgroundColor: Colors.white,
-                  child: ValueListenableBuilder(
-                    valueListenable: splashBloc.countdown,
-                    builder: (context, int value, child) {
-                      return Text(
-                        value.toString(),
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .bodyText2,
-                      );
-                    },
+      backgroundColor: kPrimaryColor,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/presentation/lettering_v3.png"),
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
             ),
-          )
-        ],
+            Positioned(
+              right: 15.0,
+              top: 15.0,
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white38,
+                      spreadRadius: 3,
+                    )
+                  ],
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: CircleAvatar(
+                    radius: 17,
+                    backgroundColor: Colors.white,
+                    child: ValueListenableBuilder(
+                      valueListenable: splashBloc.countdown,
+                      builder: (context, int value, child) {
+                        return Text(
+                          value.toString(),
+                          style: Theme.of(context).textTheme.bodyText2,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

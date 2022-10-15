@@ -21,6 +21,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/product_rep
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/photoview_wrapper.dart';
 
+import '../../../domain/usecase/page.dart';
 import '../../widget/vimeo_player.dart';
 
 class ProductBloc extends ChangeNotifier {
@@ -47,6 +48,7 @@ class ProductBloc extends ChangeNotifier {
       PagingController(firstPageKey: 0);
 
   int indexPhotoViewer = 0;
+  int indexPhotoViewerDescription = 0;
   ValueNotifier<int> quantity = ValueNotifier(1);
 
   ValueNotifier<Variation> variation = ValueNotifier(Variation());
@@ -149,6 +151,7 @@ class ProductBloc extends ChangeNotifier {
             final nextPageKey = pageKey + newItems.length;
             pagingController.appendPage(newItems, nextPageKey);
           }
+
           return;
         }
 
@@ -201,8 +204,7 @@ class ProductBloc extends ChangeNotifier {
                 ),
               ),
               placeholder: (context, url) => const SizedBox.shrink(),
-              errorWidget: (context, url, error) =>
-                  Image.asset("assets/no-image.png"),
+              errorWidget: (context, url, error) => Image.asset("assets/no-image.png"),
             ),
           ),
         ),
@@ -423,6 +425,12 @@ class ProductBloc extends ChangeNotifier {
     notifyListeners();
   }
 
+
+
+  void onChangedIndexDescription(index){
+    indexPhotoViewerDescription = index;
+  }
+
   void onChangedIndex(index) {
     if (product!.galleryVideo!.isNotEmpty) {
       final length = product!.galleryVideo!.length;
@@ -440,8 +448,12 @@ class ProductBloc extends ChangeNotifier {
     indexPhotoViewer = index;
   }
 
-  void onChangedPhotoPage(int index) {
-    swiperController.move(index);
+  Future<void> onChangedPhotoPage(int index) async {
+    print("**************");
+    print("indexPhotoViewer: $indexPhotoViewer");
+    print("Index: $index");
+    print("**************");
+    await swiperController.move(index);
     indexPhotoViewer = index;
   }
 
@@ -581,8 +593,7 @@ class ProductBloc extends ChangeNotifier {
                 }
               }
 
-              final response = await productRepositoryInterface
-                  .vimeoVideoConfigFromUrl(vimeoVideoId: vimeoVideoId);
+              final response = await productRepositoryInterface.vimeoVideoConfigFromUrl(vimeoVideoId: vimeoVideoId);
 
               if (response is String) {
                 if (kDebugMode) {

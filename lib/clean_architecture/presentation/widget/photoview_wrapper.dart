@@ -12,9 +12,10 @@ import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/custom_toast.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 
+import '../../domain/usecase/page.dart';
 import '../provider/product/product_bloc.dart';
 
-enum ManagerTypePhotoViewer { single, navigation }
+
 
 class GalleryPhotoViewWrapper extends StatefulWidget {
   const GalleryPhotoViewWrapper({
@@ -69,7 +70,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
 
   @override
   Widget build(BuildContext context) {
-    final productBloc = Provider.of<ProductBloc>(context, listen: false);
+    final productBloc = context.watch<ProductBloc>();
 
     pageController = PageController(initialPage: productBloc.indexPhotoViewer);
     if (widget.isAppBar) {
@@ -79,10 +80,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
     }
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 0,
-        backgroundColor: Colors.black,
-      ),
+
       backgroundColor: Colors.black,
       body: AnimatedBuilder(
         animation: _controller,
@@ -100,7 +98,10 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
                 gallery: gallery,
                 managerType: widget.managerTypePhotoViewer,
                 position: productBloc.indexPhotoViewer,
-                onPhotoPageChanged: productBloc.onChangedPhotoPage,
+                onPhotoPageChanged: (index) async {
+                  print("index pass: $index");
+                  await productBloc.onChangedPhotoPage(index);
+                },
               ),
             ),
             Positioned(
@@ -230,13 +231,10 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
         type: "success",
       );
 
-      print("Termino ejecución");
     } on PlatformException catch (error) {
       if (kDebugMode) {
         print(error);
       }
-
-      print("Que ocurre");
     }
   }
 
@@ -248,8 +246,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
   }) {
     if (managerType == ManagerTypePhotoViewer.single) {
       return PhotoView(
-        imageProvider:
-            CachedNetworkImageProvider("$_url/${gallery[position].src}"),
+        imageProvider: CachedNetworkImageProvider("$_url/${gallery[position].src}"),
         backgroundDecoration: widget.backgroundDecoration,
         minScale: PhotoViewComputedScale.contained * (0.5 + position / 10),
         maxScale: PhotoViewComputedScale.covered * 4.1,

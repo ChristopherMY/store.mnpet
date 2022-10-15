@@ -17,3 +17,5 @@ enum CardType {
   americanExpress,
   discover,
 }
+
+enum ManagerTypePhotoViewer { single, navigation }

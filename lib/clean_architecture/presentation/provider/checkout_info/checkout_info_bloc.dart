@@ -14,9 +14,20 @@ import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_pay
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 
 class CheckOutInfoBloc extends ChangeNotifier {
+  bool isExpanded = false;
+  ValueNotifier<bool>  isTabExpanded = ValueNotifier(false);
+
+  final duration = const Duration(milliseconds: 300);
+
+  final colors = [
+    Colors.grey.shade300,
+    Colors.grey.shade300,
+  ];
+
   String cardNumber = '';
   String expiryDate = '';
   String cardHolderName = '';
@@ -54,7 +65,8 @@ class CheckOutInfoBloc extends ChangeNotifier {
           print("expiryDate IS VOID");
         }
 
-        GlobalSnackBar.showWarningSnackBar(context, "Fecha de expiración vacía");
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Fecha de expiración vacía");
         return;
       }
 
@@ -253,7 +265,8 @@ class CheckOutInfoBloc extends ChangeNotifier {
       cardNumber: cardNumber.replaceAll(' ', '').trim(),
       identificationNumber: identificationNumber,
       identificationId: documentType.id,
-      cardHolderName: "${userInformation.name!.trim()} ${userInformation.lastname!.trim()}",
+      cardHolderName:
+          "${userInformation.name!.trim()} ${userInformation.lastname!.trim()}",
     );
 
     if (response is String) {
@@ -394,5 +407,9 @@ class CheckOutInfoBloc extends ChangeNotifier {
 
     // ScaffoldMessenger.of(context).removeCurrentSnackBar();
     // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void refresh() {
+    notifyListeners();
   }
 }

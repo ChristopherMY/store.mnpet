@@ -16,7 +16,4 @@ class AccountBloc extends ChangeNotifier {
   LoadStatus loadProfileScreen = LoadStatus.loading;
   ValueNotifier<bool> pressed = ValueNotifier(false);
 
-  void onHighlightChanged(bool press) {
-    pressed.value = press;
-  }
 }

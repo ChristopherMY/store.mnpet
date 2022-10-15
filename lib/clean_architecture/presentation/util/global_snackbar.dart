@@ -141,7 +141,7 @@ class GlobalSnackBar {
     String message,
   ) {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    Scaffold.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         elevation: 0.0,
         //behavior: SnackBarBehavior.floating,

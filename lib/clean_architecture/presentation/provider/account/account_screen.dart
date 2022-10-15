@@ -379,65 +379,104 @@ class HeaderInformation extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: ValueListenableBuilder(
-                              valueListenable: accountBloc.pressed,
-                              builder: (context, bool value, child) {
-                                return FlatButton(
-                                  color: Colors.white,
-                                  splashColor: kPrimaryColor,
-                                  textColor:
-                                      value ? Colors.white : kPrimaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    side: const BorderSide(
-                                        color: kPrimaryColor, width: 1),
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  height: 45.0,
-                                  onHighlightChanged:
-                                      accountBloc.onHighlightChanged,
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            SignUpScreen.init(context),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text(
-                                    "Crear cuenta",
-                                    textAlign: TextAlign.center,
+                            child: _GeneralButton(
+                              text: "Crear cuenta",
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => SignUpScreen.init(context),
                                   ),
                                 );
                               },
+                              backgroundColor: Colors.white,
+                              primary: kPrimaryColor,
+                              fontColor: Colors.black,
                             ),
+                            // TextButton(
+                            // color: Colors.white,
+                            // splashColor: kPrimaryColor,
+                            // textColor:
+                            //     value ? Colors.white : kPrimaryColor,
+                            // shape: RoundedRectangleBorder(
+                            //   side: const BorderSide(
+                            //       color: kPrimaryColor, width: 1),
+                            //   borderRadius: BorderRadius.circular(15.0),
+                            // ),
+                            // height: 45.0,
+                            // onHighlightChanged:
+                            //     accountBloc.onHighlightChanged,
+                            // onPressed: () {
+                            //   Navigator.of(context).push(
+                            //     MaterialPageRoute(
+                            //       builder: (context) =>
+                            //           SignUpScreen.init(context),
+                            //     ),
+                            //   );
+                            // },
+                            // child: const Text(
+                            //   "Crear cuenta",
+                            //   textAlign: TextAlign.center,
+                            // ),
+                            // ),
                           ),
                           const SizedBox(width: 30.0),
                           Expanded(
-                            child: FlatButton(
-                              color: kPrimaryColor,
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                    color: kPrimaryColor, width: 1),
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              height: 45.0,
+                            child: _GeneralButton(
+                              text: "Iniciar Sesión",
                               onPressed: () {
+                                final mainBloc = context.read<MainBloc>();
                                 mainBloc.requestAccess(context);
                               },
-                              child: const Text(
-                                "Iniciar sesión",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
+                              backgroundColor: kPrimaryColor,
+                              primary: Colors.white,
+                              fontColor: Colors.white,
                             ),
                           )
                         ],
                       ),
                     ],
-                  )
+                  ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GeneralButton extends StatelessWidget {
+  const _GeneralButton({
+    Key? key,
+    required this.text,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.primary,
+    required this.fontColor,
+  }) : super(key: key);
+
+  final String text;
+  final VoidCallback onPressed;
+  final Color backgroundColor;
+  final Color primary;
+  final Color fontColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        primary: primary,
+        elevation: 1,
+        minimumSize: const Size.fromHeight(45.0),
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+      ),
+      onPressed: onPressed,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: fontColor,
         ),
       ),
     );

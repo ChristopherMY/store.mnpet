@@ -24,7 +24,6 @@ class Assets {
   static const String fontOpenSans-Light = 'assets/font/OpenSans-Light.ttf';
   static const String fontOpenSans-Regular = 'assets/font/OpenSans-Regular.ttf';
   static const String fontOpenSans-SemiBold = 'assets/font/OpenSans-SemiBold.ttf';
-  static const String iconsAdvertencia = 'assets/icons/advertencia.png';
   static const String iconsFacebook-2 = 'assets/icons/facebook-2.svg';
   static const String iconsGoogle-icon = 'assets/icons/google-icon.svg';
   static const String iconsLocation-point = 'assets/icons/location-point.svg';
@@ -53,8 +52,9 @@ class Assets {
   static const String playerPause = 'assets/player/pause.png';
   static const String playerPlay = 'assets/player/play.png';
   static const String playerReplay = 'assets/player/replay.png';
-  static const String responseError = 'assets/response/error.png';
-  static const String responseSuccess = 'assets/response/success.png';
+  static const String presentationLetteringMnPet = 'assets/presentation/lettering_mn_pet.png';
+  static const String presentationLetteringV2 = 'assets/presentation/lettering_v2.png';
+  static const String presentationLetteringV3 = 'assets/presentation/lettering_v3.png';
   static const String svgImage = 'assets/icons/svg/image.svg';
   static const String svgLocation = 'assets/icons/svg/location.svg';
 

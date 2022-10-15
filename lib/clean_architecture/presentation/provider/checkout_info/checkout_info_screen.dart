@@ -61,432 +61,544 @@ class CheckoutInfoScreen extends StatefulWidget {
 }
 
 class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
-  bool hasTe = false;
+  void handleUserInformation() async {
+    final mainBloc = context.read<MainBloc>();
+    if (mainBloc.informationUser is! UserInformation) {
+      final loadInformation = await mainBloc.getUserInformation();
+      if (loadInformation is UserInformation) {
+        mainBloc.informationUser = loadInformation;
+      }
 
-  final colors = [
-    Colors.grey.shade300,
-    Colors.grey.shade300,
-  ];
+      mainBloc.account.value = Account.active;
+      mainBloc.refreshMainBloc();
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    handleUserInformation();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final mainBloc = context.read<MainBloc>();
+    final mainBloc = context.watch<MainBloc>();
 
-    final checkoutInfoBloc = context.watch<CheckOutInfoBloc>();
+    if (mainBloc.informationUser is UserInformation) {
+      final checkoutInfoBloc = context.watch<CheckOutInfoBloc>();
 
-    return LoaderOverlay(
-      child: Scaffold(
-        appBar: AppBar(
-          iconTheme: const IconThemeData(color: Colors.black),
-          bottomOpacity: 0.0,
-          elevation: 0.0,
-          backgroundColor: kBackGroundColor,
-          systemOverlayStyle: const SystemUiOverlayStyle(
-            statusBarColor: kBackGroundColor,
-            statusBarIconBrightness: Brightness.dark,
-          ),
-          leading: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: const Padding(
-              padding: EdgeInsets.only(left: 15.0),
-              child: CircleAvatar(
-                backgroundColor: Colors.black12,
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Colors.black,
-                  size: 20.0,
-                ),
-              ),
+      return LoaderOverlay(
+        child: Scaffold(
+          appBar: AppBar(
+            iconTheme: const IconThemeData(color: Colors.black),
+            bottomOpacity: 0.0,
+            elevation: 0.0,
+            backgroundColor: kBackGroundColor,
+            systemOverlayStyle: const SystemUiOverlayStyle(
+              statusBarColor: kBackGroundColor,
+              statusBarIconBrightness: Brightness.dark,
             ),
-          ),
-          centerTitle: false,
-          title: Text(
-            "Orden",
-            style: Theme.of(context).textTheme.bodyText2,
-          ),
-          actions: [
-            GestureDetector(
+            leading: GestureDetector(
               onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) {
-                      return SearchKeywordScreen.init(context);
-                    },
-                  ),
-                );
+                Navigator.of(context).pop();
               },
-              child: const CircleAvatar(
-                backgroundColor: Colors.black12,
-                child: Icon(
-                  CommunityMaterialIcons.magnify,
-                  color: Colors.black,
-                  size: 22,
+              child: const Padding(
+                padding: EdgeInsets.only(left: 15.0),
+                child: CircleAvatar(
+                  backgroundColor: Colors.black12,
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 20.0,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(width: 15.0),
-          ],
-          leadingWidth: 55.0,
-        ),
-        backgroundColor: kBackGroundColor,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: SizeConfig.screenHeight! -
-                            SizeConfig.screenHeight! * 0.27,
-                        child: PageView(
-                          controller: checkoutInfoBloc.pageController,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: const <Widget>[
-                            OrderCheckoutScreen(),
-                            PaymentCheckoutScreen()
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15.0),
-                        child: SmoothPageIndicator(
-                          controller: checkoutInfoBloc.pageController,
-                          count: 2,
-                          onDotClicked: (index) async {
-                            await checkoutInfoBloc.pageController.animateToPage(
-                              index,
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeIn,
-                            );
-                          },
-                          effect: CustomizableEffect(
-                            activeDotDecoration: DotDecoration(
-                              width: getProportionateScreenWidth(66.0),
-                              height: 12.0,
-                              color: kPrimaryColor,
-                              borderRadius: BorderRadius.circular(24.0),
-                            ),
-                            dotDecoration: DotDecoration(
-                              width: 44.0,
-                              height: 12.0,
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(16.0),
-                              verticalOffset: 0,
-                            ),
-                            spacing: 20.0,
-                            inActiveColorOverride: (i) => colors[i],
+            centerTitle: false,
+            title: Text(
+              "Orden",
+              style: Theme.of(context).textTheme.bodyText2,
+            ),
+            actions: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) {
+                        return SearchKeywordScreen.init(context);
+                      },
+                    ),
+                  );
+                },
+                child: const CircleAvatar(
+                  backgroundColor: Colors.black12,
+                  child: Icon(
+                    CommunityMaterialIcons.magnify,
+                    color: Colors.black,
+                    size: 22,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 15.0),
+            ],
+            leadingWidth: 55.0,
+          ),
+          backgroundColor: kBackGroundColor,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: SizeConfig.screenHeight! -
+                              SizeConfig.screenHeight! * 0.27,
+                          child: PageView(
+                            controller: checkoutInfoBloc.pageController,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: const <Widget>[
+                              OrderCheckoutScreen(),
+                              PaymentCheckoutScreen()
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15.0),
+                          child: SmoothPageIndicator(
+                            controller: checkoutInfoBloc.pageController,
+                            count: 2,
+                            onDotClicked: (index) async {
+                              await checkoutInfoBloc.pageController
+                                  .animateToPage(
+                                index,
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeIn,
+                              );
+                            },
+                            effect: CustomizableEffect(
+                              activeDotDecoration: DotDecoration(
+                                width: getProportionateScreenWidth(66.0),
+                                height: 12.0,
+                                color: kPrimaryColor,
+                                borderRadius: BorderRadius.circular(24.0),
+                              ),
+                              dotDecoration: DotDecoration(
+                                width: 44.0,
+                                height: 12.0,
+                                color: Colors.grey,
+                                borderRadius: BorderRadius.circular(16.0),
+                                verticalOffset: 0,
+                              ),
+                              spacing: 20.0,
+                              inActiveColorOverride: (i) =>
+                                  checkoutInfoBloc.colors[i],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: 0,
-                width: SizeConfig.screenWidth!,
-                child: ValueListenableBuilder(
-                  valueListenable: mainBloc.informationCart,
-                  builder: (_, cart, __) {
-                    if (cart is Cart) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            hasTe = !hasTe;
-                          });
-                        },
-                        child: Container(
-                          color: kPrimaryColor,
-                          child: Column(
-                            children: [
-                              AnimatedCrossFade(
-                                firstChild: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0,
-                                    horizontal: 15.0,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text(
-                                        "Total",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                      Text(
-                                        "S/ ${parseDouble(cart.total!)}",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                secondChild: Column(
+                Positioned(
+                  bottom: 0,
+                  width: SizeConfig.screenWidth!,
+                  right: 0,
+                  child: ValueListenableBuilder(
+                    valueListenable: mainBloc.informationCart,
+                    builder: (_, cart, __) {
+                      if (cart is Cart) {
+                        return Column(
+                          children: [
+                            SizedBox(
+                              width: SizeConfig.screenWidth!,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 15.0, bottom: 15.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Container(
-                                      decoration: const BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(width: 1),
-                                        ),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0,
-                                          horizontal: 15.0,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              "Total",
-                                              style: TextStyle(
-                                                  color: Colors.white),
+                                    GestureDetector(
+                                      onTap: () {
+                                        checkoutInfoBloc.isTabExpanded.value =
+                                            !checkoutInfoBloc.isTabExpanded.value;
+                                      },
+                                      child: ValueListenableBuilder(
+                                        valueListenable:
+                                            checkoutInfoBloc.isTabExpanded,
+                                        builder: (_, bool isTabExpanded, __) {
+                                          return AnimatedContainer(
+                                            duration: checkoutInfoBloc.duration,
+                                            width: isTabExpanded
+                                                ? getProportionateScreenWidth(50)
+                                                : getProportionateScreenWidth(70),
+                                            height:
+                                                getProportionateScreenHeight(50),
+                                            alignment: Alignment.center,
+                                            clipBehavior: Clip.hardEdge,
+                                            decoration: BoxDecoration(
+                                              color: isTabExpanded
+                                                  ? Colors.black
+                                                  : Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
                                             ),
-                                            Text(
-                                              "S/ ${parseDouble(cart.total!)}",
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
+                                            child: Text(
+                                              "Envío",
+                                              style: TextStyle(
+                                                color: isTabExpanded
+                                                    ? Colors.white
+                                                    : Colors.black,
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                          );
+                                        },
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0,
-                                        vertical: 15.0,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          RowDetailPriceInfo(
-                                            title: "Subtotal",
-                                            price: parseDouble(cart.subTotal!),
-                                            fontSize: 12,
-                                            verticalPadding: 5.0,
-                                          ),
-                                          _divider(),
-                                          RowDetailPriceInfo(
-                                            title: "Envío",
-                                            price: parseDouble(cart.shipment!),
-                                            fontSize: 12,
-                                            verticalPadding: 5.0,
-                                          ),
-                                          _divider(),
-                                          RowDetailPriceInfo(
-                                            title: "Total",
-                                            price: parseDouble(cart.total!),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                            verticalPadding: 5.0,
-                                          ),
-                                        ],
+                                    GestureDetector(
+                                      onTap: () {
+                                        checkoutInfoBloc.isTabExpanded.value =
+                                            !checkoutInfoBloc.isTabExpanded.value;
+                                      },
+                                      child: ValueListenableBuilder(
+                                        valueListenable:
+                                            checkoutInfoBloc.isTabExpanded,
+                                        builder: (_, bool isTabExpanded, __) {
+                                          return AnimatedContainer(
+                                            duration: checkoutInfoBloc.duration,
+                                            width: isTabExpanded
+                                                ? getProportionateScreenWidth(70)
+                                                : getProportionateScreenWidth(50),
+                                            alignment: Alignment.center,
+                                            height:
+                                                getProportionateScreenHeight(30),
+                                            clipBehavior: Clip.hardEdge,
+                                            decoration: BoxDecoration(
+                                              color: isTabExpanded
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              borderRadius:
+                                              BorderRadius.circular(15.0),
+                                            ),
+                                            child: Text(
+                                              "Pagar",
+                                              style: TextStyle(
+                                                color: isTabExpanded
+                                                    ? Colors.black
+                                                    : Colors.white,
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
                                   ],
                                 ),
-                                crossFadeState: hasTe
-                                    ? CrossFadeState.showSecond
-                                    : CrossFadeState.showFirst,
-                                duration: kThemeAnimationDuration,
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: Container(
-          height: SizeConfig.screenHeight! - SizeConfig.screenHeight! * 0.923,
-          decoration: const BoxDecoration(
-            color: kPrimaryColor,
-            border: Border(
-              top: BorderSide(width: 1),
-            ),
-          ),
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-            child: DefaultButton(
-              text: 'Continuar',
-              color: Colors.white,
-              colorText: Colors.black,
-              press: () async {
-                dynamic existsDefaultAddress;
-                dynamic existsDefaultPhone;
-                context.loaderOverlay.show();
-
-                if (mainBloc.informationUser is UserInformation) {
-                  UserInformation userInfo = mainBloc.informationUser;
-                  List<Address> addresses = userInfo.addresses ?? [];
-                  List<Phone> phones = userInfo.phones ?? [];
-
-                  switch (checkoutInfoBloc.pageController.page!.toInt()) {
-                    case 0:
-                      {
-                        if (addresses.isNotEmpty) {
-                          existsDefaultAddress = addresses.firstWhereOrNull(
-                              (element) => element.addressDefault == true);
-                        }
-
-                        if (phones.isNotEmpty) {
-                          existsDefaultPhone = phones.firstWhereOrNull(
-                              (element) => element.phoneDefault == true);
-                        }
-
-                        if (existsDefaultAddress != null &&
-                            existsDefaultAddress is Address &&
-                            existsDefaultPhone != null &&
-                            existsDefaultPhone is Phone) {
-                          await Future.value(
-                            checkoutInfoBloc.pageController.animateToPage(
-                              checkoutInfoBloc.pageController.page!.toInt() + 1,
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeIn,
                             ),
-                          );
-                          return;
-                        }
-
-                        GlobalSnackBar.showWarningSnackBar(
-                          context,
-                          "Complete los datos para continuar",
+                            Container(
+                              color: kPrimaryColor,
+                              child: GestureDetector(
+                                onTap: () {
+                                  checkoutInfoBloc.isExpanded =
+                                      !checkoutInfoBloc.isExpanded;
+                                  checkoutInfoBloc.refresh();
+                                },
+                                child: AnimatedCrossFade(
+                                  firstChild: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0,
+                                      horizontal: 15.0,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "Total",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        Text(
+                                          "S/ ${parseDouble(cart.total!)}",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  secondChild: Column(
+                                    children: [
+                                      Container(
+                                        decoration: const BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(width: 1),
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 10.0,
+                                            horizontal: 15.0,
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                "Total",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              Text(
+                                                "S/ ${parseDouble(cart.total!)}",
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10.0,
+                                          vertical: 15.0,
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            RowDetailPriceInfo(
+                                              title: "Subtotal",
+                                              price:
+                                                  parseDouble(cart.subTotal!),
+                                              fontSize: 12,
+                                              verticalPadding: 5.0,
+                                            ),
+                                            _divider(),
+                                            RowDetailPriceInfo(
+                                              title: "Envío",
+                                              price:
+                                                  parseDouble(cart.shipment!),
+                                              fontSize: 12,
+                                              verticalPadding: 5.0,
+                                            ),
+                                            _divider(),
+                                            RowDetailPriceInfo(
+                                              title: "Total",
+                                              price: parseDouble(cart.total!),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                              verticalPadding: 5.0,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  crossFadeState: checkoutInfoBloc.isExpanded
+                                      ? CrossFadeState.showSecond
+                                      : CrossFadeState.showFirst,
+                                  duration: kThemeAnimationDuration,
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       }
-                      break;
-                    case 1:
-                      {
-                        if (mainBloc.informationCart.value is Cart) {
-                          final response = await checkoutInfoBloc.handlePayment(
-                            cartInformation: mainBloc.informationCart.value,
-                            userInformation: mainBloc.informationUser,
-                            context: context,
-                          );
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          bottomNavigationBar: Container(
+            height: SizeConfig.screenHeight! - SizeConfig.screenHeight! * 0.923,
+            decoration: const BoxDecoration(
+              color: kPrimaryColor,
+              border: Border(
+                top: BorderSide(width: 1),
+              ),
+            ),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+              child: DefaultButton(
+                text: 'Continuar',
+                color: Colors.white,
+                colorText: Colors.black,
+                press: () async {
+                  dynamic existsDefaultAddress;
+                  dynamic existsDefaultPhone;
 
-                          if (response is! http.Response) {
-                            if (kDebugMode) {
-                              print("response NO PERTENECE A http.Response");
-                            }
+                  if (mainBloc.informationUser is UserInformation) {
+                    UserInformation userInfo = mainBloc.informationUser;
+                    List<Address> addresses = userInfo.addresses ?? [];
+                    List<Phone> phones = userInfo.phones ?? [];
 
-                            GlobalSnackBar.showWarningSnackBar(context,
-                                "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
-                            return;
+                    switch (checkoutInfoBloc.pageController.page!.toInt()) {
+                      case 0:
+                        {
+                          if (addresses.isNotEmpty) {
+                            existsDefaultAddress = addresses.firstWhereOrNull(
+                                (element) => element.addressDefault == true);
                           }
 
-                          if (response is String) {
-                            if (kDebugMode) {
-                              print(response);
-                            }
+                          if (phones.isNotEmpty) {
+                            existsDefaultPhone = phones.firstWhereOrNull(
+                                (element) => element.phoneDefault == true);
+                          }
 
-                            GlobalSnackBar.showWarningSnackBar(
-                              context,
-                              "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                          if (existsDefaultAddress != null &&
+                              existsDefaultAddress is Address &&
+                              existsDefaultPhone != null &&
+                              existsDefaultPhone is Phone) {
+                            await Future.value(
+                              checkoutInfoBloc.pageController.animateToPage(
+                                checkoutInfoBloc.pageController.page!.toInt() +
+                                    1,
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeIn,
+                              ),
                             );
                             return;
                           }
 
-                          final decode = json.decode(response.body);
+                          GlobalSnackBar.showWarningSnackBar(
+                            context,
+                            "Complete los datos para continuar",
+                          );
+                        }
+                        break;
+                      case 1:
+                        {
+                          if (mainBloc.informationCart.value is Cart) {
+                            context.loaderOverlay.show();
+                            final response =
+                                await checkoutInfoBloc.handlePayment(
+                              cartInformation: mainBloc.informationCart.value,
+                              userInformation: mainBloc.informationUser,
+                              context: context,
+                            );
 
-                          if (!mounted) return;
+                            context.loaderOverlay.hide();
 
-                          if (response.statusCode == 501) {
-                            print("data Error");
-                            print(response);
+                            if (response is! http.Response) {
+                              if (kDebugMode) {
+                                print("response NO PERTENECE A http.Response");
+                              }
 
-                            if (decode['error']['status'] == 400) {
-                              final errorText =
-                                  checkoutInfoBloc.badRequestProcess(response);
-
-                              GlobalSnackBar.showErrorSnackBarIcon(
-                                context,
-                                errorText,
-                              );
-
-                              return;
-                            }
-
-                            if (checkoutInfoBloc.installmentsDetail
-                                is! MercadoPagoPaymentMethodInstallments) {
                               GlobalSnackBar.showWarningSnackBar(context,
                                   "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
                               return;
                             }
 
-                            final errorText = checkoutInfoBloc.badTokenProcess(
-                              status: decode['status'],
-                              installments: checkoutInfoBloc.installmentsDetail,
-                            );
+                            if (response is String) {
+                              if (kDebugMode) {
+                                print(response);
+                              }
 
-                            GlobalSnackBar.showErrorSnackBarIcon(
-                                context, errorText);
-
-                            print(
-                                "PROBLEMAS AL REALIZAR EL PAGO ERROR CODE: ${response.statusCode}");
-
-                            return;
-                          }
-
-                          if (response.statusCode != 201) {
-                            if (kDebugMode) {
-                              print(
-                                  "response.statusCode status code fail is != 201 and contain ${response.statusCode}");
+                              GlobalSnackBar.showWarningSnackBar(
+                                context,
+                                "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                              );
+                              return;
                             }
 
-                            GlobalSnackBar.showWarningSnackBar(
-                              context,
-                              "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-                            );
-                            return;
-                          }
+                            final decode = json.decode(response.body);
 
-                          MercadoPagoPayment infoPayment =
-                              MercadoPagoPayment.fromJsonMap(decode);
+                            if (!mounted) return;
 
-                          print(infoPayment.status);
-                          print(infoPayment.statusDetail);
+                            if (response.statusCode == 501) {
+                              print("data Error");
+                              print(response);
 
-                          if (infoPayment.statusDetail == "accredited") {
-                            await mainBloc.handleGetShoppingCart();
+                              if (decode['error']['status'] == 400) {
+                                final errorText = checkoutInfoBloc
+                                    .badRequestProcess(response);
 
-                            await Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => TransactionScreen(
-                                  mercadoPagoPayment: infoPayment,
+                                GlobalSnackBar.showErrorSnackBarIcon(
+                                  context,
+                                  errorText,
+                                );
+
+                                return;
+                              }
+
+                              if (checkoutInfoBloc.installmentsDetail
+                                  is! MercadoPagoPaymentMethodInstallments) {
+                                GlobalSnackBar.showWarningSnackBar(context,
+                                    "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+                                return;
+                              }
+
+                              final errorText =
+                                  checkoutInfoBloc.badTokenProcess(
+                                status: decode['status'],
+                                installments:
+                                    checkoutInfoBloc.installmentsDetail,
+                              );
+
+                              GlobalSnackBar.showErrorSnackBarIcon(
+                                  context, errorText);
+
+                              print(
+                                  "PROBLEMAS AL REALIZAR EL PAGO ERROR CODE: ${response.statusCode}");
+
+                              return;
+                            }
+
+                            if (response.statusCode != 201) {
+                              if (kDebugMode) {
+                                print(
+                                    "response.statusCode status code fail is != 201 and contain ${response.statusCode}");
+                              }
+
+                              GlobalSnackBar.showWarningSnackBar(
+                                context,
+                                "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                              );
+                              return;
+                            }
+
+                            MercadoPagoPayment infoPayment =
+                                MercadoPagoPayment.fromJsonMap(decode);
+
+                            print(infoPayment.status);
+                            print(infoPayment.statusDetail);
+
+                            if (infoPayment.statusDetail == "accredited") {
+                              await mainBloc.handleGetShoppingCart();
+
+                              await Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (_) => TransactionScreen(
+                                    mercadoPagoPayment: infoPayment,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           }
                         }
-                      }
-                      break;
-                    default:
-                      GlobalSnackBar.showWarningSnackBar(
-                        context,
-                        "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-                      );
+                        break;
+                      default:
+                        GlobalSnackBar.showWarningSnackBar(
+                          context,
+                          "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                        );
+                    }
                   }
-                }
-
-                context.loaderOverlay.hide();
-              },
+                },
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      return const Placeholder();
+    }
   }
 
   _divider() {
@@ -589,29 +701,25 @@ class OrderCheckoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.0),
-        color: Colors.grey.shade300,
-      ),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(16.0),
+      // ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Información de envío",
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  "* Se debe de mantener un registro como principal",
-                  style: Theme.of(context).textTheme.headline5,
-                ),
-              ],
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Información de envío",
+                style: Theme.of(context).textTheme.bodyText1,
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                "* Se debe de mantener un registro como principal",
+                style: Theme.of(context).textTheme.headline5,
+              ),
+            ],
           ),
           _OrderCheckoutShipping.init(context),
           SizedBox(height: getProportionateScreenHeight(25.0)),
@@ -1047,7 +1155,6 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.0),
-        color: Colors.grey.shade300,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

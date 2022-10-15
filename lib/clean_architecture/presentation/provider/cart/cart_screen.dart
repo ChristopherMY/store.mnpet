@@ -9,6 +9,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
@@ -245,6 +246,12 @@ class _CartScreenState extends State<CartScreen> {
                               return DefaultButton(
                                 text: "Ir a pagar",
                                 press: () {
+                                  if (mainBloc.credentials is! CredentialsAuth) {
+                                    mainBloc.requestAccess(context);
+
+                                    return;
+                                  }
+
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (__) {

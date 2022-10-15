@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,10 @@ import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_sc
 
 void main() async {
   await Hive.initFlutter();
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations(
+    [DeviceOrientation.portraitUp],
+  );
   runApp(const MyApp());
 }
 
@@ -80,7 +85,7 @@ class MyApp extends StatelessWidget {
               return Consumer<MainBloc>(
                 builder: (context, provider, child) {
                   return MaterialApp(
-                    title: 'Mundo Pet Ecommerce App',
+                    title: 'Mundo Pet',
                     debugShowCheckedModeBanner: false,
                     theme: ThemeData.light().copyWith(
                       backgroundColor: Colors.white,
