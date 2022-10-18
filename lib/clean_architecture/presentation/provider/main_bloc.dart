@@ -67,7 +67,6 @@ class MainBloc extends ChangeNotifier {
 
   String ubigeo = "";
 
-  dynamic shoppingCartId;
   dynamic informationUser;
   ValueNotifier<dynamic> informationCart = ValueNotifier(dynamic);
   dynamic residence;
@@ -91,8 +90,8 @@ class MainBloc extends ChangeNotifier {
 
       if (indexSelected.value == 1) {
         if (credentials is! CredentialsAuth) {
+          //  sessionAccount.value = Session.inactive;
           if (informationCart.value is! Cart) {
-            handleLoadShoppingCartId();
             handleGetShoppingCartNotAccount();
             return;
           }
@@ -106,7 +105,7 @@ class MainBloc extends ChangeNotifier {
 
       if (indexSelected.value == 2) {
         if (credentials is! CredentialsAuth) {
-          requestAccess(context);
+          handleAuthAccess(context);
 
           return;
         } else {
@@ -128,7 +127,7 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
-  void requestAccess(BuildContext context) {
+  void handleAuthAccess(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: ((context) => const LoginScreen()),
@@ -367,18 +366,17 @@ class MainBloc extends ChangeNotifier {
   }
 
   Future<bool> loadSessionPromise() async {
-    final responseCredentials = await Future.microtask(() async {
-      return CredentialsAuth.fromMap(
-        await hiveRepositoryInterface.read(
-              containerName: "authentication",
-              key: "credentials",
-            ) ??
-            {"email": "", "email_confirmed": false, "token": ""},
-      );
-    });
-
-    print("responseCredentials: ");
-    print(responseCredentials.toMap());
+    final responseCredentials = await Future.microtask(
+      () async {
+        return CredentialsAuth.fromMap(
+          await hiveRepositoryInterface.read(
+                containerName: "authentication",
+                key: "credentials",
+              ) ??
+              {"email": "", "email_confirmed": false, "token": ""},
+        );
+      },
+    );
 
     if (responseCredentials.token.isNotEmpty) {
       credentials = responseCredentials;
@@ -411,7 +409,8 @@ class MainBloc extends ChangeNotifier {
 
     if (responseCredentials.token.isNotEmpty) {
       credentials = responseCredentials;
-      headers[HttpHeaders.authorizationHeader] = "Bearer ${responseCredentials.token}";
+      headers[HttpHeaders.authorizationHeader] =
+          "Bearer ${responseCredentials.token}";
       sessionAccount.value = Session.active;
     }
   }
@@ -515,13 +514,14 @@ class MainBloc extends ChangeNotifier {
 
   Future<dynamic> getShoppingCartTemp({
     required String districtId,
-    required String carId,
   }) async {
-    Map<String, String> bodyParams = {'cart_id': carId};
+    final shoppingCartId = await handleGetShoppingCartId();
+
+    Map<String, String> headers = {'Custom-Cart': shoppingCartId};
 
     final response = await cartRepositoryInterface.getShoppingCartTemp(
       districtId: districtId,
-      bodyParams: bodyParams,
+      headers: headers,
     );
 
     if (response is String) {
@@ -545,19 +545,14 @@ class MainBloc extends ChangeNotifier {
   }
 
   void handleGetShoppingCartNotAccount() async {
-    sessionAccount.value = Session.inactive;
+    final shoppingCartId = await handleGetShoppingCartId();
 
     getShoppingCartTemp(
       districtId: residence.districtId!,
-      carId: shoppingCartId,
     ).then(
       (cart) async {
-        print("!!Solicitando carrito de compras temporal!!");
-        print("Shopping cart id es: $shoppingCartId");
-
         if (cart is Cart) {
-          if (shoppingCartId.toString().isEmpty || shoppingCartId is! String) {
-            print("Esta registrando Shopping cart Id");
+          if (shoppingCartId.toString().isEmpty) {
             await hiveRepositoryInterface.save(
               containerName: "shopping",
               key: "cartId",
@@ -590,21 +585,9 @@ class MainBloc extends ChangeNotifier {
     );
   }
 
-  // Future<dynamic> refreshShoppingCart() async {
-  //   cartStatus.value = LoadStatus.loading;
-  //
-  //   final shoppingCart = await getShoppingCart(
-  //     districtId: residence.districtId!,
-  //     headers: headers,
-  //   );
-  //
-  //   cartStatus.value = LoadStatus.normal;
-  //   return shoppingCart;
-  // }
-
   Future<dynamic> changeShoppingCart() async {
-    print("Moviendo carrito");
-    print('Carrito ID $shoppingCartId');
+    final shoppingCartId = await handleGetShoppingCartId();
+
     final response = await cartRepositoryInterface.moveShoppingCart(
       cartId: shoppingCartId,
       headers: headers,
@@ -625,23 +608,11 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteShoppingCartTemp() async {
+  Future<void> handleRemoveShoppingCart() async {
     await hiveRepositoryInterface.remove(
       containerName: "shopping",
       key: "cartId",
     );
-  }
-
-  void handleLoadShoppingCartId() async {
-    if (shoppingCartId.toString().isEmpty || shoppingCartId is! String) {
-      shoppingCartId = await Future.microtask(() async {
-        return await hiveRepositoryInterface.read(
-              containerName: "shopping",
-              key: "cartId",
-            ) ??
-            "";
-      });
-    }
   }
 
   Future<dynamic> deleteItemShoppingCart({
@@ -694,13 +665,20 @@ class MainBloc extends ChangeNotifier {
     }
 
     /// Continue computing execution code
+
+    final shoppingCartId = await handleGetShoppingCartId();
+
     final cart = await getShoppingCartTemp(
       districtId: residence.districtId!,
-      carId: shoppingCartId,
     );
 
+    print("RESOLVIO!!!");
+    print("Cart");
+    print(cart);
+
     if (cart is Cart) {
-      if (shoppingCartId.toString().isEmpty || shoppingCartId is! String) {
+      print(cart.toMap());
+      if (shoppingCartId.toString().isEmpty) {
         await hiveRepositoryInterface.save(
           containerName: "shopping",
           key: "cartId",
@@ -727,6 +705,8 @@ class MainBloc extends ChangeNotifier {
         headers: headers,
       );
     } else {
+      final shoppingCartId = await handleGetShoppingCartId();
+
       response = await cartRepositoryInterface.updateProductCartTemp(
         cartId: shoppingCartId,
         productId: productId,
@@ -742,5 +722,13 @@ class MainBloc extends ChangeNotifier {
     }
 
     return false;
+  }
+
+  Future<String> handleGetShoppingCartId() async {
+    return await hiveRepositoryInterface.read(
+          containerName: "shopping",
+          key: "cartId",
+        ) ??
+        "";
   }
 }

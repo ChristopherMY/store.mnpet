@@ -79,8 +79,7 @@ class MyApp extends StatelessWidget {
                 )
                   ..handleLoadSession()
                   ..initRegion()
-                  ..handleLoadShipmentResidence()
-                  ..handleLoadShoppingCartId(),
+                  ..handleLoadShipmentResidence(),
             builder: (context, child) {
               return Consumer<MainBloc>(
                 builder: (context, provider, child) {

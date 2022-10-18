@@ -27,7 +27,6 @@ import 'package:store_mundo_pet/clean_architecture/presentation/widget/dotted_sw
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/photoview_wrapper.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/star_rating.dart';
 
 import '../../../domain/usecase/page.dart';
@@ -123,7 +122,8 @@ class _ProductScreenState extends State<ProductScreen> {
                   builderDelegate: PagedChildBuilderDelegate<Product>(
                     firstPageErrorIndicatorBuilder: (context) {
                       return const LottieAnimation(
-                          source: "assets/lottie/lonely-404.json");
+                        source: "assets/lottie/lonely-404.json",
+                      );
                     },
                     itemBuilder: (context, item, index) {
                       return TrendingItemMain(

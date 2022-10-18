@@ -425,7 +425,7 @@ class HeaderInformation extends StatelessWidget {
                               text: "Iniciar Sesión",
                               onPressed: () {
                                 final mainBloc = context.read<MainBloc>();
-                                mainBloc.requestAccess(context);
+                                mainBloc.handleAuthAccess(context);
                               },
                               backgroundColor: kPrimaryColor,
                               primary: Colors.white,

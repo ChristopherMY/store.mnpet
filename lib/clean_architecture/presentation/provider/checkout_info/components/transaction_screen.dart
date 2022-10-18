@@ -22,7 +22,6 @@ class TransactionScreen extends StatefulWidget {
 class _TransactionScreenState extends State<TransactionScreen> {
   late ConfettiController _controllerCenter;
 
-
   void handleControlConfetti() async {
     Future.delayed(
       const Duration(seconds: 6),
@@ -75,11 +74,21 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final collectorId = widget.mercadoPagoPayment.collectorId;
+    final mercadoPagoPayment = widget.mercadoPagoPayment;
 
-    return Material(
-      color: kBackGroundColor,
-      child: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: kBackGroundColor,
+      // appBar: AppBar(
+      //   systemOverlayStyle: const SystemUiOverlayStyle(
+      //     statusBarColor: kBackGroundColor,
+      //     statusBarIconBrightness: Brightness.dark,
+      //   ),
+      //   toolbarOpacity: 0,
+      //   toolbarHeight:  0,
+      //   leadingWidth: 0,
+      //   titleSpacing: 0,
+      // ),
+      body: SingleChildScrollView(
         child: SizedBox(
           height: SizeConfig.screenHeight,
           width: SizeConfig.screenWidth,
@@ -100,14 +109,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       height: getProportionateScreenHeight(30.0),
                     ),
                     Ticket(
-                      width: getProportionateScreenWidth(270.0),
-                      height: getProportionateScreenHeight(440.0),
+                      width: SizeConfig.screenWidth! * 0.8,
+                      height: SizeConfig.screenHeight! * 0.64,
                       color: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20.0,
                         vertical: 24.0,
                       ),
-                      child: TicketData(),
+                      child: TicketData(mercadoPagoPayment: mercadoPagoPayment),
                       // ),
                     ),
                     SizedBox(
@@ -124,7 +133,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ],
                 ),
               ),
-
               Align(
                 alignment: Alignment.topCenter,
                 child: ConfettiWidget(
@@ -144,22 +152,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   createParticlePath: drawStar, // define a custom shape/path.
                 ),
               ),
-
-              // Material(
-              //   elevation: 1,
-              // color: Colors.white,
-              // clipBehavior: Clip.hardEdge,
-              //   borderRadius: BorderRadius.circular(12.0),
-              // child:
-
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: TextButton(
-                    onPressed: () {
-                      _controllerCenter.play();
-                    },
-                    child: _display('blast\nstars')),
-              ),
+              // Align(
+              //   alignment: Alignment.bottomCenter,
+              //   child: TextButton(
+              //       onPressed: () {
+              //         _controllerCenter.play();
+              //       },
+              //       child: _display('blast\nstars')),
+              // ),
             ],
           ),
         ),
@@ -178,12 +178,21 @@ class _TransactionScreenState extends State<TransactionScreen> {
 class TicketData extends StatelessWidget {
   const TicketData({
     Key? key,
+    required this.mercadoPagoPayment,
   }) : super(key: key);
+
+  final MercadoPagoPayment mercadoPagoPayment;
+
+  String handleParseDatetime(DateTime date) {
+    final datetime = DateTime.parse(date.toIso8601String());
+    final resolve = "${datetime.day}/${datetime.month}/${datetime.year}";
+    return resolve;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -202,30 +211,22 @@ class TicketData extends StatelessWidget {
                 ),
               ),
             ),
-            Row(
-              children: const [
-                Text(
-                  'LHR',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Icon(
-                    Icons.flight_takeoff,
-                    color: Colors.pink,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    'ISL',
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            )
+            // Row(
+            //   children: const [
+            //     Text(
+            //       'Procesando',
+            //       style: TextStyle(
+            //           color: Colors.black, fontWeight: FontWeight.bold),
+            //     ),
+            //     Padding(
+            //       padding: EdgeInsets.only(left: 8.0),
+            //       child: Icon(
+            //         Icons.local_shipping,
+            //         color: kPrimaryColorRed,
+            //       ),
+            //     ),
+            //   ],
+            // )
           ],
         ),
         const Padding(
@@ -243,46 +244,86 @@ class TicketData extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ticketDetailsWidget(
-                '# Orden',
-                '48484848114',
-                'Fecha',
-                '28-08-2022',
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0, left: 12.0),
+                child: ticketDetailsWidget(
+                  '# Orden',
+                  mercadoPagoPayment.collectorId!,
+                  'Fecha',
+                  handleParseDatetime(mercadoPagoPayment.dateApproved!),
+                ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 12.0, right: 52.0),
-                child: ticketDetailsWidget('Flight', '76836A45', 'Gate', '66B'),
+                padding:
+                    const EdgeInsets.only(top: 12.0, right: 12.0, left: 12.0),
+                child: ticketDetailsWidget(
+                  'Total ',
+                  'S/ ${mercadoPagoPayment.transactionAmount!}',
+                  'Correo electrónico',
+                  '${mercadoPagoPayment.payer!.email}',
+                ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 12.0, right: 53.0),
-                child: ticketDetailsWidget('Class', 'Business', 'Seat', '21B'),
+                padding:
+                    const EdgeInsets.only(top: 12.0, right: 12.0, left: 12.0),
+                child: ticketDetailsWidget(
+                  'Documento',
+                  mercadoPagoPayment.payer!.identificationType!,
+                  'N° documento',
+                  mercadoPagoPayment.payer!.identificationNumber!,
+                ),
               ),
             ],
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.only(top: 10.0, left: 75.0, right: 75.0),
-          child: Text(
-            '0000 +9230 2884 5163',
-            style: TextStyle(
-              color: Colors.black,
-            ),
+        Padding(
+          padding: const EdgeInsets.only(top: 12.0, right: 12.0, left: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text(
+                "Descripción",
+                style: const TextStyle(color: Colors.grey),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  mercadoPagoPayment.description!,
+                  style: const TextStyle(color: Colors.black),
+                ),
+              )
+            ],
           ),
         ),
-        const SizedBox(height: 30),
-        const Text('Vistinamos tambien en mundonegocio.com.pe')
+        const Spacer(),
+        Image.asset(
+          "assets/mercadopago.png",
+          alignment: Alignment.center,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.check_sharp),
+            Text(
+              'Compra verificada por mercado pago',
+            ),
+          ],
+        )
       ],
     );
   }
 }
 
-Widget ticketDetailsWidget(String firstTitle, String firstDesc,
-    String secondTitle, String secondDesc) {
+Widget ticketDetailsWidget(
+  String firstTitle,
+  String firstDesc,
+  String secondTitle,
+  String secondDesc,
+) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 12.0),
+      Expanded(
+        flex: 2,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -300,8 +341,8 @@ Widget ticketDetailsWidget(String firstTitle, String firstDesc,
           ],
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.only(right: 20.0),
+      Expanded(
+        flex: 2,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

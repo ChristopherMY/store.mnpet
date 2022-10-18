@@ -93,7 +93,8 @@ class ProductBloc extends ChangeNotifier {
   }
 
   Future<void> loadProductDetails({required String slug}) async {
-    final response = await productRepositoryInterface.getProductSlug(slug: slug);
+    final response =
+        await productRepositoryInterface.getProductSlug(slug: slug);
 
     if (response is String) {
       if (kDebugMode) {
@@ -121,7 +122,8 @@ class ProductBloc extends ChangeNotifier {
     required List<Brand> categories,
     required int pageKey,
   }) async {
-    final response = await productRepositoryInterface.getRelatedProductsPagination(
+    final response =
+        await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
       finalRange: _finalRange,
       initialRange: _initialRange,
@@ -139,7 +141,8 @@ class ProductBloc extends ChangeNotifier {
       if (response.statusCode == 200) {
         final products = jsonDecode(response.body) as List;
         if (products.isNotEmpty) {
-          List<Product> newItems = products.map((e) => Product.fromMap(e)).toList().cast();
+          List<Product> newItems =
+              products.map((e) => Product.fromMap(e)).toList().cast();
 
           _initialRange += 20;
           _finalRange += 20;
@@ -162,7 +165,8 @@ class ProductBloc extends ChangeNotifier {
 
   void handleInitVariation({required Product product}) {
     List<Variation> variations = [...product.variations!];
-    int position = variations.indexWhere((element) => element.variationDefault == true);
+    int position =
+        variations.indexWhere((element) => element.variationDefault == true);
 
     if (position != -1) {
       /// Here
@@ -204,7 +208,8 @@ class ProductBloc extends ChangeNotifier {
                 ),
               ),
               placeholder: (context, url) => const SizedBox.shrink(),
-              errorWidget: (context, url, error) => Image.asset("assets/no-image.png"),
+              errorWidget: (context, url, error) =>
+                  Image.asset("assets/no-image.png"),
             ),
           ),
         ),
@@ -217,7 +222,8 @@ class ProductBloc extends ChangeNotifier {
 
   void handleBuildVariationAttributesContent({required Product product}) {
     for (var attr in variation.value.attributes!) {
-      final indexOfAttribute = product.modalAttributes!.indexWhere((element) => element.attributeId == attr.id);
+      final indexOfAttribute = product.modalAttributes!
+          .indexWhere((element) => element.attributeId == attr.id);
 
       if (indexOfAttribute != -1) {
         product.modalAttributes![indexOfAttribute].checkedName = attr.name;
@@ -228,7 +234,8 @@ class ProductBloc extends ChangeNotifier {
 
     for (var coincidence in variation.value.coincidence!) {
       for (var attr in product.attributes!) {
-        final indexOfTerm = attr.terms!.indexWhere((term) => term.label == coincidence);
+        final indexOfTerm =
+            attr.terms!.indexWhere((term) => term.label == coincidence);
 
         if (indexOfTerm != -1) {
           attr.terms![indexOfTerm].hasBorder = true;
@@ -238,7 +245,8 @@ class ProductBloc extends ChangeNotifier {
       }
 
       for (var attr in product.modalAttributes!) {
-        final indexOfTerm = attr.terms!.indexWhere((term) => term.label == coincidence);
+        final indexOfTerm =
+            attr.terms!.indexWhere((term) => term.label == coincidence);
 
         if (indexOfTerm != -1) {
           attr.terms![indexOfTerm].hasBorder = true;
@@ -425,9 +433,7 @@ class ProductBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
-  void onChangedIndexDescription(index){
+  void onChangedIndexDescription(index) {
     indexPhotoViewerDescription = index;
   }
 
@@ -470,6 +476,7 @@ class ProductBloc extends ChangeNotifier {
           {"email_confirmed": false},
     );
 
+    /// Si no hay token consedera la accion de trabajar con carrito de compras temporal
     if (credentials.token.isNotEmpty && credentials.token.isNotEmpty) {
       Map<String, dynamic> buildCart = {
         "product_id": product!.id!,
@@ -482,64 +489,83 @@ class ProductBloc extends ChangeNotifier {
         headers: headers,
       );
 
-      if (response is http.Response) {
-        if (response.statusCode == 200) {
-          stateOnlyCustomIndicatorText.value = ButtonState.idle;
-          return true;
+      if (response is String) {
+        if (kDebugMode) {
+          print(response);
         }
 
         stateOnlyCustomIndicatorText.value = ButtonState.idle;
         return false;
-      } else if (response is String) {
-        if (kDebugMode) {
-          print(response);
-        }
       }
-    } else {
-      String shoppingCartId = await Future.microtask(() async {
-        return await hiveRepositoryInterface.read(
-              containerName: "shopping",
-              key: "cartId",
-            ) ??
-            "";
-      });
 
-      Map<String, dynamic> buildCart = {
-        "product_id": product!.id!,
-        "variation_id": variation.value.id,
-        "quantity": quantity.value,
-        "cart_id": shoppingCartId,
-      };
-
-      final response =
-          await cartRepositoryInterface.onSaveShoppingCartTemp(cart: buildCart);
-
-      if (response is http.Response) {
-        if (response.statusCode == 200) {
-          final responseApi = cartFromMap(response.body);
-          if (shoppingCartId.isEmpty) {
-            await hiveRepositoryInterface.save(
-              containerName: "shopping",
-              key: "cartId",
-              value: responseApi.id,
-            );
-          }
-
-          stateOnlyCustomIndicatorText.value = ButtonState.idle;
-          return true;
-        }
-
+      if (response is! http.Response) {
         stateOnlyCustomIndicatorText.value = ButtonState.idle;
         return false;
-      } else if (response is String) {
-        if (kDebugMode) {
-          print(response);
-        }
+      }
+
+      if (response.statusCode == 200) {
+        stateOnlyCustomIndicatorText.value = ButtonState.idle;
+        return false;
+      }
+
+      stateOnlyCustomIndicatorText.value = ButtonState.idle;
+      return true;
+    }
+
+    String shoppingCartId = await hiveRepositoryInterface.read(
+          containerName: "shopping",
+          key: "cartId",
+        ) ??
+        "";
+
+    print("ShoppingCartId: $shoppingCartId");
+
+    Map<String, dynamic> buildCart = {
+      "product_id": product!.id!,
+      "variation_id": variation.value.id,
+      "quantity": quantity.value,
+      "cart_id": shoppingCartId,
+    };
+
+    print("Binding Cart");
+    print(buildCart);
+
+    final response =
+        await cartRepositoryInterface.onSaveShoppingCartTemp(cart: buildCart);
+
+    if (response is String) {
+      if (kDebugMode) {
+        print(response);
+      }
+
+      stateOnlyCustomIndicatorText.value = ButtonState.idle;
+      return false;
+    }
+
+    if (response is! http.Response) {
+      stateOnlyCustomIndicatorText.value = ButtonState.idle;
+      return false;
+    }
+
+    if (response.statusCode != 200) {
+      stateOnlyCustomIndicatorText.value = ButtonState.idle;
+      return false;
+    }
+
+    final responseApi = cartFromMap(response.body);
+
+    if (responseApi.id!.isNotEmpty) {
+      if (shoppingCartId.isEmpty) {
+        await hiveRepositoryInterface.save(
+          containerName: "shopping",
+          key: "cartId",
+          value: responseApi.id,
+        );
       }
     }
 
     stateOnlyCustomIndicatorText.value = ButtonState.idle;
-    return false;
+    return true;
   }
 
   void initProductState({
@@ -550,7 +576,7 @@ class ProductBloc extends ChangeNotifier {
       [
         loadVimeoVideoConfig(galleryVideo: galleryVideo),
         loadProductDetails(slug: slug),
-        refreshUbigeo(slug: slug)
+        refreshUbigeo(slug: slug),
       ],
     );
 
@@ -593,7 +619,8 @@ class ProductBloc extends ChangeNotifier {
                 }
               }
 
-              final response = await productRepositoryInterface.vimeoVideoConfigFromUrl(vimeoVideoId: vimeoVideoId);
+              final response = await productRepositoryInterface
+                  .vimeoVideoConfigFromUrl(vimeoVideoId: vimeoVideoId);
 
               if (response is String) {
                 if (kDebugMode) {

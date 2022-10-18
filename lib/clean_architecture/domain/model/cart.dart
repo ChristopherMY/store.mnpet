@@ -28,20 +28,20 @@ class Cart {
   final String? total;
 
   factory Cart.fromMap(Map<String, dynamic> json) => Cart(
-    id: json["_id"] == null ? null : json["_id"],
-    userId: json["user_id"] == null ? null : json["user_id"],
+    id: json["_id"] ?? "",
+    userId: json["user_id"]?? "",
     products: json["products"] == null ? [] : List<Product>.from(json["products"].map((x) => Product.fromMap(x))),
-    subTotal: json["sub_total"] == null ? null : json["sub_total"],
-    shipment: json["shipment"] == null ? null : json["shipment"],
-    total: json["total"] == null ? null : json["total"].toString(),
+    subTotal: json["sub_total"] ?? "",
+    shipment: json["shipment"] ?? "",
+    total: json["total"] ?? "",
   );
 
   Map<String, dynamic> toMap() => {
-    "_id": id == null ? null : id,
-    "user_id": userId == null ? null : userId,
+    "_id": id ?? "",
+    "user_id": userId ?? "",
     "products": products == null ? null : List<dynamic>.from(products!.map((x) => x.toMap())),
-    "sub_total": subTotal == null ? null : subTotal,
-    "shipment": shipment == null ? null : shipment,
-    "total": total == null ? null : total,
+    "sub_total": subTotal ?? "",
+    "shipment": shipment ?? "",
+    "total": total ?? "",
   };
 }

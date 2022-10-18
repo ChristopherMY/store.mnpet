@@ -89,21 +89,14 @@ class _CartScreenState extends State<CartScreen> {
                     headers: mainBloc.headers,
                   );
                 } else {
-                  mainBloc.handleLoadShoppingCartId();
                   response = await mainBloc.getShoppingCartTemp(
                     districtId: mainBloc.residence.districtId!,
-                    carId: mainBloc.shoppingCartId,
                   );
                 }
 
-                // print("Reload Cart");
-                // print(response);
-                // print(mainBloc.shoppingCartId);
-
                 if (response is Cart) {
-                  print(response.toMap());
-                  if (mainBloc.shoppingCartId.toString().isEmpty ||
-                      mainBloc.shoppingCartId is! String) {
+                  final shoppingCartId = await mainBloc.handleGetShoppingCartId();
+                  if (shoppingCartId.toString().isEmpty) {
                     await mainBloc.hiveRepositoryInterface.save(
                       containerName: "shopping",
                       key: "cartId",
@@ -247,7 +240,7 @@ class _CartScreenState extends State<CartScreen> {
                                 text: "Ir a pagar",
                                 press: () {
                                   if (mainBloc.credentials is! CredentialsAuth) {
-                                    mainBloc.requestAccess(context);
+                                    mainBloc.handleAuthAccess(context);
 
                                     return;
                                   }
@@ -392,7 +385,7 @@ class CardItem extends StatelessWidget {
   Widget build(BuildContext context) {
     const url = Environment.API_DAO;
     return Container(
-      constraints: const BoxConstraints(minHeight: 125.0),
+      constraints: BoxConstraints(minHeight: getProportionateScreenHeight(135.0)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10.0),
@@ -416,7 +409,7 @@ class CardItem extends StatelessWidget {
             ),
             Expanded(
               child: Container(
-                constraints: const BoxConstraints(minHeight: 105.0),
+                constraints: const BoxConstraints(minHeight: 135.0),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 5.0),
                   child: Column(

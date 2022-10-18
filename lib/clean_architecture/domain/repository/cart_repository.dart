@@ -39,7 +39,7 @@ abstract class CartRepositoryInterface {
   // Cart
   Future<dynamic> getShoppingCartTemp({
     required String districtId,
-    required Map<String, String> bodyParams,
+    required Map<String, String> headers,
   });
 
   // http.response

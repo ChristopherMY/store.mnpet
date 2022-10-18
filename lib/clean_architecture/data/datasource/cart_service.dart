@@ -169,13 +169,12 @@ class CartService implements CartRepositoryInterface {
   @override
   Future<dynamic> getShoppingCartTemp({
     required String districtId,
-    required Map<String, String> bodyParams,
+    required Map<String, String> headers,
   }) async {
     try {
-      return await http.post(
-        Uri.parse("$_url/api/v1/cart/temporal?&district_id=$districtId"),
+      return await http.get(
+        Uri.parse("$_url/api/v1/cart/temporal?district_id=$districtId"),
         headers: headers,
-        body: jsonEncode(bodyParams),
       );
     } on Exception catch (e) {
       if (kDebugMode) {
@@ -197,11 +196,7 @@ class CartService implements CartRepositoryInterface {
         body: json.encode(cart),
       );
     } on Exception catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-
-      return null;
+      return e.toString();
     }
   }
 
@@ -236,6 +231,4 @@ class CartService implements CartRepositoryInterface {
       return e.toString();
     }
   }
-
-
 }

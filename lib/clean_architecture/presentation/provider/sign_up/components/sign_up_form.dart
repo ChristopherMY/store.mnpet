@@ -252,17 +252,29 @@ class _SignUpFormState extends State<SignUpForm> {
                         signUpBloc.termsConditionsConfirmed.value
                   };
 
-                  final response =
-                      await signUpBloc.registerUser(user: modelUser);
+                  final response = await signUpBloc.registerUser(user: modelUser);
+
+                  if (response is bool) {
+                    if (!mounted) return;
+                    return GlobalSnackBar.showErrorSnackBarIcon(
+                      context,
+                      "Tuvimos problemas, vuelva a intentarlo",
+                    );
+                  }
+
                   if (response is ResponseApi) {
                     if (response.status == "error") {
                       if (!mounted) return;
-                      return GlobalSnackBar.showErrorSnackBarIcon(
+                      GlobalSnackBar.showErrorSnackBarIcon(
                         context,
                         response.message,
                       );
                     }
-                  } else if (response is CredentialsAuth) {
+
+                    return;
+                  }
+
+                  if (response is CredentialsAuth) {
                     final responseSession = await mainBloc.loadSessionPromise();
                     if (responseSession) {
                       final responseUserInformation =
@@ -275,15 +287,9 @@ class _SignUpFormState extends State<SignUpForm> {
                         int count = 0;
                         Navigator.of(context).popUntil((route) => count++ >= 3);
                       }
-
-                      return;
                     }
-                  } else if (response is bool) {
-                    if (!mounted) return;
-                    return GlobalSnackBar.showErrorSnackBarIcon(
-                      context,
-                      "Tuvimos problemas, vuelva a intentarlo",
-                    );
+
+                    return;
                   }
                 }
               }

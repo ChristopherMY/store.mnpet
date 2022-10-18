@@ -9,11 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/tab_payment_page.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
@@ -117,7 +117,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
             ),
             centerTitle: false,
             title: Text(
-              "Orden",
+              "Pago",
               style: Theme.of(context).textTheme.bodyText2,
             ),
             actions: [
@@ -164,39 +164,6 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                             ],
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15.0),
-                          child: SmoothPageIndicator(
-                            controller: checkoutInfoBloc.pageController,
-                            count: 2,
-                            onDotClicked: (index) async {
-                              await checkoutInfoBloc.pageController
-                                  .animateToPage(
-                                index,
-                                duration: const Duration(milliseconds: 400),
-                                curve: Curves.easeIn,
-                              );
-                            },
-                            effect: CustomizableEffect(
-                              activeDotDecoration: DotDecoration(
-                                width: getProportionateScreenWidth(66.0),
-                                height: 12.0,
-                                color: kPrimaryColor,
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              dotDecoration: DotDecoration(
-                                width: 44.0,
-                                height: 12.0,
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.circular(16.0),
-                                verticalOffset: 0,
-                              ),
-                              spacing: 20.0,
-                              inActiveColorOverride: (i) =>
-                                  checkoutInfoBloc.colors[i],
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -208,92 +175,152 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                   child: ValueListenableBuilder(
                     valueListenable: mainBloc.informationCart,
                     builder: (_, cart, __) {
+                      print("Build informationCart");
                       if (cart is Cart) {
                         return Column(
                           children: [
                             SizedBox(
                               width: SizeConfig.screenWidth!,
                               child: Padding(
-                                padding: const EdgeInsets.only(left: 15.0, bottom: 15.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        checkoutInfoBloc.isTabExpanded.value =
-                                            !checkoutInfoBloc.isTabExpanded.value;
-                                      },
-                                      child: ValueListenableBuilder(
-                                        valueListenable:
-                                            checkoutInfoBloc.isTabExpanded,
-                                        builder: (_, bool isTabExpanded, __) {
-                                          return AnimatedContainer(
-                                            duration: checkoutInfoBloc.duration,
-                                            width: isTabExpanded
-                                                ? getProportionateScreenWidth(50)
-                                                : getProportionateScreenWidth(70),
-                                            height:
-                                                getProportionateScreenHeight(50),
-                                            alignment: Alignment.center,
-                                            clipBehavior: Clip.hardEdge,
-                                            decoration: BoxDecoration(
-                                              color: isTabExpanded
-                                                  ? Colors.black
-                                                  : Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                            ),
-                                            child: Text(
-                                              "Envío",
-                                              style: TextStyle(
-                                                color: isTabExpanded
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        checkoutInfoBloc.isTabExpanded.value =
-                                            !checkoutInfoBloc.isTabExpanded.value;
-                                      },
-                                      child: ValueListenableBuilder(
-                                        valueListenable:
-                                            checkoutInfoBloc.isTabExpanded,
-                                        builder: (_, bool isTabExpanded, __) {
-                                          return AnimatedContainer(
-                                            duration: checkoutInfoBloc.duration,
-                                            width: isTabExpanded
-                                                ? getProportionateScreenWidth(70)
-                                                : getProportionateScreenWidth(50),
-                                            alignment: Alignment.center,
-                                            height:
-                                                getProportionateScreenHeight(30),
-                                            clipBehavior: Clip.hardEdge,
-                                            decoration: BoxDecoration(
-                                              color: isTabExpanded
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                              borderRadius:
-                                              BorderRadius.circular(15.0),
-                                            ),
-                                            child: Text(
-                                              "Pagar",
-                                              style: TextStyle(
-                                                color: isTabExpanded
-                                                    ? Colors.black
-                                                    : Colors.white,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
+                                padding: const EdgeInsets.only(
+                                  bottom: 15.0,
+                                  right: 10.0,
+                                ),
+                                child: ValueListenableBuilder(
+                                  valueListenable:
+                                      checkoutInfoBloc.tabsPaymentPage,
+                                  builder: (_,
+                                      List<TabPaymentPage> tabsPaymentPage,
+                                      __) {
+                                    print("Build tabsPaymentPage");
+                                    return Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: List.generate(
+                                          tabsPaymentPage.length,
+                                          (index) {
+                                            final tabPaymentPage =
+                                                tabsPaymentPage[index];
+                                            return _TabPaymentPage(
+                                              onTap: () {
+                                                checkoutInfoBloc
+                                                    .handleChangeTabPaymentPage(
+                                                        index);
+                                              },
+                                              tabPaymentPage: tabPaymentPage,
+                                            );
+                                          },
+                                        )
+                                        //[
+                                        //   GestureDetector(
+                                        //     onTap: () async {
+                                        //       checkoutInfoBloc.isTabExpanded.value =
+                                        //           !checkoutInfoBloc
+                                        //               .isTabExpanded.value;
+                                        //
+                                        //       await checkoutInfoBloc.pageController
+                                        //           .animateToPage(
+                                        //         0,
+                                        //         duration:
+                                        //             const Duration(milliseconds: 400),
+                                        //         curve: Curves.easeIn,
+                                        //       );
+                                        //     },
+                                        //     child: ValueListenableBuilder(
+                                        //       valueListenable:
+                                        //           checkoutInfoBloc.isTabExpanded,
+                                        //       builder: (_, bool isTabExpanded, __) {
+                                        //         return AnimatedContainer(
+                                        //           duration: checkoutInfoBloc.duration,
+                                        //           width: isTabExpanded
+                                        //               ? getProportionateScreenWidth(
+                                        //                   50.0)
+                                        //               : getProportionateScreenWidth(
+                                        //                   45.0),
+                                        //           height: isTabExpanded
+                                        //               ? getProportionateScreenWidth(
+                                        //                   50.0)
+                                        //               : getProportionateScreenWidth(
+                                        //                   45.0),
+                                        //           alignment: Alignment.center,
+                                        //           clipBehavior: Clip.hardEdge,
+                                        //           decoration: BoxDecoration(
+                                        //             color: isTabExpanded
+                                        //                 ? Colors.black
+                                        //                 : Colors.white,
+                                        //             borderRadius:
+                                        //                 BorderRadius.circular(15.0),
+                                        //           ),
+                                        //           child: Text(
+                                        //             "Envío",
+                                        //             style: TextStyle(
+                                        //               color: isTabExpanded
+                                        //                   ? Colors.white
+                                        //                   : Colors.black,
+                                        //             ),
+                                        //           ),
+                                        //         );
+                                        //       },
+                                        //     ),
+                                        //   ),
+                                        //   const SizedBox(height: 10.0),
+                                        //   GestureDetector(
+                                        //     onTap: () async {
+                                        //       checkoutInfoBloc.isTabExpanded.value =
+                                        //           !checkoutInfoBloc
+                                        //               .isTabExpanded.value;
+                                        //
+                                        //       await checkoutInfoBloc.pageController
+                                        //           .animateToPage(
+                                        //         1,
+                                        //         duration:
+                                        //             const Duration(milliseconds: 400),
+                                        //         curve: Curves.easeIn,
+                                        //       );
+                                        //     },
+                                        //     child: ValueListenableBuilder(
+                                        //       valueListenable:
+                                        //           checkoutInfoBloc.isTabExpanded,
+                                        //       builder: (_, bool isTabExpanded, __) {
+                                        //         return AnimatedContainer(
+                                        //           duration: checkoutInfoBloc.duration,
+                                        //           width: isTabExpanded
+                                        //               ? getProportionateScreenWidth(
+                                        //                   45.0)
+                                        //               : getProportionateScreenWidth(
+                                        //                   50.0),
+                                        //           height: isTabExpanded
+                                        //               ? getProportionateScreenWidth(
+                                        //                   45.0)
+                                        //               : getProportionateScreenWidth(
+                                        //                   50.0),
+                                        //           alignment: Alignment.center,
+                                        //           clipBehavior: Clip.hardEdge,
+                                        //           decoration: BoxDecoration(
+                                        //             color: isTabExpanded
+                                        //                 ? Colors.white
+                                        //                 : Colors.black,
+                                        //             borderRadius:
+                                        //                 BorderRadius.circular(15.0),
+                                        //           ),
+                                        //           child: Text(
+                                        //             "Pagar",
+                                        //             style: TextStyle(
+                                        //               color: isTabExpanded
+                                        //                   ? Colors.black
+                                        //                   : Colors.white,
+                                        //             ),
+                                        //           ),
+                                        //         );
+                                        //       },
+                                        //     ),
+                                        //   ),
+                                        // ],
+
+                                        );
+                                  },
                                 ),
                               ),
                             ),
@@ -433,6 +460,8 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                   dynamic existsDefaultAddress;
                   dynamic existsDefaultPhone;
 
+                  // checkoutInfoBloc.pageController.jumpToPage(1);
+
                   if (mainBloc.informationUser is UserInformation) {
                     UserInformation userInfo = mainBloc.informationUser;
                     List<Address> addresses = userInfo.addresses ?? [];
@@ -455,6 +484,8 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                               existsDefaultAddress is Address &&
                               existsDefaultPhone != null &&
                               existsDefaultPhone is Phone) {
+                            checkoutInfoBloc.handleChangeTabPaymentPage(1);
+
                             await Future.value(
                               checkoutInfoBloc.pageController.animateToPage(
                                 checkoutInfoBloc.pageController.page!.toInt() +
@@ -659,30 +690,27 @@ class _ButtonCrud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: SizeConfig.screenWidth! - SizeConfig.screenWidth! * 0.55,
+      width: SizeConfig.screenWidth! - SizeConfig.screenWidth! * 0.59,
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.symmetric(vertical: 15.0),
         child: Material(
-          color: kBackGroundColor,
+          color: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18.0),
           ),
+          elevation: 1,
           clipBehavior: Clip.hardEdge,
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.all(5.0),
+              padding: const EdgeInsets.symmetric(vertical: 9.0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  const SizedBox(
-                    width: 25.0,
-                    height: 25.0,
-                    child: Icon(
-                      CupertinoIcons.plus,
-                      size: 18,
-                    ),
+                  const Icon(
+                    CupertinoIcons.plus,
+                    size: 18.0,
                   ),
-                  const SizedBox(width: 10.0),
                   Text(titleButton)
                 ],
               ),
@@ -721,8 +749,9 @@ class OrderCheckoutScreen extends StatelessWidget {
               ),
             ],
           ),
+          SizedBox(height: getProportionateScreenHeight(20.0)),
           _OrderCheckoutShipping.init(context),
-          SizedBox(height: getProportionateScreenHeight(25.0)),
+          SizedBox(height: getProportionateScreenHeight(20.0)),
           _OrderCheckoutShippingPhone.init(context),
         ],
       ),
@@ -759,10 +788,11 @@ class _OrderCheckoutShippingState extends State<_OrderCheckoutShipping> {
         SizedBox(
           height: 190,
           child: Padding(
-            padding: const EdgeInsets.only(left: 7.0),
+            padding: const EdgeInsets.only(left: 0.0),
             child: ListView(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.all(0),
               children: List.generate(
                 mainBloc.informationUser!.addresses.length,
                 (index) {
@@ -772,8 +802,8 @@ class _OrderCheckoutShippingState extends State<_OrderCheckoutShipping> {
                         SizeConfig.screenWidth! * 0.13,
                     child: Card(
                       color: Colors.white,
-                      margin: const EdgeInsets.all(5.0),
-                      elevation: 2,
+                      // margin: const EdgeInsets.all(5.0),
+                      elevation: 1,
                       clipBehavior: Clip.hardEdge,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
@@ -789,8 +819,8 @@ class _OrderCheckoutShippingState extends State<_OrderCheckoutShipping> {
                                 Text(address.addressType!),
                                 Container(
                                   clipBehavior: Clip.hardEdge,
-                                  width: 25,
-                                  height: 25,
+                                  width: 25.0,
+                                  height: 25.0,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: address!.addressDefault!
@@ -800,7 +830,7 @@ class _OrderCheckoutShippingState extends State<_OrderCheckoutShipping> {
                                   ),
                                   child: Icon(
                                     Icons.check,
-                                    size: 15,
+                                    size: 15.0,
                                     color: address!.addressDefault!
                                         ? Colors.white
                                         : Colors.black,
@@ -965,7 +995,7 @@ class _OrderCheckoutShippingPhoneState
         SizedBox(
           height: 135,
           child: Padding(
-            padding: const EdgeInsets.only(left: 7.0),
+            padding: const EdgeInsets.only(left: 0.0),
             child: ListView(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
@@ -978,7 +1008,7 @@ class _OrderCheckoutShippingPhoneState
                         SizeConfig.screenWidth! * 0.13,
                     child: Card(
                       color: Colors.white,
-                      margin: const EdgeInsets.all(5.0),
+                      // margin: const EdgeInsets.all(5.0),
                       elevation: 2,
                       clipBehavior: Clip.hardEdge,
                       shape: RoundedRectangleBorder(
@@ -1017,7 +1047,7 @@ class _OrderCheckoutShippingPhoneState
                                         ),
                                         child: Icon(
                                           Icons.check,
-                                          size: 15,
+                                          size: 15.0,
                                           color: phone.phoneDefault!
                                               ? Colors.white
                                               : Colors.black,
@@ -1151,16 +1181,19 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   Widget build(BuildContext context) {
     final checkoutInfoBloc = context.watch<CheckOutInfoBloc>();
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: CreditCardWidget(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+      child: Material(
+        color: Colors.white,
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            CreditCardWidget(
               glassmorphismConfig: Glassmorphism(
                 blurX: 1.0,
                 blurY: 1.0,
@@ -1221,72 +1254,126 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
                 ),
               ],
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 15.0),
-            child: Text("Detalle de la tarjeta"),
-          ),
-          Expanded(
-            flex: 1,
-            child: Material(
-              color: Colors.white,
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+            // Padding(
+            //   padding: const EdgeInsets.only(bottom: 25.0),
+            //   child:
+            //   Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            // const Padding(
+            //   padding:
+            //       EdgeInsets.symmetric(horizontal: 16.0, vertical: 15.0),
+            //   child: Text("Detalle de la tarjeta"),
+            // ),
+            CreditCardForm(
+              formKey: checkoutInfoBloc.formKey,
+              obscureCvv: true,
+              obscureNumber: false,
+              cardNumber: checkoutInfoBloc.cardNumber,
+              cvvCode: checkoutInfoBloc.cvvCode,
+              isHolderNameVisible: false,
+              isCardNumberVisible: true,
+              isExpiryDateVisible: true,
+              cardHolderName: checkoutInfoBloc.cardHolderName,
+              expiryDate: checkoutInfoBloc.expiryDate,
+              themeColor: Colors.blue,
+              textColor: Colors.black,
+              cvvValidationMessage: "Ingrese un CVV valido",
+              dateValidationMessage: "Fecha de expiración invalido",
+              numberValidationMessage: "Numero de tarjeta invalido",
+              cardNumberDecoration: const InputDecoration(
+                labelText: 'Número de tarjeta',
+                hintText: 'XXXX XXXX XXXX XXXX',
+                hintStyle: TextStyle(color: Colors.black),
+                labelStyle: TextStyle(color: Colors.black),
+                errorStyle: TextStyle(height: 0.0),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
               ),
-              child: CreditCardForm(
-                formKey: checkoutInfoBloc.formKey,
-                obscureCvv: true,
-                obscureNumber: false,
-                cardNumber: checkoutInfoBloc.cardNumber,
-                cvvCode: checkoutInfoBloc.cvvCode,
-                isHolderNameVisible: false,
-                isCardNumberVisible: true,
-                isExpiryDateVisible: true,
-                cardHolderName: checkoutInfoBloc.cardHolderName,
-                expiryDate: checkoutInfoBloc.expiryDate,
-                themeColor: Colors.blue,
-                textColor: Colors.black,
-                cvvValidationMessage: "Ingrese un CVV valido",
-                dateValidationMessage: "Fecha de expiración invalido",
-                numberValidationMessage: "Numero de tarjeta invalido",
-                cardNumberDecoration: const InputDecoration(
-                  labelText: 'Número de tarjeta',
-                  hintText: 'XXXX XXXX XXXX XXXX',
-                  hintStyle: TextStyle(color: Colors.black),
-                  labelStyle: TextStyle(color: Colors.black),
-                  errorStyle: TextStyle(height: 0.0),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                ),
-                expiryDateDecoration: const InputDecoration(
-                  hintStyle: TextStyle(color: Colors.black),
-                  labelStyle: TextStyle(color: Colors.black),
-                  errorStyle: TextStyle(height: 0.0),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelText: 'Fecha de expiración',
-                  hintText: 'XX/XX',
-                ),
-                cvvCodeDecoration: const InputDecoration(
-                  hintStyle: TextStyle(color: Colors.black),
-                  labelStyle: TextStyle(color: Colors.black),
-                  errorStyle: TextStyle(height: 0.0),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelText: 'CVV',
-                  hintText: 'XXX',
-                ),
-                cardHolderDecoration: const InputDecoration(
-                  hintStyle: TextStyle(color: Colors.black),
-                  labelStyle: TextStyle(color: Colors.black),
-                  errorStyle: TextStyle(height: 0.0),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelText: 'Titular de la tarjeta',
-                ),
-                onCreditCardModelChange:
-                    checkoutInfoBloc.onCreditCardModelChange,
+              expiryDateDecoration: const InputDecoration(
+                hintStyle: TextStyle(color: Colors.black),
+                labelStyle: TextStyle(color: Colors.black),
+                errorStyle: TextStyle(height: 0.0),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                labelText: 'Fecha de expiración',
+                hintText: 'XX/XX',
               ),
+              cvvCodeDecoration: const InputDecoration(
+                hintStyle: TextStyle(color: Colors.black),
+                labelStyle: TextStyle(color: Colors.black),
+                errorStyle: TextStyle(height: 0.0),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                labelText: 'CVV',
+                hintText: 'XXX',
+              ),
+              cardHolderDecoration: const InputDecoration(
+                hintStyle: TextStyle(color: Colors.black),
+                labelStyle: TextStyle(color: Colors.black),
+                errorStyle: TextStyle(height: 0.0),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                labelText: 'Titular de la tarjeta',
+              ),
+              onCreditCardModelChange: checkoutInfoBloc.onCreditCardModelChange,
             ),
+            // ],
+            // ),
+            // ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TabPaymentPage extends StatelessWidget {
+  const _TabPaymentPage({
+    Key? key,
+    required this.onTap,
+    required this.tabPaymentPage,
+  }) : super(key: key);
+
+  final VoidCallback onTap;
+  final TabPaymentPage tabPaymentPage;
+
+  @override
+  Widget build(BuildContext context) {
+    final checkoutInfoBloc = context.watch<CheckOutInfoBloc>();
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: checkoutInfoBloc.duration,
+        margin: const EdgeInsets.only(bottom: 10.0),
+        width: tabPaymentPage.checked!
+            ? getProportionateScreenWidth(50.0)
+            : getProportionateScreenWidth(45.0),
+        height: tabPaymentPage.checked!
+            ? getProportionateScreenWidth(50.0)
+            : getProportionateScreenWidth(45.0),
+        alignment: Alignment.center,
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          // color: tabPaymentPage.checked! ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(15.0),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black, //New
+              blurRadius: 1.0,
+              offset: Offset(0, 1),
+            )
+          ],
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            colors: <Color>[
+              Color(0xFF14ad9e),
+              kPrimaryColor,
+            ],
           ),
-        ],
+        ),
+        child: Text(
+          tabPaymentPage.title!,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

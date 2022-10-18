@@ -11,22 +11,26 @@ import 'package:store_mundo_pet/clean_architecture/domain/model/credit_card_mode
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_card_token.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_document_type.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/tab_payment_page.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 
 class CheckOutInfoBloc extends ChangeNotifier {
   bool isExpanded = false;
-  ValueNotifier<bool>  isTabExpanded = ValueNotifier(false);
 
-  final duration = const Duration(milliseconds: 300);
+  final duration = const Duration(milliseconds: 200);
 
   final colors = [
     Colors.grey.shade300,
     Colors.grey.shade300,
   ];
+
+  ValueNotifier<List<TabPaymentPage>> tabsPaymentPage = ValueNotifier([
+    TabPaymentPage(checked: true, title: "Envío",showIcon: false),
+    TabPaymentPage(checked: false, title: "Pagar", showIcon: true),
+  ]);
 
   String cardNumber = '';
   String expiryDate = '';
@@ -411,5 +415,22 @@ class CheckOutInfoBloc extends ChangeNotifier {
 
   void refresh() {
     notifyListeners();
+  }
+
+  void handleChangeTabPaymentPage(int index) async {
+    List<TabPaymentPage> copyTabsPaymentPage = List.from(tabsPaymentPage.value);
+
+    await pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeIn,
+    );
+
+    for(int i = 0; i < tabsPaymentPage.value.length; i++){
+      copyTabsPaymentPage[i] = copyTabsPaymentPage[i].copyWith(checked: i == index);
+    }
+
+
+    tabsPaymentPage.value = copyTabsPaymentPage;
   }
 }

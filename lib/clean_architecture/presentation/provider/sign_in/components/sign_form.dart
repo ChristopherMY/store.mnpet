@@ -33,6 +33,23 @@ class _SignFormState extends State<SignForm> {
 
       final response = await signInBloc.signIn();
 
+      if (!mounted) return;
+      if (response is bool && response == false) {
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Tenemos un problema, por favor inténtelo más tarde.",
+        );
+
+        signInBloc.isLoading.value = false;
+        return;
+      }
+
+      if (response is ResponseAuth) {
+        signInBloc.isLoading.value = false;
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
+      }
+
       if (response is CredentialsAuth) {
         final responseSession = await mainBloc.loadSessionPromise();
         if (responseSession) {
@@ -40,16 +57,15 @@ class _SignFormState extends State<SignForm> {
 
           if (responseUserInformation is UserInformation) {
             mainBloc.informationUser = responseUserInformation;
+
             if (!mounted) return;
             signInBloc.isLoading.value = false;
 
             final response = await mainBloc.changeShoppingCart();
-            print(response);
+
             if (response is ResponseApi) {
-              print(response.toMap());
               if (response.status == "success") {
-                await mainBloc.deleteShoppingCartTemp();
-                mainBloc.shoppingCartId = "";
+                await mainBloc.handleRemoveShoppingCart();
               }
             }
 
@@ -69,17 +85,10 @@ class _SignFormState extends State<SignForm> {
           );
 
         }
-      } else if (response is bool && response == false) {
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Tenemos un problema, por favor inténtelo más tarde.",
-        );
-      } else if (response is ResponseAuth) {
-        GlobalSnackBar.showWarningSnackBar(context, response.message);
       }
     }
 
-    signInBloc.isLoading.value = false;
+
   }
 
   @override
