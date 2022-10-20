@@ -13,9 +13,7 @@ abstract class UserRepositoryInterface {
   });
 
   Future<dynamic> updateUserInformation({
-    required String name,
-    required String lastname,
-    required String document,
+    required Map<String, dynamic> binding,
     required Map<String, String> headers,
   });
 

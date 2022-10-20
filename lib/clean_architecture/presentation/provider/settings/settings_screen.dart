@@ -1,150 +1,234 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
 
 import '../../widget/item_button.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen._({Key? key}) : super(key: key);
 
   static Widget init(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => SettingsBloc(),
+    return ChangeNotifierProvider<SettingsBloc>(
+      create: (context) => SettingsBloc(
+          userRepositoryInterface: context.read<UserRepositoryInterface>()),
       builder: (_, __) => const SettingsScreen._(),
     );
   }
 
   @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  void handleSaveConfigurationAccount() async {
+    final settingsBloc = context.read<SettingsBloc>();
+
+    if (settingsBloc.formKey.currentState!.validate()) {
+      final mainBloc = context.read<MainBloc>();
+      context.loaderOverlay.show();
+
+      Map<String, dynamic> binding = {
+        "name": settingsBloc.nameController.text,
+        "lastname": settingsBloc.lastnameController.text,
+        "document": <String, String>{
+          "value": settingsBloc.documentNumberController.text,
+          "type": "DNI"
+        },
+      };
+
+      final headers = mainBloc.headers;
+
+      final response = await settingsBloc.userRepositoryInterface
+          .updateUserInformation(binding: binding, headers: headers);
+
+      if (!mounted) return;
+
+      if (response is String) {
+        if (kDebugMode) {
+          print(response);
+        }
+
+        context.loaderOverlay.hide();
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Lo sentimos, vuelva a intentarlo otra vez",
+        );
+        return;
+      }
+
+      if (response is! http.Response) {
+        context.loaderOverlay.hide();
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Lo sentimos, vuelva a intentarlo otra vez",
+        );
+        return;
+      }
+
+      if (response.statusCode != 200) {
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Lo sentimos, vuelva a intentarlo otra vez",
+        );
+        context.loaderOverlay.hide();
+        return;
+      }
+
+      final responseDecode = json.decode(response.body);
+      final informationUser = UserInformation.fromMap(responseDecode);
+
+      mainBloc.informationUser = informationUser;
+      mainBloc.refreshMainBloc();
+      context.loaderOverlay.hide();
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
-        bottomOpacity: 0.0,
-        elevation: 0.0,
-        title: const Text(
-          "Configuración de mi cuenta",
-          style: TextStyle(color: Colors.black, fontSize: 16),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Text(
-                    "Información personal",
-                    style: Theme.of(context).textTheme.bodyText1,
-                  ),
+    final settingsBloc = context.watch<SettingsBloc>();
+    final mainBloc = context.read<MainBloc>();
+
+    UserInformation userInformation = mainBloc.informationUser;
+
+    return SafeArea(
+      child: LoaderOverlay(
+        child: Scaffold(
+          appBar: AppBar(
+            iconTheme: const IconThemeData(color: Colors.black),
+            backgroundColor: Colors.white,
+            bottomOpacity: 0.0,
+            elevation: 0.0,
+            title: const Text(
+              "Configuración de mi cuenta",
+              style: TextStyle(color: Colors.black, fontSize: 16),
+            ),
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Form(
+                key: settingsBloc.formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Text(
+                        "Información personal",
+                        style: Theme.of(context).textTheme.bodyText1,
+                      ),
+                    ),
+                    TextFormField(
+                      controller: settingsBloc.nameController,
+                      keyboardType: TextInputType.text,
+                      // initialValue: settingsBloc.nameController.text = ,
+                      textInputAction: TextInputAction.next,
+                      onChanged: settingsBloc.onChangeName,
+                      validator: settingsBloc.onValidationName,
+                      style: Theme.of(context).textTheme.bodyText2,
+                      decoration: InputDecoration(
+                        labelText: "Nombre",
+                        hintText: "Ingresa tu nombre",
+                        labelStyle: const TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        hintStyle: Theme.of(context).textTheme.bodyText2,
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        errorStyle: const TextStyle(height: 0),
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    TextFormField(
+                      controller: settingsBloc.lastnameController,
+                      keyboardType: TextInputType.text,
+                      //   initialValue: userInformation.lastname,
+                      textInputAction: TextInputAction.next,
+                      onChanged: settingsBloc.onChangeLastName,
+                      validator: settingsBloc.onValidationLastName,
+                      style: Theme.of(context).textTheme.bodyText2,
+                      decoration: InputDecoration(
+                        labelText: "Apellido (como aparece en tu DNI)",
+                        hintText: "Ingresa tu apellido",
+                        labelStyle: const TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.w400),
+                        hintStyle: Theme.of(context).textTheme.bodyText2,
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        errorStyle: const TextStyle(height: 0),
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    TextFormField(
+                      controller: settingsBloc.documentNumberController,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      // initialValue: userInformation.document!.value!,
+                      onChanged: settingsBloc.onChangeNumberDoc,
+                      validator: settingsBloc.onValidationNumberDoc,
+                      style: Theme.of(context).textTheme.bodyText2,
+                      decoration: InputDecoration(
+                        labelText: "DNI",
+                        hintText: "Ingresa tu número de documento",
+                        labelStyle: const TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        hintStyle: Theme.of(context).textTheme.bodyText2,
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        errorStyle: const TextStyle(height: 0),
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    TextFormField(
+                      enabled: false,
+                      keyboardType: TextInputType.text,
+                      initialValue: "demo@demo.com",
+                      style: Theme.of(context).textTheme.bodyText2,
+                      decoration: InputDecoration(
+                        labelText: "Email",
+                        hintText: "Ingresa tu correo electrónico",
+                        labelStyle: const TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        hintStyle: Theme.of(context).textTheme.bodyText2,
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        errorStyle: const TextStyle(height: 0),
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    ItemButton(
+                      title: "Cambiar contraseña",
+                      press: () {},
+                      icon: Icons.security,
+                    ),
+                    ItemButton(
+                      title: "Cambiar correo",
+                      press: () {},
+                      icon: Icons.mail_outline_sharp,
+                    ),
+                    const SizedBox(height: 50),
+                    DefaultButton(
+                      text: "Guardar",
+                      press: handleSaveConfigurationAccount,
+                    ),
+                  ],
                 ),
-                buildNameFormField(context: context),
-                const SizedBox(height: 10.0),
-                buildLastNameFormField(context: context),
-                const SizedBox(height: 10.0),
-                buildDNIFormField(context: context),
-                const SizedBox(height: 10.0),
-                buildEmailFormField(context: context),
-                const SizedBox(height: 10.0),
-                ItemButton(
-                  title: "Cambiar contraseña",
-                  press: () {},
-                  icon: Icons.security,
-                ),
-                ItemButton(
-                  title: "Cambiar correo",
-                  press: () {},
-                  icon: Icons.mail_outline_sharp,
-                ),
-                const SizedBox(height: 50),
-                DefaultButton(text: "Guardar", press: () {}),
-              ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  TextFormField buildNameFormField({required BuildContext context}) {
-    final settingBloc = Provider.of<SettingsBloc>(context);
-
-    return TextFormField(
-      //controller: signInBloc.passwordController,
-      keyboardType: TextInputType.text,
-      // onChanged: signInBloc.onChangePassword,
-      // validator: signInBloc.onValidationPassword,
-      style: Theme.of(context).textTheme.bodyText2,
-      decoration: InputDecoration(
-        labelText: "Nombre",
-        hintText: "Ingresa tu nombre",
-        labelStyle: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w400),
-        hintStyle: Theme.of(context).textTheme.bodyText2,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        errorStyle: const TextStyle(height: 0),
-      ),
-    ) ;
-  }
-
-  TextFormField buildLastNameFormField({required BuildContext context}) {
-    final settingBloc = Provider.of<SettingsBloc>(context);
-
-    return TextFormField(
-      //controller: signInBloc.passwordController,
-      keyboardType: TextInputType.text,
-      // onChanged: signInBloc.onChangePassword,
-      // validator: signInBloc.onValidationPassword,
-      style: Theme.of(context).textTheme.bodyText2,
-      decoration: InputDecoration(
-        labelText: "Apellido (como aparece en tu DNI)",
-        hintText: "Ingresa tu apellido",
-        labelStyle: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w400),
-        hintStyle: Theme.of(context).textTheme.bodyText2,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        errorStyle: const TextStyle(height: 0),
-      ),
-    );
-  }
-
-  TextFormField buildDNIFormField({required BuildContext context}) {
-    final settingBloc = Provider.of<SettingsBloc>(context);
-
-    return TextFormField(
-      //controller: signInBloc.passwordController,
-      keyboardType: TextInputType.number,
-      // onChanged: signInBloc.onChangePassword,
-      // validator: signInBloc.onValidationPassword,
-      style: Theme.of(context).textTheme.bodyText2,
-      decoration: InputDecoration(
-        labelText: "DNI",
-        hintText: "Ingresa tu número de documento",
-        labelStyle: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w400),
-        hintStyle: Theme.of(context).textTheme.bodyText2,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        errorStyle: const TextStyle(height: 0),
-      ),
-    );
-  }
-
-  TextFormField buildEmailFormField({required BuildContext context}) {
-    final settingBloc = Provider.of<SettingsBloc>(context);
-
-    return TextFormField(
-      enabled: false,
-      keyboardType: TextInputType.text,
-      initialValue: "demo@demo.com",
-      style: Theme.of(context).textTheme.bodyText2,
-      decoration: InputDecoration(
-        labelText: "Email",
-        hintText: "Ingresa tu correo electrónico",
-        labelStyle: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w400),
-        hintStyle: Theme.of(context).textTheme.bodyText2,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        errorStyle: const TextStyle(height: 0),
       ),
     );
   }

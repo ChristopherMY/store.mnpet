@@ -82,8 +82,7 @@ class HomeBloc extends ChangeNotifier {
   }
 
   void handleInitComponents() async {
-    final collection =
-        await Future.wait([homeRepositoryInterface.getCategoriesHome()]);
+    final collection = await Future.wait([homeRepositoryInterface.getCategoriesHome()]);
 
     collection.forEachIndexed(
       (index, response) {

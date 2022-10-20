@@ -164,13 +164,13 @@ class RecoveryPasswordForm extends StatelessWidget {
             text: "Restablecer",
             press: () async {
               if (recoveryPasswordBloc.formKey.currentState!.validate()) {
-                recoveryPasswordBloc.formKey.currentState!.save();
                 context.loaderOverlay.show();
+                recoveryPasswordBloc.formKey.currentState!.save();
+
                 final response = await recoveryPasswordBloc.changePassword(
                   userId: forgotPasswordBloc.responseForgotPassword.userId!,
                   password: recoveryPasswordBloc.passwordController.text,
-                  passwordConfirmation:
-                      recoveryPasswordBloc.passwordConfirmController.text,
+                  passwordConfirmation: recoveryPasswordBloc.passwordConfirmController.text,
                 );
 
                 if (response is ResponseForgotPassword) {
@@ -187,13 +187,18 @@ class RecoveryPasswordForm extends StatelessWidget {
                   }
 
                   GlobalSnackBar.showErrorSnackBarIcon(
-                      context, response.message!);
-                } else {
-                  GlobalSnackBar.showErrorSnackBarIcon(
                     context,
-                    "Tuvimos problemas, vuelva a intentarlo más tarde.",
+                    response.message!,
                   );
+
+                  context.loaderOverlay.hide();
+                  return;
                 }
+
+                GlobalSnackBar.showErrorSnackBarIcon(
+                  context,
+                  "Tuvimos problemas, vuelva a intentarlo más tarde.",
+                );
 
                 context.loaderOverlay.hide();
               }

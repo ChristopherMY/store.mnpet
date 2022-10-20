@@ -48,17 +48,24 @@ class OtpBloc extends ChangeNotifier {
   }) async {
     final response =
         await authRepositoryInterface.validateOtp(otp: pin, userId: userId);
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decode = json.decode(response.body);
-        return ResponseForgotPassword.fromMap(decode);
-      }
-    } else if (response is String) {
+
+    if (response is String) {
       if (kDebugMode) {
         print(response);
       }
+
+      return false;
     }
 
-    return false;
+    if (response is! http.Response) {
+      return false;
+    }
+
+    if (response.statusCode == 200) {
+      return false;
+    }
+
+    final decode = json.decode(response.body);
+    return ResponseForgotPassword.fromMap(decode);
   }
 }

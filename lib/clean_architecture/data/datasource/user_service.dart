@@ -305,18 +305,10 @@ class UserService implements UserRepositoryInterface {
 
   @override
   Future<dynamic> updateUserInformation({
-    required String name,
-    required String lastname,
-    required String document,
+    required Map<String, dynamic> binding,
     required Map<String, String> headers,
   }) async {
     try {
-      Map<String, String> binding = {
-        "name": name,
-        "lastname": lastname,
-        "document": document,
-      };
-
       final bindingEncode = json.encode(binding);
       return await http.put(
         Uri.parse(
@@ -325,7 +317,6 @@ class UserService implements UserRepositoryInterface {
         headers: headers,
         body: bindingEncode,
       );
-
     } on Exception catch (e) {
       if (kDebugMode) {
         print(e);
