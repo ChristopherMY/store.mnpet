@@ -12,6 +12,13 @@ abstract class UserRepositoryInterface {
     required Map<String, String> headers,
   });
 
+  Future<dynamic> updateUserInformation({
+    required String name,
+    required String lastname,
+    required String document,
+    required Map<String, String> headers,
+  });
+
   // http.response
   Future<dynamic> createAddress({
     required Address address,

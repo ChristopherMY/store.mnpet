@@ -240,6 +240,7 @@ class _CartScreenState extends State<CartScreen> {
                                 text: "Ir a pagar",
                                 press: () {
                                   if (mainBloc.credentials is! CredentialsAuth) {
+                                    mainBloc.countNavigateIterationScreen = 3;
                                     mainBloc.handleAuthAccess(context);
 
                                     return;

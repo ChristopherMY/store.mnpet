@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/response_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 
@@ -26,7 +26,6 @@ class SignInBloc extends ChangeNotifier {
   TextEditingController passwordController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  ValueNotifier<bool> isLoading = ValueNotifier(false);
   bool loginState = false;
 
   void addError({required String error}) {
@@ -91,29 +90,35 @@ class SignInBloc extends ChangeNotifier {
       password: passwordController.text,
     );
 
-    if (responseAuth is http.Response) {
-      final response = json.decode(responseAuth.body);
-
-      if (responseAuth.statusCode == 200) {
-        final credentials = CredentialsAuth.fromMap(response);
-
-        await hiveRepositoryInterface.save(
-          containerName: "authentication",
-          key: "credentials",
-          value: credentials.toMap(),
-        );
-
-        return credentials;
-      } else {
-        return ResponseAuth.fromMap(response);
-      }
-    } else if (responseAuth is String) {
+    if (responseAuth is String) {
       if (kDebugMode) {
         print(responseAuth);
       }
+
+      return false;
     }
 
-    return false;
-  }
+    if (responseAuth is! http.Response) {
+      return false;
+    }
 
+    if (responseAuth.statusCode != 200) {
+      final response = json.decode(responseAuth.body);
+      return ResponseAuth.fromMap(response);
+    }
+
+    final response = json.decode(responseAuth.body);
+    final credentials = CredentialsAuth.fromMap(response);
+
+    await hiveRepositoryInterface.save(
+      containerName: "authentication",
+      key: "credentials",
+      value: credentials.toMap(),
+
+    );
+
+    return credentials;
+
+
+  }
 }

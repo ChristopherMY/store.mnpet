@@ -36,7 +36,6 @@ class MainBloc extends ChangeNotifier {
     required this.cartRepositoryInterface,
   });
 
-  bool isLogged = false;
   ValueNotifier<Session> sessionAccount = ValueNotifier(Session.inactive);
   ValueNotifier<Account> account = ValueNotifier(Account.inactive);
   ValueNotifier<Home> home = ValueNotifier(Home.inactive);
@@ -66,6 +65,8 @@ class MainBloc extends ChangeNotifier {
   String districtId = "";
 
   String ubigeo = "";
+
+  int countNavigateIterationScreen = 3;
 
   dynamic informationUser;
   ValueNotifier<dynamic> informationCart = ValueNotifier(dynamic);
@@ -378,15 +379,15 @@ class MainBloc extends ChangeNotifier {
       },
     );
 
-    if (responseCredentials.token.isNotEmpty) {
-      credentials = responseCredentials;
-      headers[HttpHeaders.authorizationHeader] =
-          "Bearer ${responseCredentials.token}";
-
-      return true;
+    if (responseCredentials.token.isEmpty) {
+      return false;
     }
 
-    return false;
+    credentials = responseCredentials;
+    headers[HttpHeaders.authorizationHeader] =
+        "Bearer ${responseCredentials.token}";
+
+    return true;
   }
 
 // TODO: Solo se trabajara en el Main Screen
@@ -411,7 +412,8 @@ class MainBloc extends ChangeNotifier {
       credentials = responseCredentials;
       headers[HttpHeaders.authorizationHeader] =
           "Bearer ${responseCredentials.token}";
-      sessionAccount.value = Session.active;
+
+      // sessionAccount.value = Session.active;
     }
   }
 

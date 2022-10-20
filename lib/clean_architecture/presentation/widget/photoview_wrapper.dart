@@ -15,8 +15,6 @@ import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import '../../domain/usecase/page.dart';
 import '../provider/product/product_bloc.dart';
 
-
-
 class GalleryPhotoViewWrapper extends StatefulWidget {
   const GalleryPhotoViewWrapper({
     Key? key,
@@ -48,9 +46,9 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
     with SingleTickerProviderStateMixin {
   final _url = Environment.API_DAO;
   final toast = CustomToast();
-  late final PageController pageController;
-  late final AnimationController _controller;
-  late final List<MainImage> gallery;
+  late PageController pageController;
+  late AnimationController _controller;
+  List<MainImage> gallery = <MainImage>[];
 
   List strings = [
     "woadaipwdjwiaddawdad dwa dphawd auhdwh 9uhdaw87dya wdy8aw u8auda8 dw8",
@@ -72,15 +70,15 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
   Widget build(BuildContext context) {
     final productBloc = context.watch<ProductBloc>();
 
-    pageController = PageController(initialPage: productBloc.indexPhotoViewer);
     if (widget.isAppBar) {
       gallery = productBloc.product!.galleryHeader!;
+      pageController = PageController(initialPage: productBloc.indexPhotoViewer);
     } else {
       gallery = productBloc.product!.galleryDescription!;
+      pageController = PageController(initialPage: productBloc.indexPhotoViewerDescription);
     }
 
     return Scaffold(
-
       backgroundColor: Colors.black,
       body: AnimatedBuilder(
         animation: _controller,
@@ -97,10 +95,16 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
               child: managerPhotoViewer(
                 gallery: gallery,
                 managerType: widget.managerTypePhotoViewer,
-                position: productBloc.indexPhotoViewer,
+                position: widget.isAppBar
+                    ? productBloc.indexPhotoViewer
+                    : productBloc.indexPhotoViewerDescription,
                 onPhotoPageChanged: (index) async {
                   print("index pass: $index");
-                  await productBloc.onChangedPhotoPage(index);
+
+                  return await productBloc.onChangedPhotoPage(
+                    index,
+                    widget.isAppBar,
+                  );
                 },
               ),
             ),
@@ -135,13 +139,13 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
                     actions: [
                       IconButton(
                         onPressed: () {
-                          print("Quiiere presioanr");
+                          final index = widget.isAppBar
+                              ? productBloc.indexPhotoViewer
+                              : productBloc.indexPhotoViewerDescription;
                           onDownload(
                             context: context,
-                            fileUrl:
-                                "$_url/${gallery[productBloc.indexPhotoViewer].src}",
+                            fileUrl: "$_url/${gallery[index].src}",
                           );
-                          print("Presiono");
                         },
                         icon: const Icon(Icons.save),
                       ),
@@ -230,7 +234,6 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
         message: "Guardado en: $path",
         type: "success",
       );
-
     } on PlatformException catch (error) {
       if (kDebugMode) {
         print(error);
@@ -246,7 +249,8 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
   }) {
     if (managerType == ManagerTypePhotoViewer.single) {
       return PhotoView(
-        imageProvider: CachedNetworkImageProvider("$_url/${gallery[position].src}"),
+        imageProvider:
+            CachedNetworkImageProvider("$_url/${gallery[position].src}"),
         backgroundDecoration: widget.backgroundDecoration,
         minScale: PhotoViewComputedScale.contained * (0.5 + position / 10),
         maxScale: PhotoViewComputedScale.covered * 4.1,

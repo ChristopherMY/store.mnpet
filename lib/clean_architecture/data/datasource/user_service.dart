@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/order.dart' as order;
+import 'package:store_mundo_pet/clean_architecture/domain/model/order.dart'
+    as order;
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
@@ -21,7 +22,7 @@ class UserService implements UserRepositoryInterface {
       return await http.put(
         Uri.parse(
           "$_url/api/v1/users/ecommerce"
-              "/addresses/main?address_id=$addressId",
+          "/addresses/main?address_id=$addressId",
         ),
         headers: headers,
       );
@@ -106,7 +107,7 @@ class UserService implements UserRepositoryInterface {
       {required Map<String, String> headers}) async {
     try {
       return await http.get(
-        Uri.parse("$_url/api/v1/users/ecommerce/user"),
+        Uri.parse("$_url/api/v1/users/ecommerce"),
         headers: headers,
       );
     } catch (e) {
@@ -127,8 +128,7 @@ class UserService implements UserRepositoryInterface {
         headers: headers,
       );
 
-      if (res.statusCode == 200){
-
+      if (res.statusCode == 200) {
         return order.Order.fromMap(jsonDecode(res.body));
       }
 
@@ -260,8 +260,10 @@ class UserService implements UserRepositoryInterface {
   }
 
   @override
-  Future<dynamic> deleteUserPhone(
-      {required String phoneId, required Map<String, String> headers}) async {
+  Future<dynamic> deleteUserPhone({
+    required String phoneId,
+    required Map<String, String> headers,
+  }) async {
     try {
       return await http.delete(
         Uri.parse(
@@ -301,4 +303,35 @@ class UserService implements UserRepositoryInterface {
     }
   }
 
+  @override
+  Future<dynamic> updateUserInformation({
+    required String name,
+    required String lastname,
+    required String document,
+    required Map<String, String> headers,
+  }) async {
+    try {
+      Map<String, String> binding = {
+        "name": name,
+        "lastname": lastname,
+        "document": document,
+      };
+
+      final bindingEncode = json.encode(binding);
+      return await http.put(
+        Uri.parse(
+          "$_url/api/v1/users/ecommerce",
+        ),
+        headers: headers,
+        body: bindingEncode,
+      );
+
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return e.toString();
+    }
+  }
 }

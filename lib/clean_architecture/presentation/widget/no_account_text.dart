@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
 
 class NoAccountText extends StatelessWidget {
@@ -10,6 +12,8 @@ class NoAccountText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mainBloc = context.read<MainBloc>();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -18,9 +22,13 @@ class NoAccountText extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyText2,
         ),
         GestureDetector(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => SignUpScreen.init(context)),
-          ),
+          onTap: () {
+            mainBloc.countNavigateIterationScreen = 3;
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (context) => SignUpScreen.init(context)),
+            );
+          },
           child: Text(
             "Registrate",
             style: Theme.of(context)

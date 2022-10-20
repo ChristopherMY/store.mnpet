@@ -13,7 +13,7 @@ class AuthService implements AuthRepositoryInterface {
   Future<dynamic> createUser({required Map<String, dynamic> user}) async {
     try {
       return await http.post(
-        Uri.parse("$_url/api/v1/users/ecommerce/register_native"),
+        Uri.parse("$_url/api/v1/users/ecommerce/register-native"),
         headers: headers,
         body: json.encode(user),
       );
@@ -53,7 +53,7 @@ class AuthService implements AuthRepositoryInterface {
       final encode = json.encode(bodyParams);
 
       return await http.post(
-        Uri.parse("$_url/api/v1/users/ecommerce/change_password"),
+        Uri.parse("$_url/api/v1/users/ecommerce/change-password"),
         headers: headers,
         body: encode,
       );
@@ -76,7 +76,7 @@ class AuthService implements AuthRepositoryInterface {
       final encode = json.encode(bodyParams);
 
       return await http.post(
-        Uri.parse("$_url/api/v1/users/ecommerce/validate_otp"),
+        Uri.parse("$_url/api/v1/users/ecommerce/validate-otp"),
         headers: headers,
         body: encode,
       );
@@ -92,7 +92,7 @@ class AuthService implements AuthRepositoryInterface {
     required String passwordConfirmation,
   }) async{
     try {
-      Uri url = Uri.parse("$_url/api/v1/users/ecommerce/change_password");
+      Uri url = Uri.parse("$_url/api/v1/users/ecommerce/change-password");
       Map<String, dynamic> bodyParams = {
         "user_id": userId,
         "password": password,

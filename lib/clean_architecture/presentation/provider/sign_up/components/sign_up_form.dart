@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/keyboard.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
@@ -228,70 +233,94 @@ class _SignUpFormState extends State<SignUpForm> {
               }
 
               if (signUpBloc.formKey.currentState!.validate()) {
+                context.loaderOverlay.show();
                 signUpBloc.formKey.currentState!.save();
                 KeyboardUtil.hideKeyboard(context);
-                if (signUpBloc.errors.value.isEmpty) {
-                  signUpBloc.isLoading.value = true;
 
-                  Map<String, dynamic> modelUser = {
-                    "name": signUpBloc.nameController.text,
-                    "lastname": signUpBloc.lastnameController.text,
-                    "password": signUpBloc.passwordController.text,
-                    "email": signUpBloc.emailController.text,
-                    "document": {
-                      "value": signUpBloc.numDocController.text,
-                      "type": "DNI"
-                    },
-                    // "phone": {
-                    //   "value": phoneNumber,
-                    //   "type": "phone",
-                    //   "area_code": "51",
-                    //   "default": true
-                    // },
-                    "terms_conditions_confirmed":
-                        signUpBloc.termsConditionsConfirmed.value
-                  };
+                if (signUpBloc.errors.value.isNotEmpty) {
+                  context.loaderOverlay.hide();
+                  return GlobalSnackBar.showWarningSnackBar(
+                    context,
+                    "Vuelva a revisar la información ingresada",
+                  );
+                }
 
-                  final response = await signUpBloc.registerUser(user: modelUser);
+                Map<String, dynamic> modelUser = {
+                  "name": signUpBloc.nameController.text,
+                  "lastname": signUpBloc.lastnameController.text,
+                  "password": signUpBloc.passwordController.text,
+                  "email": signUpBloc.emailController.text,
+                  "document": {
+                    "value": signUpBloc.numDocController.text,
+                    "type": "DNI"
+                  },
+                  // "phone": {
+                  //   "value": phoneNumber,
+                  //   "type": "phone",
+                  //   "area_code": "51",
+                  //   "default": true
+                  // },
+                  "terms_conditions_confirmed":
+                      signUpBloc.termsConditionsConfirmed.value
+                };
 
-                  if (response is bool) {
-                    if (!mounted) return;
-                    return GlobalSnackBar.showErrorSnackBarIcon(
+                final response = await signUpBloc.registerUser(user: modelUser);
+                if (!mounted) return;
+
+                if (response is bool) {
+                  context.loaderOverlay.hide();
+
+                  return GlobalSnackBar.showErrorSnackBarIcon(
+                    context,
+                    "Tuvimos problemas, vuelva a intentarlo",
+                  );
+                }
+
+                if (response is ResponseApi) {
+                  if (response.status == "error") {
+                    GlobalSnackBar.showErrorSnackBarIcon(
                       context,
-                      "Tuvimos problemas, vuelva a intentarlo",
+                      response.message,
                     );
                   }
 
-                  if (response is ResponseApi) {
-                    if (response.status == "error") {
-                      if (!mounted) return;
-                      GlobalSnackBar.showErrorSnackBarIcon(
-                        context,
-                        response.message,
-                      );
-                    }
-
-                    return;
-                  }
-
-                  if (response is CredentialsAuth) {
-                    final responseSession = await mainBloc.loadSessionPromise();
-                    if (responseSession) {
-                      final responseUserInformation =
-                          await mainBloc.getUserInformation();
-
-                      if (responseUserInformation) {
-                        if (!mounted) return;
-                        mainBloc.refreshMainBloc();
-                        signUpBloc.isLoading.value = false;
-                        int count = 0;
-                        Navigator.of(context).popUntil((route) => count++ >= 3);
-                      }
-                    }
-
-                    return;
-                  }
+                  context.loaderOverlay.hide();
+                  return;
                 }
+
+                if (response is! CredentialsAuth) {
+                  context.loaderOverlay.hide();
+                  return GlobalSnackBar.showErrorSnackBarIcon(
+                    context,
+                    "Tuvimos problemas, vuelva a intentarlo",
+                  );
+                }
+
+                mainBloc.credentials = response;
+                mainBloc.headers[HttpHeaders.authorizationHeader] =
+                    "Bearer ${response.token}";
+
+                final userInformation = await mainBloc.getUserInformation();
+                if (!mounted) return;
+
+                if (userInformation is! UserInformation) {
+                  context.loaderOverlay.hide();
+
+                  return GlobalSnackBar.showErrorSnackBarIcon(
+                    context,
+                    "Tuvimos problemas, vuelva a intentarlo",
+                  );
+                }
+
+                mainBloc.informationUser = userInformation;
+                mainBloc.account.value = Account.active;
+
+                /// Count step to back
+                int count = 0;
+                Navigator.of(context).popUntil((route) =>
+                    count++ >= mainBloc.countNavigateIterationScreen);
+
+                context.loaderOverlay.hide();
               }
             },
           ),

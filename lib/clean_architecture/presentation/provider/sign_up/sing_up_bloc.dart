@@ -32,7 +32,6 @@ class SignUpBloc extends ChangeNotifier {
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  ValueNotifier<bool> isLoading = ValueNotifier(false);
   ValueNotifier<bool> termsConditionsConfirmed = ValueNotifier(false);
 
   /*
@@ -130,7 +129,9 @@ class SignUpBloc extends ChangeNotifier {
   void onChangeEmail(String value) {
     if (value.isNotEmpty) {
       removeError(error: kEmailNullError);
-    } else if (emailValidatorRegExp.hasMatch(value)) {
+    }
+
+    if (emailValidatorRegExp.hasMatch(value)) {
       removeError(error: kInvalidEmailError);
     }
   }
@@ -139,7 +140,9 @@ class SignUpBloc extends ChangeNotifier {
     if (value!.isEmpty) {
       addError(error: kEmailNullError);
       return "";
-    } else if (!emailValidatorRegExp.hasMatch(value)) {
+    }
+
+    if (!emailValidatorRegExp.hasMatch(value)) {
       addError(error: kInvalidEmailError);
       return "";
     }
@@ -175,30 +178,38 @@ class SignUpBloc extends ChangeNotifier {
 
   Future<dynamic> registerUser({required Map<String, dynamic> user}) async {
     final response = await authRepositoryInterface.createUser(user: user);
-    if (response is http.Response) {
-      final decode = json.decode(response.body);
 
-      if (response.statusCode == 200) {
-        final credentials = CredentialsAuth.fromMap(decode);
-
-        await hiveRepositoryInterface.save(
-          containerName: "authentication",
-          key: "credentials",
-          value: credentials.toMap(),
-        );
-
-        return credentials;
-      } else if (response.statusCode == 402) {
-        return ResponseApi.fromMap(decode);
-      } else if (response.statusCode == 404) {
-        return ResponseApi.fromMap(decode);
-      } else {
-        return false;
-      }
-    } else if (response is String) {
+    if (response is String) {
       if (kDebugMode) {
         print(response);
       }
+
+      return false;
+    }
+
+    if (response is! http.Response) {
+      return false;
+    }
+
+    final decode = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      final credentials = CredentialsAuth.fromMap(decode);
+
+      print("credentials.toMap()");
+      print(credentials.toMap());
+
+      await hiveRepositoryInterface.save(
+        containerName: "authentication",
+        key: "credentials",
+        value: credentials.toMap(),
+      );
+
+      return credentials;
+    } else if (response.statusCode == 402) {
+      return ResponseApi.fromMap(decode);
+    } else if (response.statusCode == 404) {
+      return ResponseApi.fromMap(decode);
     }
 
     return false;

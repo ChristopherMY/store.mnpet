@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
@@ -23,128 +24,122 @@ class SignForm extends StatefulWidget {
 
 class _SignFormState extends State<SignForm> {
   void validateSession() async {
-    final signInBloc = Provider.of<SignInBloc>(context, listen: false);
-    final mainBloc = Provider.of<MainBloc>(context, listen: false);
+    final signInBloc = context.read<SignInBloc>();
+    final mainBloc = context.read<MainBloc>();
 
     if (signInBloc.formKey.currentState!.validate()) {
+      context.loaderOverlay.show();
+
       signInBloc.formKey.currentState!.save();
-      signInBloc.isLoading.value = true;
       KeyboardUtil.hideKeyboard(context);
 
       final response = await signInBloc.signIn();
-
       if (!mounted) return;
+
       if (response is bool && response == false) {
+        context.loaderOverlay.hide();
         GlobalSnackBar.showWarningSnackBar(
           context,
-          "Tenemos un problema, por favor inténtelo más tarde.",
+          "Lo sentimos, por favor inténtelo más tarde",
         );
 
-        signInBloc.isLoading.value = false;
         return;
       }
 
       if (response is ResponseAuth) {
-        signInBloc.isLoading.value = false;
+        context.loaderOverlay.hide();
         GlobalSnackBar.showWarningSnackBar(context, response.message);
         return;
       }
 
-      if (response is CredentialsAuth) {
-        final responseSession = await mainBloc.loadSessionPromise();
-        if (responseSession) {
-          final responseUserInformation = await mainBloc.getUserInformation();
+      if (response is! CredentialsAuth) {
+        context.loaderOverlay.hide();
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Lo sentimos, por favor inténtelo más tarde",
+        );
+        return;
+      }
 
-          if (responseUserInformation is UserInformation) {
-            mainBloc.informationUser = responseUserInformation;
+      final responseSession = await mainBloc.loadSessionPromise();
+      if (responseSession) {
+        final responseUserInformation = await mainBloc.getUserInformation();
+        if (!mounted) return;
 
-            if (!mounted) return;
-            signInBloc.isLoading.value = false;
+        if (responseUserInformation is UserInformation) {
+          mainBloc.informationUser = responseUserInformation;
 
-            final response = await mainBloc.changeShoppingCart();
+          final response = await mainBloc.changeShoppingCart();
 
-            if (response is ResponseApi) {
-              if (response.status == "success") {
-                await mainBloc.handleRemoveShoppingCart();
-              }
+          if (response is ResponseApi) {
+            if (response.status == "success") {
+              await mainBloc.handleRemoveShoppingCart();
             }
-
-            mainBloc.sessionAccount.value = Session.active;
-            mainBloc.account.value = Account.active;
-
-            mainBloc.refreshMainBloc();
-            int count = 0;
-
-            Navigator.of(context).popUntil((route) => count++ >= 2);
-            return;
           }
 
-          GlobalSnackBar.showWarningSnackBar(
-            context,
-            "Tenemos un problema, por favor inténtelo más tarde.",
-          );
+          mainBloc.sessionAccount.value = Session.active;
+          mainBloc.account.value = Account.active;
 
+          mainBloc.refreshMainBloc();
+          int count = 0;
+
+          Navigator.of(context).popUntil((route) => count++ >= 2);
+          return;
         }
+
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Tenemos un problema, por favor inténtelo más tarde.",
+        );
       }
     }
-
-
   }
 
   @override
   Widget build(BuildContext context) {
     final signInBloc = context.watch<SignInBloc>();
-    return ValueListenableBuilder(
-      valueListenable: signInBloc.isLoading,
-      builder: (context, bool value, child) {
-        return IgnorePointer(
-          ignoring: value,
-          child: Form(
-            key: signInBloc.formKey,
-            child: Column(
-              children: [
-                buildEmailFormField(context: context),
-                SizedBox(height: getProportionateScreenHeight(30)),
-                buildPasswordFormField(context: context),
-                SizedBox(height: getProportionateScreenHeight(25)),
-                Row(
-                  children: [
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ForgotPasswordScreen.init(context),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        "Recuperar contraseña",
-                        style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                              decoration: TextDecoration.underline,
-                            ),
-                      ),
+    return Form(
+      key: signInBloc.formKey,
+      child: Column(
+        children: [
+          buildEmailFormField(context: context),
+          SizedBox(height: getProportionateScreenHeight(30)),
+          buildPasswordFormField(context: context),
+          SizedBox(height: getProportionateScreenHeight(25)),
+          Row(
+            children: [
+              const Spacer(),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ForgotPasswordScreen.init(context),
                     ),
-                  ],
+                  );
+                },
+                child: Text(
+                  "Recuperar contraseña",
+                  style: Theme.of(context).textTheme.bodyText2!.copyWith(
+                        decoration: TextDecoration.underline,
+                      ),
                 ),
-                SizedBox(height: getProportionateScreenHeight(25.0)),
-                ValueListenableBuilder(
-                  valueListenable: signInBloc.errors,
-                  builder: (context, List<String> value, child) {
-                    return FormError(errors: value);
-                  },
-                ),
-                SizedBox(height: getProportionateScreenHeight(25.0)),
-                DefaultButton(
-                  text: "Continuar",
-                  press: validateSession,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      },
+          SizedBox(height: getProportionateScreenHeight(25.0)),
+          ValueListenableBuilder(
+            valueListenable: signInBloc.errors,
+            builder: (context, List<String> value, child) {
+              return FormError(errors: value);
+            },
+          ),
+          SizedBox(height: getProportionateScreenHeight(25.0)),
+          DefaultButton(
+            text: "Continuar",
+            press: validateSession,
+          ),
+        ],
+      ),
     );
   }
 

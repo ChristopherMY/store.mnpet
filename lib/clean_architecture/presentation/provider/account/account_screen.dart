@@ -52,140 +52,79 @@ class _AccountScreenState extends State<AccountScreen> {
     return ValueListenableBuilder(
       valueListenable: mainBloc.account,
       builder: (context, Account account, child) {
-        return Stack(
-          children: [
+        return RefreshIndicator(
+          notificationPredicate: (_) => account == Account.active,
+          triggerMode: RefreshIndicatorTriggerMode.onEdge,
+          onRefresh: () async {
+            if (mainBloc.informationUser is UserInformation) {
+              final response = await mainBloc.getUserInformation();
+              if (response is UserInformation) {
+
+                mainBloc.informationUser = response;
+                mainBloc.refreshMainBloc();
+
+                if (!mounted) return;
+                await GlobalSnackBar.showInfoSnackBarIcon(
+                  context,
+                  "Información actualizada.",
+                );
+              }
+            }
+          },
+          child: Stack(children: [
             // sessionAccount == Session.normal
             //     ?
-            RefreshIndicator(
-              notificationPredicate: (_) => account == Session.active,
-              triggerMode: RefreshIndicatorTriggerMode.onEdge,
-              onRefresh: () async {
-                if (mainBloc.informationUser is UserInformation) {
-                  final response = await mainBloc.getUserInformation();
-                  if (response is UserInformation) {
-                    mainBloc.informationUser = response;
-                    mainBloc.refreshMainBloc();
-                    if (!mounted) return;
-                    await GlobalSnackBar.showInfoSnackBarIcon(
-                      context,
-                      "Información actualizada.",
-                    );
-                  }
-                }
-              },
-              child: CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    pinned: true,
-                    snap: false,
-                    floating: false,
-                    toolbarHeight: 56.0,
-                    backgroundColor: kBackGroundColor,
-                    systemOverlayStyle: const SystemUiOverlayStyle(
-                      statusBarColor: kBackGroundColor,
-                      statusBarIconBrightness: Brightness.dark,
-                    ),
-                    expandedHeight: getProportionateScreenHeight(56.0),
-                    actions: [
-                      account == Account.active
-                          ? Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          SettingsScreen.init(context),
-                                    ),
-                                  );
-                                },
-                                child: const Icon(
-                                  Icons.settings,
-                                  color: Colors.black,
-                                ),
+            CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  snap: false,
+                  floating: false,
+                  toolbarHeight: 56.0,
+                  backgroundColor: kBackGroundColor,
+                  systemOverlayStyle: const SystemUiOverlayStyle(
+                    statusBarColor: kBackGroundColor,
+                    statusBarIconBrightness: Brightness.dark,
+                  ),
+                  expandedHeight: getProportionateScreenHeight(56.0),
+                  actions: [
+                    account == Account.active
+                        ? Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        SettingsScreen.init(context),
+                                  ),
+                                );
+                              },
+                              child: const Icon(
+                                Icons.settings,
+                                color: Colors.black,
                               ),
-                            )
-                          : const SizedBox.shrink(),
-                    ],
-                  ),
-                  SliverToBoxAdapter(
-                    child: HeaderInformation(
-                      accountActive: account == Account.active,
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: account == Account.active,
-                    sliver: const SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20.0,
-                        horizontal: 25.0,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Text(
-                          "Mi perfil",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverVisibility(
-                    visible: account == Account.active,
-                    sliver: SliverToBoxAdapter(
-                      child: TargetOption(
-                        title: "Mis Direcciones",
-                        subTitle: "Mis direcciones de envío",
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ShipmentScreen(),
                             ),
-                          );
-                        },
-                        icon: Icons.directions,
-                      ),
-                    ),
+                          )
+                        : const SizedBox.shrink(),
+                  ],
+                ),
+                SliverToBoxAdapter(
+                  child: HeaderInformation(
+                    accountActive: account == Account.active,
                   ),
-                  SliverVisibility(
-                    visible: account == Account.active,
-                    sliver: SliverToBoxAdapter(
-                      child: TargetOption(
-                        title: "Mis órdenes",
-                        subTitle: 'Detalle de órdenes',
-                        onTap: () {},
-                        icon: Icons.local_shipping_outlined,
-                      ),
-                    ),
-                  ),
-                  // SliverVisibility(
-                  //   visible: value,
-                  //   sliver: SliverToBoxAdapter(
-                  //     child: TargetOption(
-                  //       title: "Mis Tarjetas",
-                  //       subTitle: 'Detalle de tarjetas guardadas',
-                  //       onTap: () {
-                  //         Navigator.of(context).push(
-                  //           MaterialPageRoute(
-                  //             builder: (context) => const CreditCartScreen(),
-                  //           ),
-                  //         );
-                  //       },
-                  //       icon: Icons.credit_score,
-                  //       // Icons.credit_card
-                  //     ),
-                  //   ),
-                  // ),
-                  const SliverPadding(
+                ),
+                SliverVisibility(
+                  visible: account == Account.active,
+                  sliver: const SliverPadding(
                     padding: EdgeInsets.symmetric(
                       vertical: 20.0,
                       horizontal: 25.0,
                     ),
                     sliver: SliverToBoxAdapter(
                       child: Text(
-                        "Ayuda",
+                        "Mi perfil",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -193,48 +132,109 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                     ),
                   ),
-                  SliverToBoxAdapter(
+                ),
+                SliverVisibility(
+                  visible: account == Account.active,
+                  sliver: SliverToBoxAdapter(
                     child: TargetOption(
-                      title: "Contacto",
-                      subTitle: 'Horario de atención',
-                      onTap: () {},
-                      icon: Icons.phone,
+                      title: "Mis Direcciones",
+                      subTitle: "Mis direcciones de envío",
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const ShipmentScreen(),
+                          ),
+                        );
+                      },
+                      icon: Icons.directions,
                     ),
                   ),
-                  SliverToBoxAdapter(
+                ),
+                SliverVisibility(
+                  visible: account == Account.active,
+                  sliver: SliverToBoxAdapter(
                     child: TargetOption(
-                      title: "Privacidad",
-                      subTitle: 'Terminos y condiciones',
+                      title: "Mis órdenes",
+                      subTitle: 'Detalle de órdenes',
                       onTap: () {},
-                      icon: Icons.question_mark_rounded,
+                      icon: Icons.local_shipping_outlined,
                     ),
                   ),
-                  SliverVisibility(
-                    visible: account == Account.active,
-                    sliver: SliverToBoxAdapter(
-                      child: TargetOption(
-                        title: "Cerrar sesión",
-                        subTitle: "Cerrar sesión en este dispositivo",
-                        onTap: mainBloc.signOut,
-                        icon: CommunityMaterialIcons.logout,
+                ),
+                // SliverVisibility(
+                //   visible: value,
+                //   sliver: SliverToBoxAdapter(
+                //     child: TargetOption(
+                //       title: "Mis Tarjetas",
+                //       subTitle: 'Detalle de tarjetas guardadas',
+                //       onTap: () {
+                //         Navigator.of(context).push(
+                //           MaterialPageRoute(
+                //             builder: (context) => const CreditCartScreen(),
+                //           ),
+                //         );
+                //       },
+                //       icon: Icons.credit_score,
+                //       // Icons.credit_card
+                //     ),
+                //   ),
+                // ),
+                const SliverPadding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 20.0,
+                    horizontal: 25.0,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      "Ayuda",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
+                ),
+                SliverToBoxAdapter(
+                  child: TargetOption(
+                    title: "Contacto",
+                    subTitle: 'Horario de atención',
+                    onTap: () {},
+                    icon: Icons.phone,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: TargetOption(
+                    title: "Privacidad",
+                    subTitle: 'Terminos y condiciones',
+                    onTap: () {},
+                    icon: Icons.question_mark_rounded,
+                  ),
+                ),
+                SliverVisibility(
+                  visible: account == Account.active,
+                  sliver: SliverToBoxAdapter(
+                    child: TargetOption(
+                      title: "Cerrar sesión",
+                      subTitle: "Cerrar sesión en este dispositivo",
+                      onTap: mainBloc.signOut,
+                      icon: CommunityMaterialIcons.logout,
+                    ),
+                  ),
+                ),
 
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    fillOverscroll: true,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: getProportionateScreenHeight(25.0),
-                        top: getProportionateScreenHeight(25.0),
-                      ),
-                      child: const CopyRight(),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  fillOverscroll: true,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: getProportionateScreenHeight(25.0),
+                      top: getProportionateScreenHeight(25.0),
                     ),
+                    child: const CopyRight(),
                   ),
-                ],
-              ),
-            )
+                ),
+              ],
+            ),
             // : const Positioned.fill(
             //     child: Center(
             //       child: LottieAnimation(
@@ -242,7 +242,8 @@ class _AccountScreenState extends State<AccountScreen> {
             //       ),
             //     ),
             //   ),
-          ],
+            //   ),
+          ]),
         );
       },
     );
@@ -382,9 +383,12 @@ class HeaderInformation extends StatelessWidget {
                             child: _GeneralButton(
                               text: "Crear cuenta",
                               onPressed: () {
+                                mainBloc.countNavigateIterationScreen = 1;
+
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => SignUpScreen.init(context),
+                                    builder: (context) =>
+                                        SignUpScreen.init(context),
                                   ),
                                 );
                               },

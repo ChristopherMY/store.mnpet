@@ -454,13 +454,19 @@ class ProductBloc extends ChangeNotifier {
     indexPhotoViewer = index;
   }
 
-  Future<void> onChangedPhotoPage(int index) async {
+  Future<void> onChangedPhotoPage(int index, bool isAppBar) async {
     print("**************");
     print("indexPhotoViewer: $indexPhotoViewer");
     print("Index: $index");
     print("**************");
+
     await swiperController.move(index);
-    indexPhotoViewer = index;
+    if(isAppBar){
+      indexPhotoViewer = index;
+    }
+
+    indexPhotoViewerDescription = index;
+    // notifyListeners();
   }
 
   Future<dynamic> onSaveShoppingCart({
