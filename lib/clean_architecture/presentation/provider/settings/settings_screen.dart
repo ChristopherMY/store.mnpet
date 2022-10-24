@@ -95,6 +95,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   @override
+  void initState() {
+    final settingsBloc = context.read<SettingsBloc>();
+    final mainBloc = context.read<MainBloc>();
+
+    UserInformation userInformation = mainBloc.informationUser;
+
+    settingsBloc.nameController = TextEditingController(text: userInformation.name);
+    settingsBloc.lastnameController = TextEditingController(text: userInformation.lastname);
+    settingsBloc.documentNumberController = TextEditingController(text: userInformation.document!.value!);
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final settingsBloc = context.watch<SettingsBloc>();
     final mainBloc = context.read<MainBloc>();
@@ -132,7 +146,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     TextFormField(
                       controller: settingsBloc.nameController,
                       keyboardType: TextInputType.text,
-                      // initialValue: settingsBloc.nameController.text = ,
                       textInputAction: TextInputAction.next,
                       onChanged: settingsBloc.onChangeName,
                       validator: settingsBloc.onValidationName,
@@ -153,7 +166,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     TextFormField(
                       controller: settingsBloc.lastnameController,
                       keyboardType: TextInputType.text,
-                      //   initialValue: userInformation.lastname,
                       textInputAction: TextInputAction.next,
                       onChanged: settingsBloc.onChangeLastName,
                       validator: settingsBloc.onValidationLastName,
@@ -173,7 +185,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       controller: settingsBloc.documentNumberController,
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.done,
-                      // initialValue: userInformation.document!.value!,
                       onChanged: settingsBloc.onChangeNumberDoc,
                       validator: settingsBloc.onValidationNumberDoc,
                       style: Theme.of(context).textTheme.bodyText2,
@@ -193,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     TextFormField(
                       enabled: false,
                       keyboardType: TextInputType.text,
-                      initialValue: "demo@demo.com",
+                      initialValue: userInformation.email!.address!,
                       style: Theme.of(context).textTheme.bodyText2,
                       decoration: InputDecoration(
                         labelText: "Email",
@@ -210,12 +221,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 10.0),
                     ItemButton(
                       title: "Cambiar contraseña",
-                      press: () {},
+                      press: () {
+
+                      },
                       icon: Icons.security,
                     ),
                     ItemButton(
                       title: "Cambiar correo",
-                      press: () {},
+                      press: () {
+
+                      },
                       icon: Icons.mail_outline_sharp,
                     ),
                     const SizedBox(height: 50),

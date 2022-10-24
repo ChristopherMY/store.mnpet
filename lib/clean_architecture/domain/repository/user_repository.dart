@@ -65,7 +65,7 @@ abstract class UserRepositoryInterface {
   Future<dynamic> pushUserNotificationToken();
 
   // List<Order>
-  Future<dynamic> getOrdersById();
+  Future<dynamic> getOrdersById({ required Map<String, String> headers,});
 
   // List<Order>
   Future<dynamic> getOrderDetailById({required int paymentId});

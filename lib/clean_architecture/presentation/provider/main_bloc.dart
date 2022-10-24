@@ -390,6 +390,20 @@ class MainBloc extends ChangeNotifier {
     return true;
   }
 
+  Future<CredentialsAuth> loadCredentialsAuth() async {
+    return await Future.microtask(
+          () async {
+        return CredentialsAuth.fromMap(
+          await hiveRepositoryInterface.read(
+            containerName: "authentication",
+            key: "credentials",
+          ) ??
+              {"email": "", "email_confirmed": false, "token": ""},
+        );
+      },
+    );
+  }
+
 // TODO: Solo se trabajara en el Main Screen
   Future<void> handleLoadSession() async {
     final responseCredentials = await Future.microtask(

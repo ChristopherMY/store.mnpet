@@ -27,7 +27,7 @@ class _LottieAnimationState extends State<LottieAnimation>
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         iteration++;
-        if (iteration < 10) {
+        if (iteration < 15) {
           _controller.reset();
           _controller.forward();
         }

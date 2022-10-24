@@ -2,9 +2,11 @@
 import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_credentials.dart';
 
 class Environment {
-  static const String API_DAO = "http://192.168.1.18:5002";
+  static const String API_DAO = "http://192.168.1.17:5000";
+  // static const String API_DAO = "http://192.168.1.18:5002";
   // static const String API_DAO = "https://pro.mundo-negocio.com";
-  static const String CLOUD_FRONT = "http://192.168.1.18:5002";
+  static const String CLOUD_FRONT = "http://192.168.1.17:5000";
+  // static const String CLOUD_FRONT = "http://192.168.1.18:5002";
   // https://d6ypdlu64lib9.cloudfront.net
   static MercadoPagoCredentials mercadoPagoCredentials = MercadoPagoCredentials(
     publicKey: "TEST-58794f26-90e9-4535-ae05-b975a3f86e7d",

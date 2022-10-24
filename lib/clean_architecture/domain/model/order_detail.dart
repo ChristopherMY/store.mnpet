@@ -1,87 +1,123 @@
 // To parse this JSON data, do
 //
-//     final order = orderFromMap(jsonString);
+//     final orderDetail = orderDetailFromMap(jsonString);
 
 import 'dart:convert';
 
-Order orderFromMap(String str) => Order.fromMap(json.decode(str));
+OrderDetail orderDetailFromMap(String str) => OrderDetail.fromMap(json.decode(str));
 
-String orderToMap(Order data) => json.encode(data.toMap());
+String orderDetailToMap(OrderDetail data) => json.encode(data.toMap());
 
-class Order {
-  Order({
+class OrderDetail {
+  OrderDetail({
     this.id,
+    this.additionalInfo,
+    this.companyName,
     this.statusDetail,
     this.status,
     this.items,
-    this.paymentId,
     this.subTotal,
     this.shipPrice,
     this.transactionAmount,
     this.payer,
-    this.utcData,
+    this.ipClient,
+    this.paymentId,
+    this.userId,
+    this.isRefunded,
+    this.createdAt,
+    this.updatedAt,
   });
 
   final String? id;
+  final String? additionalInfo;
+  final String? companyName;
   final String? statusDetail;
   final String? status;
   final List<Item>? items;
-  final int? paymentId;
   final int? subTotal;
   final int? shipPrice;
   final int? transactionAmount;
   final Payer? payer;
-  final String? utcData;
+  final String? ipClient;
+  final int? paymentId;
+  final String? userId;
+  final bool? isRefunded;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
-  Order copyWith({
+  OrderDetail copyWith({
     String? id,
+    String? additionalInfo,
+    String? companyName,
     String? statusDetail,
     String? status,
     List<Item>? items,
-    int? paymentId,
     int? subTotal,
     int? shipPrice,
     int? transactionAmount,
     Payer? payer,
-    String? utcData,
+    String? ipClient,
+    int? paymentId,
+    String? userId,
+    bool? isRefunded,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) =>
-      Order(
+      OrderDetail(
         id: id ?? this.id,
+        additionalInfo: additionalInfo ?? this.additionalInfo,
+        companyName: companyName ?? this.companyName,
         statusDetail: statusDetail ?? this.statusDetail,
         status: status ?? this.status,
         items: items ?? this.items,
-        paymentId: paymentId ?? this.paymentId,
         subTotal: subTotal ?? this.subTotal,
         shipPrice: shipPrice ?? this.shipPrice,
         transactionAmount: transactionAmount ?? this.transactionAmount,
         payer: payer ?? this.payer,
-        utcData: utcData ?? this.utcData,
+        ipClient: ipClient ?? this.ipClient,
+        paymentId: paymentId ?? this.paymentId,
+        userId: userId ?? this.userId,
+        isRefunded: isRefunded ?? this.isRefunded,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
       );
 
-  factory Order.fromMap(Map<String, dynamic> json) => Order(
+  factory OrderDetail.fromMap(Map<String, dynamic> json) => OrderDetail(
     id: json["_id"] == null ? null : json["_id"],
+    additionalInfo: json["additional_info"] == null ? null : json["additional_info"],
+    companyName: json["company_name"] == null ? null : json["company_name"],
     statusDetail: json["status_detail"] == null ? null : json["status_detail"],
     status: json["status"] == null ? null : json["status"],
     items: json["items"] == null ? null : List<Item>.from(json["items"].map((x) => Item.fromMap(x))),
-    paymentId: json["payment_id"] == null ? null : json["payment_id"],
     subTotal: json["sub_total"] == null ? null : json["sub_total"],
     shipPrice: json["ship_price"] == null ? null : json["ship_price"],
     transactionAmount: json["transaction_amount"] == null ? null : json["transaction_amount"],
     payer: json["payer"] == null ? null : Payer.fromMap(json["payer"]),
-    utcData: json["utc_data"] == null ? null : json["utc_data"],
+    ipClient: json["ip_client"] == null ? null : json["ip_client"],
+    paymentId: json["payment_id"] == null ? null : json["payment_id"],
+    userId: json["user_id"] == null ? null : json["user_id"],
+    isRefunded: json["is_refunded"] == null ? null : json["is_refunded"],
+    createdAt: json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
+    updatedAt: json["updatedAt"] == null ? null : DateTime.parse(json["updatedAt"]),
   );
 
   Map<String, dynamic> toMap() => {
     "_id": id == null ? null : id,
+    "additional_info": additionalInfo == null ? null : additionalInfo,
+    "company_name": companyName == null ? null : companyName,
     "status_detail": statusDetail == null ? null : statusDetail,
     "status": status == null ? null : status,
     "items": items == null ? null : List<dynamic>.from(items!.map((x) => x.toMap())),
-    "payment_id": paymentId == null ? null : paymentId,
     "sub_total": subTotal == null ? null : subTotal,
     "ship_price": shipPrice == null ? null : shipPrice,
     "transaction_amount": transactionAmount == null ? null : transactionAmount,
     "payer": payer == null ? null : payer!.toMap(),
-    "utc_data": utcData == null ? null : utcData,
+    "ip_client": ipClient == null ? null : ipClient,
+    "payment_id": paymentId == null ? null : paymentId,
+    "user_id": userId == null ? null : userId,
+    "is_refunded": isRefunded == null ? null : isRefunded,
+    "createdAt": createdAt == null ? null : createdAt!.toIso8601String(),
+    "updatedAt": updatedAt == null ? null : updatedAt!.toIso8601String(),
   };
 }
 
@@ -365,7 +401,7 @@ class Variation {
     String? id,
     bool? active,
     String? sku,
-    VariationPrice? vprice,
+    VariationPrice? price,
     bool? stockControl,
     int? stock,
     List<String>? coincidence,
@@ -604,6 +640,59 @@ class Regular {
 
 class Payer {
   Payer({
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.identification,
+    this.address,
+    this.phone,
+  });
+
+  final String? firstName;
+  final String? lastName;
+  final String? email;
+  final Identification? identification;
+  final Address? address;
+  final Phone? phone;
+
+  Payer copyWith({
+    String? firstName,
+    String? lastName,
+    String? email,
+    Identification? identification,
+    Address? address,
+    Phone? phone,
+  }) =>
+      Payer(
+        firstName: firstName ?? this.firstName,
+        lastName: lastName ?? this.lastName,
+        email: email ?? this.email,
+        identification: identification ?? this.identification,
+        address: address ?? this.address,
+        phone: phone ?? this.phone,
+      );
+
+  factory Payer.fromMap(Map<String, dynamic> json) => Payer(
+    firstName: json["first_name"] == null ? null : json["first_name"],
+    lastName: json["last_name"] == null ? null : json["last_name"],
+    email: json["email"] == null ? null : json["email"],
+    identification: json["identification"] == null ? null : Identification.fromMap(json["identification"]),
+    address: json["address"] == null ? null : Address.fromMap(json["address"]),
+    phone: json["phone"] == null ? null : Phone.fromMap(json["phone"]),
+  );
+
+  Map<String, dynamic> toMap() => {
+    "first_name": firstName == null ? null : firstName,
+    "last_name": lastName == null ? null : lastName,
+    "email": email == null ? null : email,
+    "identification": identification == null ? null : identification!.toMap(),
+    "address": address == null ? null : address!.toMap(),
+    "phone": phone == null ? null : phone!.toMap(),
+  };
+}
+
+class Address {
+  Address({
     this.direction,
     this.referenceName,
     this.addressType,
@@ -625,7 +714,7 @@ class Payer {
   final String? department;
   final String? district;
 
-  Payer copyWith({
+  Address copyWith({
     String? direction,
     String? referenceName,
     String? addressType,
@@ -636,7 +725,7 @@ class Payer {
     String? department,
     String? district,
   }) =>
-      Payer(
+      Address(
         direction: direction ?? this.direction,
         referenceName: referenceName ?? this.referenceName,
         addressType: addressType ?? this.addressType,
@@ -648,7 +737,7 @@ class Payer {
         district: district ?? this.district,
       );
 
-  factory Payer.fromMap(Map<String, dynamic> json) => Payer(
+  factory Address.fromMap(Map<String, dynamic> json) => Address(
     direction: json["direction"] == null ? null : json["direction"],
     referenceName: json["reference_name"] == null ? null : json["reference_name"],
     addressType: json["address_type"] == null ? null : json["address_type"],
@@ -670,5 +759,63 @@ class Payer {
     "province": province == null ? null : province,
     "department": department == null ? null : department,
     "district": district == null ? null : district,
+  };
+}
+
+class Identification {
+  Identification({
+    this.type,
+    this.number,
+  });
+
+  final String? type;
+  final String? number;
+
+  Identification copyWith({
+    String? type,
+    String? number,
+  }) =>
+      Identification(
+        type: type ?? this.type,
+        number: number ?? this.number,
+      );
+
+  factory Identification.fromMap(Map<String, dynamic> json) => Identification(
+    type: json["type"] == null ? null : json["type"],
+    number: json["number"] == null ? null : json["number"],
+  );
+
+  Map<String, dynamic> toMap() => {
+    "type": type == null ? null : type,
+    "number": number == null ? null : number,
+  };
+}
+
+class Phone {
+  Phone({
+    this.areaCode,
+    this.number,
+  });
+
+  final String? areaCode;
+  final int? number;
+
+  Phone copyWith({
+    String? areaCode,
+    int? number,
+  }) =>
+      Phone(
+        areaCode: areaCode ?? this.areaCode,
+        number: number ?? this.number,
+      );
+
+  factory Phone.fromMap(Map<String, dynamic> json) => Phone(
+    areaCode: json["area_code"] == null ? null : json["area_code"],
+    number: json["number"] == null ? null : json["number"],
+  );
+
+  Map<String, dynamic> toMap() => {
+    "area_code": areaCode == null ? null : areaCode,
+    "number": number == null ? null : number,
   };
 }

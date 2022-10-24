@@ -188,7 +188,7 @@ OutlineInputBorder outlineInputBorder() {
   );
 }
 
-String? getOrderDetailStatus({required String status}) {
+String? orderDetailStatus({required String status}) {
   return {
     "pending": "Pendiente",
     "approved": "Aprobado",

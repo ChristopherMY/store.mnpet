@@ -11,6 +11,7 @@ import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/order/order_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
@@ -59,7 +60,6 @@ class _AccountScreenState extends State<AccountScreen> {
             if (mainBloc.informationUser is UserInformation) {
               final response = await mainBloc.getUserInformation();
               if (response is UserInformation) {
-
                 mainBloc.informationUser = response;
                 mainBloc.refreshMainBloc();
 
@@ -156,7 +156,16 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: TargetOption(
                       title: "Mis órdenes",
                       subTitle: 'Detalle de órdenes',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context).push(
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) {
+                              return OrderScreen.init(context);
+                            },
+                          ),
+                        );
+                      },
                       icon: Icons.local_shipping_outlined,
                     ),
                   ),

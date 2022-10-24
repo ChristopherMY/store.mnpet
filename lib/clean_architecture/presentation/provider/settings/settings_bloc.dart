@@ -7,9 +7,11 @@ class SettingsBloc extends ChangeNotifier {
 
   SettingsBloc({required this.userRepositoryInterface});
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController lastnameController = TextEditingController();
-  final TextEditingController documentNumberController = TextEditingController();
+  late TextEditingController nameController;
+
+  late TextEditingController lastnameController;
+
+  late TextEditingController documentNumberController;
 
   ValueNotifier<List<String>> errors = ValueNotifier([]);
 
