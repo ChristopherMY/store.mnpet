@@ -47,7 +47,7 @@ class SearchDetailFilterFindAttributes extends StatelessWidget {
                         isCenter: false,
                         end: -15,
                       ),
-                      animationType: BadgeAnimationType.scale,
+                      animationType: BadgeAnimationType.slide,
                       badgeContent: SizedBox(
                         width: 14.0,
                         height: 14.0,
@@ -126,6 +126,11 @@ class SearchDetailFilterFindAttributes extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                // *******************
+                // List Terms from Product Variation
+                // *******************
+
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   sliver: SliverList(

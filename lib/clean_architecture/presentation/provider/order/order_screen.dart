@@ -97,29 +97,39 @@ class _OrderScreenState extends State<OrderScreen> {
               centerTitle: false,
               elevation: 0,
             ),
-            SliverPadding(
-              padding:
-                  const EdgeInsets.only(left: 15.0, right: 15.0, bottom: 15.0),
-              sliver: SliverToBoxAdapter(
-                child: SizedBox(
-                  height: getProportionateScreenHeight(50),
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: <Widget>[
-                      _OrderCategory(
-                        title: "Proceso",
-                        onSelected: (value) {},
-                      ),
-                      const SizedBox(width: 10.0),
-                      _OrderCategory(
-                        title: "Cancelar",
-                        onSelected: (value) {},
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+
+            //----------------------
+            // List Order Category
+            //----------------------
+
+            // SliverPadding(
+            //   padding:
+            //       const EdgeInsets.only(left: 15.0, right: 15.0, bottom: 15.0),
+            //   sliver: SliverToBoxAdapter(
+            //     child: SizedBox(
+            //       height: getProportionateScreenHeight(50),
+            //       child: ListView(
+            //         scrollDirection: Axis.horizontal,
+            //         children: <Widget>[
+            //           _OrderCategory(
+            //             title: "Proceso",
+            //             onSelected: (value) {},
+            //           ),
+            //           const SizedBox(width: 10.0),
+            //           _OrderCategory(
+            //             title: "Cancelar",
+            //             onSelected: (value) {},
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
+
+            //----------------------
+            // List Order Client
+            //----------------------
+
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
@@ -128,9 +138,9 @@ class _OrderScreenState extends State<OrderScreen> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     child: _OrderDetail(order: order),
-                  );
+                  ); 
                 },
-                // 40 list items
+
                 childCount: orderBloc.orders.length,
               ),
             ),
@@ -262,7 +272,7 @@ class _OrderDetail extends StatelessWidget {
                     style: TextStyle(color: Colors.black38),
                   ),
                   Text(
-                    "S/ ${order.transactionAmount}",
+                    "S/ ${parseDouble(order.transactionAmount.toString())}",
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,

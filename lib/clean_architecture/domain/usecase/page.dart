@@ -19,3 +19,10 @@ enum CardType {
 }
 
 enum ManagerTypePhotoViewer { single, navigation }
+
+enum LoadStatus {
+  normal,
+  error,
+  loading,
+  completed,
+}

@@ -18,7 +18,6 @@ import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_reposi
 import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/photoview_wrapper.dart';
 
 import '../../../domain/usecase/page.dart';

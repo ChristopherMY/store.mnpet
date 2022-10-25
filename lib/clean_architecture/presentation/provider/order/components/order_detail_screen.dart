@@ -102,7 +102,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                       ),
                       Text(
-                        "{orderDetail.utcData}",
+                        "${orderDetail.utcData}",
                         style: const TextStyle(color: Colors.black38),
                       )
                     ],
@@ -132,21 +132,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           ],
                         ),
                       ),
-                      /*
-                              Text(
-                                "Pagado",
-                                style: TextStyle(color: Colors.green),
-                              )
-                            */
                     ],
                   ),
-                  const SizedBox(height: 15.0),
-                  Text(
-                    "${orderDetail.items!.length} ${orderDetail.items!.isNotEmpty ? "items" : "item"}",
-                    style: const TextStyle(fontWeight: FontWeight.w400),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                    child: Text(
+                      "${orderDetail.items!.length} ${orderDetail.items!.isNotEmpty ? "items" : "item"}",
+                      style: const TextStyle(fontWeight: FontWeight.w400),
+                    ),
                   ),
-                  const SizedBox(height: 15.0),
-                  ListView.builder(
+                  //----------------------
+                  // List Order Client
+                  //----------------------
+                  ListView.separated(
                     shrinkWrap: true,
                     itemCount: orderDetail.items!.length,
                     physics: const NeverScrollableScrollPhysics(),
@@ -155,13 +154,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
                       return _OrderDetailCard(item: item);
                     },
+                    separatorBuilder: (context, index) {
+                      return const SizedBox(height: 18);
+                    },
                   ),
-                  const SizedBox(height: 15.0),
-                  const Text(
-                    "Información de la orden",
-                    style: TextStyle(fontWeight: FontWeight.w700),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                    child: Text(
+                      "Información de la orden",
+                      style: Theme.of(context).textTheme.subtitle2!,
+                    ),
                   ),
-                  const SizedBox(height: 15.0),
+
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -182,7 +187,29 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 15.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: getProportionateScreenWidth(130.0),
+                          child: const Text(
+                            "Ubigueo: ",
+                            style: TextStyle(color: Colors.black38),
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            "${orderDetail.payer!.address!.department} - ${orderDetail.payer!.address!.province} - ${orderDetail.payer!.address!.district}",
+                            maxLines: 3,
+                            softWrap: true,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -194,54 +221,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                       ),
                       Text(
-                        orderDetail.payer!.phone!.number!.toString(),
+                        "${orderDetail.payer!.phone!.number!}",
                         maxLines: 3,
                         softWrap: true,
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 15.0),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: getProportionateScreenWidth(130.0),
-                        child: const Text(
-                          "Ubigueo: ",
-                          style: TextStyle(color: Colors.black38),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: getProportionateScreenWidth(130),
+                          child: const Text(
+                            "Costo de envió: ",
+                            style: TextStyle(color: Colors.black38),
+                          ),
                         ),
-                      ),
-                      Flexible(
-                        child: Text(
-                          "${orderDetail.payer!.address!.department} - ${orderDetail.payer!.address!.province} - ${orderDetail.payer!.address!.district}",
+                        Text(
+                          "S/ ${parseDouble(orderDetail.shipPrice.toString())}",
                           maxLines: 3,
                           softWrap: true,
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 15.0),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: getProportionateScreenWidth(130),
-                        child: const Text(
-                          "Costo de envió: ",
-                          style: TextStyle(color: Colors.black38),
-                        ),
-                      ),
-                      Text(
-                        "S/ ${orderDetail.shipPrice}",
-                        maxLines: 3,
-                        softWrap: true,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15.0),
+
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -253,7 +262,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                       ),
                       Text(
-                        "S/ ${orderDetail.transactionAmount}",
+                        "S/ ${parseDouble(orderDetail.transactionAmount.toString())}",
                         maxLines: 3,
                         softWrap: true,
                         style: const TextStyle(fontWeight: FontWeight.w700),
@@ -293,18 +302,21 @@ class _OrderDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            spreadRadius: 1,
-            blurRadius: 3,
-          )
-        ],
-      ),
+    return Material(
+      // margin: const EdgeInsets.only(bottom: 18),
+      //  decoration: const BoxDecoration(
+      //    color: Colors.white,
+      //    boxShadow: [
+      //      BoxShadow(
+      //        color: Colors.black12,
+      //        spreadRadius: 1,
+      //        blurRadius: 3,
+      //      )
+      //    ],
+      //  ),
+      color: Colors.white,
+      elevation: 1,
+
       child: Row(
         children: [
           Expanded(
@@ -341,7 +353,9 @@ class _OrderDetailCard extends StatelessWidget {
             child: SizedBox(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 10.0, vertical: 10.0),
+                  horizontal: 10.0,
+                  vertical: 10.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -350,13 +364,13 @@ class _OrderDetailCard extends StatelessWidget {
                       "${item.name}",
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    const SizedBox(height: 10.0),
-                    Text(
-                      "${item.categories!.first.name}",
-                      style: const TextStyle(color: Colors.black38),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Text(
+                        "${item.categories!.first.name}",
+                        style: const TextStyle(color: Colors.black38),
+                      ),
                     ),
-
-                    const SizedBox(height: 10.0),
 
                     //----------------------
                     // Create List Attributes
@@ -368,23 +382,25 @@ class _OrderDetailCard extends StatelessWidget {
                       child: Wrap(
                         direction: Axis.horizontal,
                         children: List.generate(
-                            item.variation!.attributes!.length, (index) {
-                          print("Index: $index");
-                          final attribute = item.variation!.attributes![index];
-                          return Row(
-                            children: [
-                              Text(
-                                "${attribute.name}: ",
-                                style: const TextStyle(color: Colors.black38),
-                              ),
-                              Text(
-                                "${attribute.term!.label}",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          );
-                        }),
+                          item.variation!.attributes!.length,
+                          (index) {
+                            final attribute =
+                                item.variation!.attributes![index];
+                            return Row(
+                              children: [
+                                Text(
+                                  "${attribute.name}: ",
+                                  style: const TextStyle(color: Colors.black38),
+                                ),
+                                Text(
+                                  "${attribute.term!.label}",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ),
 
@@ -397,7 +413,7 @@ class _OrderDetailCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "S/ ${item.price!.sale}",
+                          "S/ ${parseDouble(item.price!.sale!)}",
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         )
                       ],

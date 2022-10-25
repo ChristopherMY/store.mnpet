@@ -6,7 +6,6 @@ import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
 class Categories extends StatelessWidget {
   final List<MasterCategory> categories;

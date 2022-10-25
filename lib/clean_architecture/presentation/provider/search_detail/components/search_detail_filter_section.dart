@@ -18,39 +18,38 @@ class SearchDetailFilterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 15.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyText1,
-                  ),
-                  hasOptionHeader!
-                      ? GestureDetector(
-                          onTap: onTap,
-                          child: const Icon(Icons.arrow_forward_ios_outlined,
-                              size: 18.0),
-                        )
-                      : const SizedBox.shrink(),
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                hasOptionHeader!
+                    ? GestureDetector(
+                        onTap: onTap,
+                        child: const Icon(
+                          Icons.arrow_forward_ios_outlined,
+                          size: 18.0,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ],
             ),
-            const SizedBox(height: 15.0),
-            Container(
-              color: defaultBackground,
-              child: child,
-            )
-          ],
-        ),
+          ),
+          const SizedBox(height: 15.0),
+          Container(
+            color: defaultBackground,
+            child: child,
+          )
+        ],
       ),
     );
   }

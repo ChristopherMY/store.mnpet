@@ -27,7 +27,7 @@ class DefaultButton extends StatelessWidget {
         style: TextButton.styleFrom(
           primary: Colors.white,
           elevation: 1,
-          minimumSize: const Size.fromHeight(45.0),
+          minimumSize: const Size.fromHeight(50.0),
           backgroundColor: color,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
@@ -36,8 +36,7 @@ class DefaultButton extends StatelessWidget {
         onPressed: press,
         child: Text(
           text,
-          style:
-              Theme.of(context).textTheme.bodyText2!.copyWith(color: colorText),
+          style:Theme.of(context).textTheme.bodyText2!.copyWith(color: colorText),
         ),
       ),
     );

@@ -4,42 +4,39 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/binding_search.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/filter_product_detail.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/search_product_details.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/sort_option.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 
 class SearchDetailBloc extends ChangeNotifier {
   ProductRepositoryInterface productRepositoryInterface;
 
   SearchDetailBloc({required this.productRepositoryInterface});
 
-  static const _url = Environment.API_DAO;
   static const _pageSize = 16;
 
   final PagingController<int, Product> pagingController =
       PagingController(firstPageKey: 0);
-  late final ValueNotifier<LoadStatus> loadStatus =
-      ValueNotifier(LoadStatus.loading);
+  ValueNotifier<LoadStatus> loadStatus = ValueNotifier(LoadStatus.loading);
 
   static const _limit = 16;
 
-  late final ValueNotifier<List<Brand>> category = ValueNotifier(<Brand>[]);
-  late final ValueNotifier<List<Brand>> productTypes = ValueNotifier(<Brand>[]);
-  late final ValueNotifier<List<Brand>> brands = ValueNotifier(<Brand>[]);
-  late final ValueNotifier<List<ProductAttribute>> attributes =
+  ValueNotifier<List<Brand>> category = ValueNotifier(<Brand>[]);
+  ValueNotifier<List<Brand>> productTypes = ValueNotifier(<Brand>[]);
+  ValueNotifier<List<Brand>> brands = ValueNotifier(<Brand>[]);
+  ValueNotifier<List<ProductAttribute>> attributes =
       ValueNotifier(<ProductAttribute>[]);
 
   late ProductAttribute attributeSelected;
+  int indexProductAttribute = 0;
 
-  late final TextEditingController searchEditingController =
-      TextEditingController();
-  late final ValueNotifier<List<Term>> searchResults = ValueNotifier(<Term>[]);
-  late int indexAttr = 0;
+  ValueNotifier<List<Term>> searchResults = ValueNotifier(<Term>[]);
+
+  TextEditingController searchEditingController = TextEditingController();
   late final BuildContext context;
 
   bool reloadLoadFilters = true;
@@ -64,8 +61,7 @@ class SearchDetailBloc extends ChangeNotifier {
   late double rangeMin = 0.0;
   late double rangeMax = 500.0;
 
-  late ValueNotifier<RangeValues> currentRangeValues =
-      ValueNotifier(const RangeValues(0, 100));
+  ValueNotifier<RangeValues> currentRangeValues = ValueNotifier(const RangeValues(0, 100));
 
   ValueNotifier<List<SortOption>> sort = ValueNotifier(
     <SortOption>[
@@ -106,6 +102,7 @@ class SearchDetailBloc extends ChangeNotifier {
   void handleChangeOptionSort(int index) {
     List<SortOption> sortList = List.from(sort.value);
     final selected = sortList[index];
+
     for (int i = 0; i < sortList.length; i++) {
       sortList[i] = sortList[i].copyWith(isChecked: (selected == sortList[i]));
     }
@@ -279,7 +276,7 @@ class SearchDetailBloc extends ChangeNotifier {
     }
 
     List<ProductAttribute> attributesList = List.from(attributes.value);
-    attributesList[indexAttr].termsSelected = termsSelectedList;
+    attributesList[indexProductAttribute].termsSelected = termsSelectedList;
     attributes.value = attributesList;
 
     terms[index].checked = isChecked ?? false;

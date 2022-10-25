@@ -8,9 +8,12 @@ import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/components/change_email_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/components/change_password_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
 
 import '../../widget/item_button.dart';
 
@@ -101,9 +104,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     UserInformation userInformation = mainBloc.informationUser;
 
-    settingsBloc.nameController = TextEditingController(text: userInformation.name);
-    settingsBloc.lastnameController = TextEditingController(text: userInformation.lastname);
-    settingsBloc.documentNumberController = TextEditingController(text: userInformation.document!.value!);
+    settingsBloc.nameController =
+        TextEditingController(text: userInformation.name);
+    settingsBloc.lastnameController =
+        TextEditingController(text: userInformation.lastname);
+    settingsBloc.documentNumberController =
+        TextEditingController(text: userInformation.document!.value!);
 
     super.initState();
   }
@@ -219,17 +225,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 10.0),
+                    ValueListenableBuilder(
+                      valueListenable: settingsBloc.errors,
+                      builder: (context, List<String> value, child) {
+                        return FormError(errors: value);
+                      },
+                    ),
+                    const SizedBox(height: 10.0),
                     ItemButton(
                       title: "Cambiar contraseña",
                       press: () {
-
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ChangePasswordScreen.init(context),
+                          ),
+                        );
                       },
                       icon: Icons.security,
                     ),
                     ItemButton(
                       title: "Cambiar correo",
                       press: () {
-
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ChangeEmailScreen.init(context),
+                          ),
+                        );
                       },
                       icon: Icons.mail_outline_sharp,
                     ),

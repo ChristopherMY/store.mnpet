@@ -27,9 +27,9 @@ class Order {
   final String? status;
   final List<Item>? items;
   final int? paymentId;
-  final int? subTotal;
-  final int? shipPrice;
-  final int? transactionAmount;
+  final double? subTotal;
+  final double? shipPrice;
+  final double? transactionAmount;
   final Payer? payer;
   final String? utcData;
 
@@ -39,9 +39,9 @@ class Order {
     String? status,
     List<Item>? items,
     int? paymentId,
-    int? subTotal,
-    int? shipPrice,
-    int? transactionAmount,
+    double? subTotal,
+    double? shipPrice,
+    double? transactionAmount,
     Payer? payer,
     String? utcData,
   }) =>
@@ -59,30 +59,40 @@ class Order {
       );
 
   factory Order.fromMap(Map<String, dynamic> json) => Order(
-    id: json["_id"] == null ? null : json["_id"],
-    statusDetail: json["status_detail"] == null ? null : json["status_detail"],
-    status: json["status"] == null ? null : json["status"],
-    items: json["items"] == null ? null : List<Item>.from(json["items"].map((x) => Item.fromMap(x))),
-    paymentId: json["payment_id"] == null ? null : json["payment_id"],
-    subTotal: json["sub_total"] == null ? null : json["sub_total"],
-    shipPrice: json["ship_price"] == null ? null : json["ship_price"],
-    transactionAmount: json["transaction_amount"] == null ? null : json["transaction_amount"],
-    payer: json["payer"] == null ? null : Payer.fromMap(json["payer"]),
-    utcData: json["utc_data"] == null ? null : json["utc_data"],
-  );
+        id: json["_id"] == null ? null : json["_id"],
+        statusDetail:
+            json["status_detail"] == null ? null : json["status_detail"],
+        status: json["status"] == null ? null : json["status"],
+        items: json["items"] == null
+            ? null
+            : List<Item>.from(json["items"].map((x) => Item.fromMap(x))),
+        paymentId: json["payment_id"] == null ? null : json["payment_id"],
+        subTotal:
+            json["sub_total"] == null ? null : json["sub_total"].toDouble(),
+        shipPrice:
+            json["ship_price"] == null ? null : json["ship_price"].toDouble(),
+        transactionAmount: json["transaction_amount"] == null
+            ? null
+            : json["transaction_amount"].toDouble(),
+        payer: json["payer"] == null ? null : Payer.fromMap(json["payer"]),
+        utcData: json["utc_data"] == null ? null : json["utc_data"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "_id": id == null ? null : id,
-    "status_detail": statusDetail == null ? null : statusDetail,
-    "status": status == null ? null : status,
-    "items": items == null ? null : List<dynamic>.from(items!.map((x) => x.toMap())),
-    "payment_id": paymentId == null ? null : paymentId,
-    "sub_total": subTotal == null ? null : subTotal,
-    "ship_price": shipPrice == null ? null : shipPrice,
-    "transaction_amount": transactionAmount == null ? null : transactionAmount,
-    "payer": payer == null ? null : payer!.toMap(),
-    "utc_data": utcData == null ? null : utcData,
-  };
+        "_id": id == null ? null : id,
+        "status_detail": statusDetail == null ? null : statusDetail,
+        "status": status == null ? null : status,
+        "items": items == null
+            ? null
+            : List<dynamic>.from(items!.map((x) => x.toMap())),
+        "payment_id": paymentId == null ? null : paymentId,
+        "sub_total": subTotal == null ? null : subTotal,
+        "ship_price": shipPrice == null ? null : shipPrice,
+        "transaction_amount":
+            transactionAmount == null ? null : transactionAmount,
+        "payer": payer == null ? null : payer!.toMap(),
+        "utc_data": utcData == null ? null : utcData,
+      };
 }
 
 class Item {
@@ -152,38 +162,58 @@ class Item {
       );
 
   factory Item.fromMap(Map<String, dynamic> json) => Item(
-    id: json["_id"] == null ? null : json["_id"],
-    general: json["general"] == null ? null : json["general"],
-    sku: json["sku"] == null ? null : json["sku"],
-    slug: json["slug"] == null ? null : json["slug"],
-    name: json["name"] == null ? null : json["name"],
-    isFree: json["is_free"] == null ? null : json["is_free"],
-    variationPrices: json["variation_prices"] == null ? null : VariationPrices.fromMap(json["variation_prices"]),
-    variation: json["variation"] == null ? null : Variation.fromMap(json["variation"]),
-    brands: json["brands"] == null ? null : List<Brand>.from(json["brands"].map((x) => Brand.fromMap(x))),
-    categories: json["categories"] == null ? null : List<Brand>.from(json["categories"].map((x) => Brand.fromMap(x))),
-    productTypes: json["product_types"] == null ? null : List<Brand>.from(json["product_types"].map((x) => Brand.fromMap(x))),
-    mainImage: json["main_image"] == null ? null : Image.fromMap(json["main_image"]),
-    price: json["price"] == null ? null : ItemPrice.fromMap(json["price"]),
-    quantity: json["quantity"] == null ? null : json["quantity"],
-  );
+        id: json["_id"] == null ? null : json["_id"],
+        general: json["general"] == null ? null : json["general"],
+        sku: json["sku"] == null ? null : json["sku"],
+        slug: json["slug"] == null ? null : json["slug"],
+        name: json["name"] == null ? null : json["name"],
+        isFree: json["is_free"] == null ? null : json["is_free"],
+        variationPrices: json["variation_prices"] == null
+            ? null
+            : VariationPrices.fromMap(json["variation_prices"]),
+        variation: json["variation"] == null
+            ? null
+            : Variation.fromMap(json["variation"]),
+        brands: json["brands"] == null
+            ? null
+            : List<Brand>.from(json["brands"].map((x) => Brand.fromMap(x))),
+        categories: json["categories"] == null
+            ? null
+            : List<Brand>.from(json["categories"].map((x) => Brand.fromMap(x))),
+        productTypes: json["product_types"] == null
+            ? null
+            : List<Brand>.from(
+                json["product_types"].map((x) => Brand.fromMap(x))),
+        mainImage: json["main_image"] == null
+            ? null
+            : Image.fromMap(json["main_image"]),
+        price: json["price"] == null ? null : ItemPrice.fromMap(json["price"]),
+        quantity: json["quantity"] == null ? null : json["quantity"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "_id": id == null ? null : id,
-    "general": general == null ? null : general,
-    "sku": sku == null ? null : sku,
-    "slug": slug == null ? null : slug,
-    "name": name == null ? null : name,
-    "is_free": isFree == null ? null : isFree,
-    "variation_prices": variationPrices == null ? null : variationPrices!.toMap(),
-    "variation": variation == null ? null : variation!.toMap(),
-    "brands": brands == null ? null : List<dynamic>.from(brands!.map((x) => x.toMap())),
-    "categories": categories == null ? null : List<dynamic>.from(categories!.map((x) => x.toMap())),
-    "product_types": productTypes == null ? null : List<dynamic>.from(productTypes!.map((x) => x.toMap())),
-    "main_image": mainImage == null ? null : mainImage!.toMap(),
-    "price": price == null ? null : price!.toMap(),
-    "quantity": quantity == null ? null : quantity,
-  };
+        "_id": id == null ? null : id,
+        "general": general == null ? null : general,
+        "sku": sku == null ? null : sku,
+        "slug": slug == null ? null : slug,
+        "name": name == null ? null : name,
+        "is_free": isFree == null ? null : isFree,
+        "variation_prices":
+            variationPrices == null ? null : variationPrices!.toMap(),
+        "variation": variation == null ? null : variation!.toMap(),
+        "brands": brands == null
+            ? null
+            : List<dynamic>.from(brands!.map((x) => x.toMap())),
+        "categories": categories == null
+            ? null
+            : List<dynamic>.from(categories!.map((x) => x.toMap())),
+        "product_types": productTypes == null
+            ? null
+            : List<dynamic>.from(productTypes!.map((x) => x.toMap())),
+        "main_image": mainImage == null ? null : mainImage!.toMap(),
+        "price": price == null ? null : price!.toMap(),
+        "quantity": quantity == null ? null : quantity,
+      };
 }
 
 class Brand {
@@ -213,18 +243,18 @@ class Brand {
       );
 
   factory Brand.fromMap(Map<String, dynamic> json) => Brand(
-    id: json["_id"] == null ? null : json["_id"],
-    name: json["name"] == null ? null : json["name"],
-    slug: json["slug"] == null ? null : json["slug"],
-    image: json["image"] == null ? null : Image.fromMap(json["image"]),
-  );
+        id: json["_id"] == null ? null : json["_id"],
+        name: json["name"] == null ? null : json["name"],
+        slug: json["slug"] == null ? null : json["slug"],
+        image: json["image"] == null ? null : Image.fromMap(json["image"]),
+      );
 
   Map<String, dynamic> toMap() => {
-    "_id": id == null ? null : id,
-    "name": name == null ? null : name,
-    "slug": slug == null ? null : slug,
-    "image": image == null ? null : image!.toMap(),
-  };
+        "_id": id == null ? null : id,
+        "name": name == null ? null : name,
+        "slug": slug == null ? null : slug,
+        "image": image == null ? null : image!.toMap(),
+      };
 }
 
 class Image {
@@ -262,22 +292,24 @@ class Image {
       );
 
   factory Image.fromMap(Map<String, dynamic> json) => Image(
-    id: json["_id"] == null ? null : json["_id"],
-    src: json["src"] == null ? null : json["src"],
-    dimensions: json["dimensions"] == null ? null : Dimensions.fromMap(json["dimensions"]),
-    aspectRatio: json["aspect_ratio"] == null ? null : json["aspect_ratio"],
-    type: json["type"] == null ? null : json["type"],
-    format: json["format"] == null ? null : json["format"],
-  );
+        id: json["_id"] == null ? null : json["_id"],
+        src: json["src"] == null ? null : json["src"],
+        dimensions: json["dimensions"] == null
+            ? null
+            : Dimensions.fromMap(json["dimensions"]),
+        aspectRatio: json["aspect_ratio"] == null ? null : json["aspect_ratio"],
+        type: json["type"] == null ? null : json["type"],
+        format: json["format"] == null ? null : json["format"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "_id": id == null ? null : id,
-    "src": src == null ? null : src,
-    "dimensions": dimensions == null ? null : dimensions!.toMap(),
-    "aspect_ratio": aspectRatio == null ? null : aspectRatio,
-    "type": type == null ? null : type,
-    "format": format == null ? null : format,
-  };
+        "_id": id == null ? null : id,
+        "src": src == null ? null : src,
+        "dimensions": dimensions == null ? null : dimensions!.toMap(),
+        "aspect_ratio": aspectRatio == null ? null : aspectRatio,
+        "type": type == null ? null : type,
+        "format": format == null ? null : format,
+      };
 }
 
 class Dimensions {
@@ -299,14 +331,14 @@ class Dimensions {
       );
 
   factory Dimensions.fromMap(Map<String, dynamic> json) => Dimensions(
-    width: json["width"] == null ? null : json["width"],
-    height: json["height"] == null ? null : json["height"],
-  );
+        width: json["width"] == null ? null : json["width"],
+        height: json["height"] == null ? null : json["height"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "width": width == null ? null : width,
-    "height": height == null ? null : height,
-  };
+        "width": width == null ? null : width,
+        "height": height == null ? null : height,
+      };
 }
 
 class ItemPrice {
@@ -328,14 +360,14 @@ class ItemPrice {
       );
 
   factory ItemPrice.fromMap(Map<String, dynamic> json) => ItemPrice(
-    regular: json["regular"] == null ? null : json["regular"],
-    sale: json["sale"] == null ? null : json["sale"],
-  );
+        regular: json["regular"] == null ? null : json["regular"],
+        sale: json["sale"] == null ? null : json["sale"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "regular": regular == null ? null : regular,
-    "sale": sale == null ? null : sale,
-  };
+        "regular": regular == null ? null : regular,
+        "sale": sale == null ? null : sale,
+      };
 }
 
 class Variation {
@@ -385,28 +417,40 @@ class Variation {
       );
 
   factory Variation.fromMap(Map<String, dynamic> json) => Variation(
-    id: json["_id"] == null ? null : json["_id"],
-    active: json["active"] == null ? null : json["active"],
-    sku: json["sku"] == null ? null : json["sku"],
-    price: json["price"] == null ? null : VariationPrice.fromMap(json["price"]),
-    stockControl: json["stock_control"] == null ? null : json["stock_control"],
-    stock: json["stock"] == null ? null : json["stock"],
-    coincidence: json["coincidence"] == null ? null : List<String>.from(json["coincidence"].map((x) => x)),
-    variationDefault: json["default"] == null ? null : json["default"],
-    attributes: json["attributes"] == null ? null : List<Attribute>.from(json["attributes"].map((x) => Attribute.fromMap(x))),
-  );
+        id: json["_id"] == null ? null : json["_id"],
+        active: json["active"] == null ? null : json["active"],
+        sku: json["sku"] == null ? null : json["sku"],
+        price: json["price"] == null
+            ? null
+            : VariationPrice.fromMap(json["price"]),
+        stockControl:
+            json["stock_control"] == null ? null : json["stock_control"],
+        stock: json["stock"] == null ? null : json["stock"],
+        coincidence: json["coincidence"] == null
+            ? null
+            : List<String>.from(json["coincidence"].map((x) => x)),
+        variationDefault: json["default"] == null ? null : json["default"],
+        attributes: json["attributes"] == null
+            ? null
+            : List<Attribute>.from(
+                json["attributes"].map((x) => Attribute.fromMap(x))),
+      );
 
   Map<String, dynamic> toMap() => {
-    "_id": id == null ? null : id,
-    "active": active == null ? null : active,
-    "sku": sku == null ? null : sku,
-    "price": price == null ? null : price!.toMap(),
-    "stock_control": stockControl == null ? null : stockControl,
-    "stock": stock == null ? null : stock,
-    "coincidence": coincidence == null ? null : List<dynamic>.from(coincidence!.map((x) => x)),
-    "default": variationDefault == null ? null : variationDefault,
-    "attributes": attributes == null ? null : List<dynamic>.from(attributes!.map((x) => x.toMap())),
-  };
+        "_id": id == null ? null : id,
+        "active": active == null ? null : active,
+        "sku": sku == null ? null : sku,
+        "price": price == null ? null : price!.toMap(),
+        "stock_control": stockControl == null ? null : stockControl,
+        "stock": stock == null ? null : stock,
+        "coincidence": coincidence == null
+            ? null
+            : List<dynamic>.from(coincidence!.map((x) => x)),
+        "default": variationDefault == null ? null : variationDefault,
+        "attributes": attributes == null
+            ? null
+            : List<dynamic>.from(attributes!.map((x) => x.toMap())),
+      };
 }
 
 class Attribute {
@@ -448,24 +492,24 @@ class Attribute {
       );
 
   factory Attribute.fromMap(Map<String, dynamic> json) => Attribute(
-    id: json["_id"] == null ? null : json["_id"],
-    name: json["name"] == null ? null : json["name"],
-    pluralName: json["plural_name"] == null ? null : json["plural_name"],
-    description: json["description"] == null ? null : json["description"],
-    slug: json["slug"] == null ? null : json["slug"],
-    term: json["term"] == null ? null : Term.fromMap(json["term"]),
-    image: json["image"] == null ? null : Image.fromMap(json["image"]),
-  );
+        id: json["_id"] == null ? null : json["_id"],
+        name: json["name"] == null ? null : json["name"],
+        pluralName: json["plural_name"] == null ? null : json["plural_name"],
+        description: json["description"] == null ? null : json["description"],
+        slug: json["slug"] == null ? null : json["slug"],
+        term: json["term"] == null ? null : Term.fromMap(json["term"]),
+        image: json["image"] == null ? null : Image.fromMap(json["image"]),
+      );
 
   Map<String, dynamic> toMap() => {
-    "_id": id == null ? null : id,
-    "name": name == null ? null : name,
-    "plural_name": pluralName == null ? null : pluralName,
-    "description": description == null ? null : description,
-    "slug": slug == null ? null : slug,
-    "term": term == null ? null : term!.toMap(),
-    "image": image == null ? null : image!.toMap(),
-  };
+        "_id": id == null ? null : id,
+        "name": name == null ? null : name,
+        "plural_name": pluralName == null ? null : pluralName,
+        "description": description == null ? null : description,
+        "slug": slug == null ? null : slug,
+        "term": term == null ? null : term!.toMap(),
+        "image": image == null ? null : image!.toMap(),
+      };
 }
 
 class Term {
@@ -499,20 +543,20 @@ class Term {
       );
 
   factory Term.fromMap(Map<String, dynamic> json) => Term(
-    value: json["value"] == null ? null : json["value"],
-    label: json["label"] == null ? null : json["label"],
-    slug: json["slug"] == null ? null : json["slug"],
-    hexa: json["hexa"] == null ? null : json["hexa"],
-    id: json["_id"] == null ? null : json["_id"],
-  );
+        value: json["value"] == null ? null : json["value"],
+        label: json["label"] == null ? null : json["label"],
+        slug: json["slug"] == null ? null : json["slug"],
+        hexa: json["hexa"] == null ? null : json["hexa"],
+        id: json["_id"] == null ? null : json["_id"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "value": value == null ? null : value,
-    "label": label == null ? null : label,
-    "slug": slug == null ? null : slug,
-    "hexa": hexa == null ? null : hexa,
-    "_id": id == null ? null : id,
-  };
+        "value": value == null ? null : value,
+        "label": label == null ? null : label,
+        "slug": slug == null ? null : slug,
+        "hexa": hexa == null ? null : hexa,
+        "_id": id == null ? null : id,
+      };
 }
 
 class VariationPrice {
@@ -534,14 +578,14 @@ class VariationPrice {
       );
 
   factory VariationPrice.fromMap(Map<String, dynamic> json) => VariationPrice(
-    regular: json["regular"] == null ? null : json["regular"],
-    sale: json["sale"] == null ? null : json["sale"],
-  );
+        regular: json["regular"] == null ? null : json["regular"],
+        sale: json["sale"] == null ? null : json["sale"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "regular": regular == null ? null : regular,
-    "sale": sale == null ? null : sale,
-  };
+        "regular": regular == null ? null : regular,
+        "sale": sale == null ? null : sale,
+      };
 }
 
 class VariationPrices {
@@ -563,14 +607,15 @@ class VariationPrices {
       );
 
   factory VariationPrices.fromMap(Map<String, dynamic> json) => VariationPrices(
-    regular: json["regular"] == null ? null : Regular.fromMap(json["regular"]),
-    sale: json["sale"] == null ? null : Regular.fromMap(json["sale"]),
-  );
+        regular:
+            json["regular"] == null ? null : Regular.fromMap(json["regular"]),
+        sale: json["sale"] == null ? null : Regular.fromMap(json["sale"]),
+      );
 
   Map<String, dynamic> toMap() => {
-    "regular": regular == null ? null : regular!.toMap(),
-    "sale": sale == null ? null : sale!.toMap(),
-  };
+        "regular": regular == null ? null : regular!.toMap(),
+        "sale": sale == null ? null : sale!.toMap(),
+      };
 }
 
 class Regular {
@@ -592,14 +637,14 @@ class Regular {
       );
 
   factory Regular.fromMap(Map<String, dynamic> json) => Regular(
-    min: json["min"] == null ? null : json["min"],
-    max: json["max"] == null ? null : json["max"],
-  );
+        min: json["min"] == null ? null : json["min"],
+        max: json["max"] == null ? null : json["max"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "min": min == null ? null : min,
-    "max": max == null ? null : max,
-  };
+        "min": min == null ? null : min,
+        "max": max == null ? null : max,
+      };
 }
 
 class Payer {
@@ -649,26 +694,27 @@ class Payer {
       );
 
   factory Payer.fromMap(Map<String, dynamic> json) => Payer(
-    direction: json["direction"] == null ? null : json["direction"],
-    referenceName: json["reference_name"] == null ? null : json["reference_name"],
-    addressType: json["address_type"] == null ? null : json["address_type"],
-    lotNumber: json["lot_number"] == null ? null : json["lot_number"],
-    dptoInt: json["dpto_int"] == null ? null : json["dpto_int"],
-    urbanName: json["urban_name"] == null ? null : json["urban_name"],
-    province: json["province"] == null ? null : json["province"],
-    department: json["department"] == null ? null : json["department"],
-    district: json["district"] == null ? null : json["district"],
-  );
+        direction: json["direction"] == null ? null : json["direction"],
+        referenceName:
+            json["reference_name"] == null ? null : json["reference_name"],
+        addressType: json["address_type"] == null ? null : json["address_type"],
+        lotNumber: json["lot_number"] == null ? null : json["lot_number"],
+        dptoInt: json["dpto_int"] == null ? null : json["dpto_int"],
+        urbanName: json["urban_name"] == null ? null : json["urban_name"],
+        province: json["province"] == null ? null : json["province"],
+        department: json["department"] == null ? null : json["department"],
+        district: json["district"] == null ? null : json["district"],
+      );
 
   Map<String, dynamic> toMap() => {
-    "direction": direction == null ? null : direction,
-    "reference_name": referenceName == null ? null : referenceName,
-    "address_type": addressType == null ? null : addressType,
-    "lot_number": lotNumber == null ? null : lotNumber,
-    "dpto_int": dptoInt == null ? null : dptoInt,
-    "urban_name": urbanName == null ? null : urbanName,
-    "province": province == null ? null : province,
-    "department": department == null ? null : department,
-    "district": district == null ? null : district,
-  };
+        "direction": direction == null ? null : direction,
+        "reference_name": referenceName == null ? null : referenceName,
+        "address_type": addressType == null ? null : addressType,
+        "lot_number": lotNumber == null ? null : lotNumber,
+        "dpto_int": dptoInt == null ? null : dptoInt,
+        "urban_name": urbanName == null ? null : urbanName,
+        "province": province == null ? null : province,
+        "department": department == null ? null : department,
+        "district": district == null ? null : district,
+      };
 }

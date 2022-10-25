@@ -24,6 +24,7 @@ class OrderDetail {
     this.paymentId,
     this.userId,
     this.isRefunded,
+    this.utcData,
     this.createdAt,
     this.updatedAt,
   });
@@ -34,14 +35,15 @@ class OrderDetail {
   final String? statusDetail;
   final String? status;
   final List<Item>? items;
-  final int? subTotal;
-  final int? shipPrice;
-  final int? transactionAmount;
+  final double? subTotal;
+  final double? shipPrice;
+  final double? transactionAmount;
   final Payer? payer;
   final String? ipClient;
   final int? paymentId;
   final String? userId;
   final bool? isRefunded;
+  final String? utcData;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -52,14 +54,15 @@ class OrderDetail {
     String? statusDetail,
     String? status,
     List<Item>? items,
-    int? subTotal,
-    int? shipPrice,
-    int? transactionAmount,
+    double? subTotal,
+    double? shipPrice,
+    double? transactionAmount,
     Payer? payer,
     String? ipClient,
     int? paymentId,
     String? userId,
     bool? isRefunded,
+    String? utcData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) =>
@@ -78,6 +81,7 @@ class OrderDetail {
         paymentId: paymentId ?? this.paymentId,
         userId: userId ?? this.userId,
         isRefunded: isRefunded ?? this.isRefunded,
+        utcData: utcData ?? this.utcData,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -89,14 +93,15 @@ class OrderDetail {
     statusDetail: json["status_detail"] == null ? null : json["status_detail"],
     status: json["status"] == null ? null : json["status"],
     items: json["items"] == null ? null : List<Item>.from(json["items"].map((x) => Item.fromMap(x))),
-    subTotal: json["sub_total"] == null ? null : json["sub_total"],
-    shipPrice: json["ship_price"] == null ? null : json["ship_price"],
-    transactionAmount: json["transaction_amount"] == null ? null : json["transaction_amount"],
+    subTotal: json["sub_total"] == null ? null : json["sub_total"].toDouble(),
+    shipPrice: json["ship_price"] == null ? null : json["ship_price"].toDouble(),
+    transactionAmount: json["transaction_amount"] == null ? null : json["transaction_amount"].toDouble(),
     payer: json["payer"] == null ? null : Payer.fromMap(json["payer"]),
     ipClient: json["ip_client"] == null ? null : json["ip_client"],
     paymentId: json["payment_id"] == null ? null : json["payment_id"],
     userId: json["user_id"] == null ? null : json["user_id"],
     isRefunded: json["is_refunded"] == null ? null : json["is_refunded"],
+    utcData: json["utc_data"] == null ? null : json["utc_data"],
     createdAt: json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
     updatedAt: json["updatedAt"] == null ? null : DateTime.parse(json["updatedAt"]),
   );
@@ -116,6 +121,7 @@ class OrderDetail {
     "payment_id": paymentId == null ? null : paymentId,
     "user_id": userId == null ? null : userId,
     "is_refunded": isRefunded == null ? null : isRefunded,
+    "utc_data": utcData == null ? null : utcData,
     "createdAt": createdAt == null ? null : createdAt!.toIso8601String(),
     "updatedAt": updatedAt == null ? null : updatedAt!.toIso8601String(),
   };

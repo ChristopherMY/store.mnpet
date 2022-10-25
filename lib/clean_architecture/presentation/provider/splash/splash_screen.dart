@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loadany.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen._({Key? key}) : super(key: key);

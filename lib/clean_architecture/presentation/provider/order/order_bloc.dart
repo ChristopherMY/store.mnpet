@@ -22,8 +22,7 @@ class OrderBloc extends ChangeNotifier {
   };
 
   Future<dynamic> getOrdersDetails() async {
-    final response =
-        await userRepositoryInterface.getOrdersById(headers: headers);
+    final response = await userRepositoryInterface.getOrdersById(headers: headers);
 
     if (response is String) {
       return null;
