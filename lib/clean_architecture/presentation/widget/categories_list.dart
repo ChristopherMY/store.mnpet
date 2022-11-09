@@ -7,15 +7,18 @@ import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 
+const cloudFront = Environment.API_DAO;
+
 class Categories extends StatelessWidget {
   final List<MasterCategory> categories;
   final LoadStatus status;
-  final _cloudFront = Environment.CLOUD_FRONT;
+  final Color backgroundColor;
 
   const Categories({
     Key? key,
     required this.categories,
     required this.status,
+    required this.backgroundColor,
   }) : super(key: key);
 
   @override
@@ -23,7 +26,7 @@ class Categories extends StatelessWidget {
     return ClipPath(
       clipper: CurveClipper(),
       child: Material(
-        color: kPrimaryColor,
+        color: Colors.white,
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: getProportionateScreenHeight(15.0),
@@ -34,7 +37,10 @@ class Categories extends StatelessWidget {
             children: <Widget>[
               Text(
                 "Un premio especial a nuevos clientes",
-                style: Theme.of(context).textTheme.headline3,
+                style: Theme.of(context)
+                    .textTheme
+                    .headline3!
+                    .copyWith(color: Colors.black),
               ),
               const SizedBox(height: 15.0),
               SingleChildScrollView(
@@ -68,19 +74,23 @@ class Categories extends StatelessWidget {
                           },
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                                maxWidth: getProportionateScreenWidth(50.0)),
+                              maxWidth: getProportionateScreenWidth(55.0),
+                            ),
                             child: Column(
                               children: <Widget>[
                                 Container(
                                   padding: EdgeInsets.all(
                                     getProportionateScreenWidth(5.0),
                                   ),
+                                  constraints: const BoxConstraints(
+                                    minHeight: 57.5,
+                                  ),
                                   decoration: BoxDecoration(
-                                      color: Color(
-                                          int.parse("0xFF${element.hexa}")),
-                                      shape: BoxShape.rectangle,
-                                      borderRadius:
-                                          BorderRadius.circular(15.0)),
+                                    color: kBackGroundColor,
+                                    // Color(int.parse("0xFF${element.hexa}")),
+                                    shape: BoxShape.rectangle,
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
                                   child: _buildImage(
                                     src: element.image!.src!,
                                   ),
@@ -93,7 +103,7 @@ class Categories extends StatelessWidget {
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 12,
-                                    color: Colors.white,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ],
@@ -104,46 +114,6 @@ class Categories extends StatelessWidget {
                     ).toList(),
                   ),
                 ),
-                // ],
-                // children: List.generate(
-                //   4,
-                //   (index) => GestureDetector(
-                //     onTap: () {},
-                //     child: ConstrainedBox(
-                //       constraints: BoxConstraints(
-                //           maxWidth: getProportionateScreenWidth(50.0)),
-                //       child: Column(
-                //         children: <Widget>[
-                //           Container(
-                //             padding: EdgeInsets.all(
-                //                 getProportionateScreenWidth(6.0),
-                //             ),
-                //             decoration: BoxDecoration(
-                //               color: Color(int.parse("0xFFff6a71")),
-                //               shape: BoxShape.circle,
-                //             ),
-                //             child: _buildImage(
-                //               src: "categories/bcdd0281-fb68-431c-a03e-9bf98ace74a4.png",
-                //             ),
-                //           ),
-                //           Text(
-                //             "Todo animales",
-                //             maxLines: 1,
-                //             overflow: TextOverflow.ellipsis,
-                //             textAlign: TextAlign.center,
-                //             style: const TextStyle(
-                //               fontSize: 12.0,
-                //               color: Colors.white,
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                //     ),
-                //   ),
-                // ),
               ),
               const SizedBox(height: 15.0)
             ],
@@ -155,7 +125,7 @@ class Categories extends StatelessWidget {
 
   _buildImage({required String src}) {
     return CachedNetworkImage(
-      imageUrl: "$_cloudFront/$src",
+      imageUrl: src,
       imageBuilder: (context, imageProvider) => Image(
         image: imageProvider,
       ),

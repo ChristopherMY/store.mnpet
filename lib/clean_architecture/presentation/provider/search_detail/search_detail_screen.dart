@@ -15,6 +15,7 @@ import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_
 import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product_grid.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
 class SearchDetailScreen extends StatefulWidget {
@@ -38,24 +39,21 @@ class SearchDetailScreen extends StatefulWidget {
     Keyword? keywords,
     MasterCategory? category,
   }) {
-    print("typeFilter: $typeFilter");
     return ChangeNotifierProvider<SearchDetailBloc>(
-      create: (context) =>
-      SearchDetailBloc(
+      create: (context) => SearchDetailBloc(
         productRepositoryInterface: context.read<ProductRepositoryInterface>(),
       )
         ..bindingSearch.keywords =
-        typeFilter == TypeFilter.keyword ? [keywords!.slug!] : []
+            typeFilter == TypeFilter.keyword ? [keywords!.slug!] : []
         ..bindingSearch.search = typeFilter == TypeFilter.search ? search! : ""
         ..bindingSearch.categories =
-        typeFilter == TypeFilter.category ? [category!.slug!] : [],
-      builder: (_, __) =>
-          SearchDetailScreen._(
-            typeFilter: typeFilter,
-            keyword: keywords,
-            search: search,
-            category: category,
-          ),
+            typeFilter == TypeFilter.category ? [category!.slug!] : [],
+      builder: (_, __) => SearchDetailScreen._(
+        typeFilter: typeFilter,
+        keyword: keywords,
+        search: search,
+        category: category,
+      ),
     );
   }
 
@@ -82,7 +80,7 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final searchDetailBloc = context.watch<SearchDetailBloc>();
-    print(widget.typeFilter);
+
     return SafeArea(
       child: LoaderOverlay(
         child: Scaffold(
@@ -104,9 +102,8 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   widget.typeFilter == TypeFilter.search
                       ? widget.search!
                       : (widget.typeFilter == TypeFilter.category
-                      ? widget.category!.name!
-                      : widget.keyword!.name!),
-
+                          ? widget.category!.name!
+                          : widget.keyword!.name!),
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -175,7 +172,7 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                                 },
                                 child: Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: const <Widget>[
                                     Icon(Icons.import_export),
                                     Text("Ordenar"),
@@ -193,7 +190,6 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                             ],
                           ),
                         ),
-
                       )
                     ],
                   ),
@@ -226,6 +222,11 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                           Color(0xFFF28767),
                           Color(0xFFFFA726),
                         ],
+                      );
+                    },
+                    noItemsFoundIndicatorBuilder: (context) {
+                      return const LottieAnimation(
+                        source: "assets/lottie/shake-a-empty-box.json",
                       );
                     },
                   ),

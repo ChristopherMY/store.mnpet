@@ -11,18 +11,9 @@ class SettingsBloc extends ChangeNotifier {
   late TextEditingController lastnameController;
   late TextEditingController documentNumberController;
 
-  TextEditingController newPasswordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
-  TextEditingController currentPasswordController = TextEditingController();
-
   ValueNotifier<List<String>> errors = ValueNotifier([]);
 
-  bool obscureTextCurrentPassword = true;
-  bool obscureTextNewPassword = true;
-  bool obscureTextConfirmPassword = true;
-
   final formKey = GlobalKey<FormState>();
-  final formPasswordKey = GlobalKey<FormState>();
 
   void addError({required String error}) {
     List<String> values = List.from(errors.value);
@@ -79,85 +70,6 @@ class SettingsBloc extends ChangeNotifier {
   String? onValidationNumberDoc(String? value) {
     if (value!.isEmpty) {
       addError(error: kNumDocNullError);
-      return "";
-    }
-
-    return null;
-  }
-
-  void onChangeNewPassword(String value) {
-    if (value.length >= 8) {
-      removeError(error: kShortPassError);
-    } else if (value.isNotEmpty) {
-      removeError(error: kPassNullError);
-    }
-  }
-
-  String? onValidationNewPassword(String? value) {
-    if (value!.isEmpty) {
-      addError(error: kPassNullError);
-      return "";
-    } else if (value.length < 8) {
-      addError(error: kShortPassError);
-      return "";
-    }
-
-    return null;
-  }
-
-  void onChangeConfirmPassword(String value) {
-    final newPassword = newPasswordController.text;
-
-    if (newPassword.isNotEmpty) {
-      removeError(error: kPassNullError);
-      return;
-    }
-
-    if (value.isNotEmpty) {
-      removeError(error: kPassNullError);
-      return;
-    }
-
-    if (newPassword == value) {
-      removeError(error: kMatchPassError);
-      return;
-    }
-  }
-
-  String? onValidationConfirmPassword(String? value) {
-    final newPassword = newPasswordController.text;
-    if (newPassword.isNotEmpty) {
-      addError(error: kPassNullError);
-      return "";
-    }
-
-    if (value!.isNotEmpty) {
-      addError(error: kPassNullError);
-      return "";
-    }
-
-    if (newPassword == value) {
-      addError(error: kMatchPassError);
-      return "";
-    }
-
-    return null;
-  }
-
-  void onChangeCurrentPassword(String value) {
-    if (value.length >= 8) {
-      removeError(error: kShortPassError);
-    } else if (value.isNotEmpty) {
-      removeError(error: kPassNullError);
-    }
-  }
-
-  String? onValidationCurrentPassword(String? value) {
-    if (value!.isEmpty) {
-      addError(error: kPassNullError);
-      return "";
-    } else if (value.length < 8) {
-      addError(error: kShortPassError);
       return "";
     }
 

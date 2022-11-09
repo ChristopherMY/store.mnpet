@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -34,7 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final homeBloc = context.watch<HomeBloc>();
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 snap: false,
                 floating: false,
                 toolbarHeight: 56.0,
-                backgroundColor: kPrimaryColor,
+                backgroundColor: kBackGroundColor,
                 systemOverlayStyle: const SystemUiOverlayStyle(
                   statusBarColor: kPrimaryColor,
                   statusBarIconBrightness: Brightness.light,
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0, left: 0.0),
                     child: GestureDetector(
-                      //    onTap: onAdditional,
+                      onTap: () {},
                       child: const Icon(
                         Icons.shopping_basket_outlined,
                         color: Colors.black45,
@@ -100,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Categories(
                       categories: categories,
                       status: LoadStatus.normal,
+                      backgroundColor: kBackGroundColor,
                     );
                   },
                 ),
@@ -130,8 +131,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2,
                   pagingController: homeBloc.pagingController,
                   builderDelegate: PagedChildBuilderDelegate<Product>(
-                    firstPageErrorIndicatorBuilder: (context){
-                      return const LottieAnimation(source: "assets/lottie/lonely-404.json");
+                    firstPageErrorIndicatorBuilder: (context) {
+                      return const LottieAnimation(
+                          source: "assets/lottie/lonely-404.json");
                     },
                     itemBuilder: (context, item, index) {
                       return TrendingItemMain(
@@ -189,5 +191,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-

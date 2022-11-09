@@ -8,8 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/components/change_email_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/components/change_password_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/change_email/change_email_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/change_password/change_password_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
@@ -66,6 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           context,
           "Lo sentimos, vuelva a intentarlo otra vez",
         );
+
         return;
       }
 
@@ -224,14 +225,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         errorStyle: const TextStyle(height: 0),
                       ),
                     ),
-                    const SizedBox(height: 10.0),
+                    const SizedBox(height: 20.0),
                     ValueListenableBuilder(
                       valueListenable: settingsBloc.errors,
                       builder: (context, List<String> value, child) {
                         return FormError(errors: value);
                       },
                     ),
-                    const SizedBox(height: 10.0),
+                    const SizedBox(height: 20.0),
                     ItemButton(
                       title: "Cambiar contraseña",
                       press: () {

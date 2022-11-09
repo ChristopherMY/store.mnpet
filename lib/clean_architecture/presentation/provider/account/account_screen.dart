@@ -571,7 +571,7 @@ class CopyRight extends StatelessWidget {
         SizedBox(
           height: 45,
           child: Image.asset(
-            "assets/images/mundo-pet.png",
+            "assets/images/logo-mn.png",
           ),
         ),
         const Text(

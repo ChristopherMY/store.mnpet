@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_bloc.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/provider/change_password/change_password_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/custom_suffix_icon.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen._({Key? key}) : super(key: key);
 
   static Widget init(BuildContext context) {
-    return ChangeNotifierProvider<SettingsBloc>.value(
-      value: context.read<SettingsBloc>(),
+    return ChangeNotifierProvider<ChangePasswordBloc>(
+      create: (context) => ChangePasswordBloc(
+        userRepositoryInterface: context.read<UserRepositoryInterface>(),
+      ),
       builder: (_, __) => const ChangePasswordScreen._(),
     );
   }
@@ -23,14 +27,14 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   void handleSavePasswordAccount() async {
-    final settingsBloc = context.read<SettingsBloc>();
+    final changePasswordBloc = context.read<ChangePasswordBloc>();
 
-    if (settingsBloc.formPasswordKey.currentState!.validate()) {}
+    if (changePasswordBloc.formKey.currentState!.validate()) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    final settingsBloc = context.watch<SettingsBloc>();
+    final changePasswordBloc = context.watch<ChangePasswordBloc>();
 
     return SafeArea(
       child: Scaffold(
@@ -60,15 +64,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Column(
               children: <Widget>[
                 Form(
-                  key: settingsBloc.formPasswordKey,
+                  key: changePasswordBloc.formKey,
                   child: Column(
                     children: [
                       TextFormField(
-                        controller: settingsBloc.newPasswordController,
-                        obscureText: settingsBloc.obscureTextNewPassword,
+                        controller: changePasswordBloc.newPasswordController,
+                        obscureText: changePasswordBloc.obscureTextNewPassword,
                         keyboardType: TextInputType.visiblePassword,
-                        onChanged: settingsBloc.onChangeNewPassword,
-                        validator: settingsBloc.onValidationNewPassword,
+                        onChanged: changePasswordBloc.onChangeNewPassword,
+                        validator: changePasswordBloc.onValidationNewPassword,
                         textInputAction: TextInputAction.next,
                         style: Theme.of(context).textTheme.bodyText2,
                         decoration: InputDecoration(
@@ -83,11 +87,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           errorStyle: const TextStyle(height: 0),
                           suffixIcon: GestureDetector(
                             onTap: () {
-                              settingsBloc.obscureTextNewPassword = !settingsBloc.obscureTextNewPassword;
-                              settingsBloc.refreshSettingsBloc();
+                              changePasswordBloc.obscureTextNewPassword =
+                                  !changePasswordBloc.obscureTextNewPassword;
+                              changePasswordBloc.refreshBloc();
                             },
                             child: CustomSuffixIcon(
-                              svgIcon: settingsBloc.obscureTextNewPassword
+                              svgIcon: changePasswordBloc.obscureTextNewPassword
                                   ? "assets/icons/eye_off_thin.svg"
                                   : "assets/icons/eye_thin.svg",
                             ),
@@ -96,11 +101,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       ),
                       SizedBox(height: getProportionateScreenHeight(15.0)),
                       TextFormField(
-                        controller: settingsBloc.confirmPasswordController,
-                        obscureText: settingsBloc.obscureTextConfirmPassword,
+                        controller:
+                            changePasswordBloc.confirmPasswordController,
+                        obscureText:
+                            changePasswordBloc.obscureTextConfirmPassword,
                         keyboardType: TextInputType.visiblePassword,
-                        onChanged: settingsBloc.onChangeConfirmPassword,
-                        validator: settingsBloc.onValidationConfirmPassword,
+                        onChanged: changePasswordBloc.onChangeConfirmPassword,
+                        validator:
+                            changePasswordBloc.onValidationConfirmPassword,
                         textInputAction: TextInputAction.next,
                         style: Theme.of(context).textTheme.bodyText2,
                         decoration: InputDecoration(
@@ -115,25 +123,30 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           errorStyle: const TextStyle(height: 0),
                           suffixIcon: GestureDetector(
                             onTap: () {
-                              settingsBloc.obscureTextConfirmPassword =
-                                  !settingsBloc.obscureTextConfirmPassword;
-                              settingsBloc.refreshSettingsBloc();
+                              changePasswordBloc.obscureTextConfirmPassword =
+                                  !changePasswordBloc
+                                      .obscureTextConfirmPassword;
+                              changePasswordBloc.refreshBloc();
                             },
                             child: CustomSuffixIcon(
-                              svgIcon: settingsBloc.obscureTextConfirmPassword
-                                  ? "assets/icons/eye_off_thin.svg"
-                                  : "assets/icons/eye_thin.svg",
+                              svgIcon:
+                                  changePasswordBloc.obscureTextConfirmPassword
+                                      ? "assets/icons/eye_off_thin.svg"
+                                      : "assets/icons/eye_thin.svg",
                             ),
                           ),
                         ),
                       ),
                       SizedBox(height: getProportionateScreenHeight(15.0)),
                       TextFormField(
-                        controller: settingsBloc.currentPasswordController,
-                        obscureText: settingsBloc.obscureTextCurrentPassword,
+                        controller:
+                            changePasswordBloc.currentPasswordController,
+                        obscureText:
+                            changePasswordBloc.obscureTextCurrentPassword,
                         keyboardType: TextInputType.visiblePassword,
-                        onChanged: settingsBloc.onChangeCurrentPassword,
-                        validator: settingsBloc.onValidationCurrentPassword,
+                        onChanged: changePasswordBloc.onChangeCurrentPassword,
+                        validator:
+                            changePasswordBloc.onValidationCurrentPassword,
                         textInputAction: TextInputAction.done,
                         style: Theme.of(context).textTheme.bodyText2,
                         decoration: InputDecoration(
@@ -148,14 +161,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           errorStyle: const TextStyle(height: 0),
                           suffixIcon: GestureDetector(
                             onTap: () {
-                              settingsBloc.obscureTextCurrentPassword =
-                                  !settingsBloc.obscureTextCurrentPassword;
-                              settingsBloc.refreshSettingsBloc();
+                              changePasswordBloc.obscureTextCurrentPassword =
+                                  !changePasswordBloc
+                                      .obscureTextCurrentPassword;
+                              changePasswordBloc.refreshBloc();
                             },
                             child: CustomSuffixIcon(
-                              svgIcon: settingsBloc.obscureTextCurrentPassword
-                                  ? "assets/icons/eye_off_thin.svg"
-                                  : "assets/icons/eye_thin.svg",
+                              svgIcon:
+                                  changePasswordBloc.obscureTextCurrentPassword
+                                      ? "assets/icons/eye_off_thin.svg"
+                                      : "assets/icons/eye_thin.svg",
                             ),
                           ),
                         ),
@@ -164,6 +179,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ),
                 ),
                 SizedBox(height: getProportionateScreenHeight(35.0)),
+                ValueListenableBuilder(
+                  valueListenable: changePasswordBloc.errors,
+                  builder: (context, List<String> value, child) {
+                    return Column(
+                      children: [
+                        FormError(errors: value),
+                        SizedBox(height: getProportionateScreenHeight(35.0)),
+                      ],
+                    );
+                  },
+                ),
                 DefaultButton(
                   text: "Guardar",
                   press: handleSavePasswordAccount,

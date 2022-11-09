@@ -418,7 +418,7 @@ class MainImage {
         "_id": id == null ? null : id,
         "src": src == null ? null : src,
         "dimensions": dimensions == null ? null : dimensions!.toMap(),
-        "aspect_ratio": aspectRatio == null ? null : aspectRatio,
+        "aspect_ratio": aspectRatio == null ? 0.88 : aspectRatio,
         "type": type == null ? null : type,
         "format": format == null ? null : format,
         "key": key == null ? null : key,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/comment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
@@ -164,11 +165,17 @@ class ProductService implements ProductRepositoryInterface {
     try {
       final encodeBody = json.encode(bindings);
 
-      return await http.post(
+      final response = await http.post(
         Uri.parse("$_url/api/v1/search/filters"),
         headers: headers,
         body: encodeBody,
       );
+
+      Logger logger = Logger();
+      logger.i(response.body);
+
+      return response;
+
     } on Exception catch (e) {
       if (kDebugMode) {
         print(e);
@@ -184,11 +191,16 @@ class ProductService implements ProductRepositoryInterface {
     try {
       final encodeBody = json.encode(bindings);
 
-      return await http.post(
+      final response = await http.post(
         Uri.parse("$_url/api/v1/search/"),
         headers: headers,
         body: encodeBody,
       );
+
+      Logger logger = Logger();
+      logger.i(response.body);
+
+      return response;
     } on Exception catch (e) {
       if (kDebugMode) {
         print(e);

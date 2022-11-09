@@ -27,9 +27,38 @@ class CartBloc extends ChangeNotifier {
   final PagingController<int, Product> pagingController =
       PagingController(firstPageKey: 0);
 
+  void initPage() {
+    pagingController.addPageRequestListener(
+      (pageKey) {
+        fetchPage(
+          pageKey: pageKey,
+          categories: [
+            Brand(
+              id: "635ade4510d23296ee080ee1",
+              slug: "piso",
+            )
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     pagingController.dispose();
+    pagingController.removePageRequestListener(
+      (pageKey) {
+        fetchPage(
+          pageKey: pageKey,
+          categories: [
+            Brand(
+              id: "635ade4510d23296ee080ee1",
+              slug: "piso",
+            )
+          ],
+        );
+      },
+    );
     super.dispose();
   }
 
@@ -56,7 +85,8 @@ class CartBloc extends ChangeNotifier {
       if (response.statusCode == 200) {
         final products = jsonDecode(response.body) as List;
         if (products.isNotEmpty) {
-          List<Product> newItems = products.map((e) => Product.fromMap(e)).toList().cast();
+          List<Product> newItems =
+              products.map((e) => Product.fromMap(e)).toList().cast();
 
           _initialRange += 20;
           _finalRange += 20;

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_in/sign_in_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -50,17 +51,9 @@ class LoginScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 45.0),
                   child: Column(
                     children: <Widget>[
-                      Container(
-                        height: 100,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            fit: BoxFit.contain,
-                            alignment: FractionalOffset.topCenter,
-                            image: AssetImage(
-                              "assets/images/mundo-pet.png",
-                            ),
-                          ),
-                        ),
+                      Image.asset(
+                        "assets/images/mundo-negocio.png",
+                        height: getProportionateScreenHeight(120.0),
                       ),
                       const SizedBox(height: 20),
                       InkWell(

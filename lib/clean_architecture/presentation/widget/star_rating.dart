@@ -5,7 +5,8 @@ class StarRating extends StatelessWidget {
   final double rating;
   final double size;
 
-  StarRating({required this.rating, required this.size});
+  const StarRating({Key? key, required this.rating, required this.size})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +31,7 @@ class StarRating extends StatelessWidget {
       icon = Icons.star;
       color = kPrimaryColorRed;
     }
+
     return Icon(
       icon,
       color: color,

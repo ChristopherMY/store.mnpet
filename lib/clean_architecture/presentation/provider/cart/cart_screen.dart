@@ -50,20 +50,8 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     final cartBloc = context.read<CartBloc>();
-
-    cartBloc.pagingController.addPageRequestListener(
-      (pageKey) {
-        cartBloc.fetchPage(
-          pageKey: pageKey,
-          categories: [
-            Brand(
-              id: "621f9beeb5ab45b8097f3454",
-              slug: "accesorios-para-mascotas",
-            )
-          ],
-        );
-      },
-    );
+    // final mainBloc = context.read<MainBloc>();
+    cartBloc.initPage();
 
     super.initState();
   }
@@ -239,7 +227,8 @@ class _CartScreenState extends State<CartScreen> {
                               return DefaultButton(
                                 text: "Ir a pagar",
                                 press: () {
-                                  if (mainBloc.credentials is! CredentialsAuth) {
+                                  if (mainBloc.credentials
+                                      is! CredentialsAuth) {
                                     mainBloc.countNavigateIterationScreen = 3;
                                     mainBloc.handleAuthAccess(context);
 
@@ -386,7 +375,8 @@ class CardItem extends StatelessWidget {
   Widget build(BuildContext context) {
     const url = Environment.API_DAO;
     return Container(
-      constraints: BoxConstraints(minHeight: getProportionateScreenHeight(135.0)),
+      constraints:
+          BoxConstraints(minHeight: getProportionateScreenHeight(135.0)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10.0),
@@ -516,9 +506,7 @@ class CardItem extends StatelessWidget {
                                     );
 
                                     if (response is ResponseApi) {
-                                      await mainBloc.handleFnShoppingCart(
-                                        enableLoader: false,
-                                      );
+                                      await mainBloc.handleFnShoppingCart();
 
                                       context.loaderOverlay.hide();
 
@@ -556,9 +544,7 @@ class CardItem extends StatelessWidget {
                                     );
 
                                     if (response is ResponseApi) {
-                                      await mainBloc.handleFnShoppingCart(
-                                        enableLoader: false,
-                                      );
+                                      await mainBloc.handleFnShoppingCart();
 
                                       context.loaderOverlay.hide();
 

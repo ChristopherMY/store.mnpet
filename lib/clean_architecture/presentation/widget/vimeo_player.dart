@@ -16,11 +16,11 @@ class VimeoVideoPlayer extends StatefulWidget {
   State<VimeoVideoPlayer> createState() => _VimeoVideoPlayerState();
 }
 
-class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
-    with AutomaticKeepAliveClientMixin {
+class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
   final BetterVideoPlayerController controllerBetterVideo =
       BetterVideoPlayerController();
-  late BetterVideoPlayerConfiguration betterVideoPlayerConfiguration;
+
+  // late BetterVideoPlayerConfiguration betterVideoPlayerConfiguration;
 
   double videoContainerRatio = 0.5;
 
@@ -34,19 +34,19 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
     }
   }
 
+  void listenerVideoPlayer() {
+    final bool isPlaying = controllerBetterVideo.value.isLoading;
+    if (isPlaying == false) {
+      //controllerBetterVideo.play();
+      //controllerBetterVideo.detachVideoPlayerController();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
 
-    controllerBetterVideo.addListener(
-      () {
-        final bool isPlaying = controllerBetterVideo.value.isLoading;
-        if (isPlaying == false) {
-          //controllerBetterVideo.play();
-          //controllerBetterVideo.detachVideoPlayerController();
-        }
-      },
-    );
+    controllerBetterVideo.addListener(listenerVideoPlayer);
 
     /*
       playerEventSubscription =
@@ -58,35 +58,40 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer>
     */
   }
 
-  @override
-  void deactivate() {
-    //  controllerBetterVideo.pause();
-    super.deactivate();
-  }
+  // @override
+  // void deactivate() {
+  //   //  controllerBetterVideo.pause();
+  //   super.deactivate();
+  // }
+
+  // void pauseVideo() async {
+  //   if (controllerBetterVideo.videoPlayerValue!.isPlaying) {
+  //     print("Esta deteniendo");
+  //     await controllerBetterVideo.pause();
+  //   }
+  // }
 
   @override
   void dispose() {
     /// disposing the controllers
-    controllerBetterVideo.pause();
+    controllerBetterVideo.removeListener(listenerVideoPlayer);
     controllerBetterVideo.dispose();
-    controllerBetterVideo.removeListener(() { });
+    // pauseVideo();
 
-    //playerEventSubscription.cancel();
+    // playerEventSubscription.cancel();
 
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    //playerEventSubscription.cancel();
-    //controllerBetterVideo.pause();
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   //playerEventSubscription.cancel();
+  //   //controllerBetterVideo.pause();
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-
     return BetterVideoPlayer(
       controller: controllerBetterVideo,
       configuration: BetterVideoPlayerConfiguration(

@@ -2,6 +2,7 @@
 class Assets {
   Assets._();
 
+  static const String assetsMercadopago = 'assets/mercadopago.png';
   static const String assetsNavCart = 'assets/nav_cart.png';
   static const String assetsNavHome = 'assets/nav_home.png';
   static const String assetsNavUser = 'assets/nav_user.png';
@@ -11,6 +12,7 @@ class Assets {
   static const String assetsPx-mn-pet-default-rosa = 'assets/px-mn-pet-default-rosa.png';
   static const String assetsPx-mn-white = 'assets/px-mn-white.png';
   static const String assetsPx-mt-pet-rosa = 'assets/px-mt-pet-rosa.png';
+  static const String banksAmex = 'assets/banks/amex.png';
   static const String banksChip = 'assets/banks/chip.png';
   static const String banksDiscover = 'assets/banks/discover.png';
   static const String banksMastercard = 'assets/banks/mastercard.png';
@@ -24,6 +26,8 @@ class Assets {
   static const String fontOpenSans-Light = 'assets/font/OpenSans-Light.ttf';
   static const String fontOpenSans-Regular = 'assets/font/OpenSans-Regular.ttf';
   static const String fontOpenSans-SemiBold = 'assets/font/OpenSans-SemiBold.ttf';
+  static const String iconsEyeOffThin = 'assets/icons/eye_off_thin.svg';
+  static const String iconsEyeThin = 'assets/icons/eye_thin.svg';
   static const String iconsFacebook-2 = 'assets/icons/facebook-2.svg';
   static const String iconsGoogle-icon = 'assets/icons/google-icon.svg';
   static const String iconsLocation-point = 'assets/icons/location-point.svg';
@@ -33,8 +37,8 @@ class Assets {
   static const String iconsTwitter = 'assets/icons/twitter.svg';
   static const String iconsUser = 'assets/icons/User.svg';
   static const String imagesCall-center-agent = 'assets/images/call-center-agent.png';
+  static const String imagesLogo = 'assets/images/logo.png';
   static const String imagesLogo-mn = 'assets/images/logo-mn.png';
-  static const String imagesLogo-small = 'assets/images/logo-small.png';
   static const String imagesMenu = 'assets/images/menu.png';
   static const String imagesMundo-negocio = 'assets/images/mundo-negocio.png';
   static const String imagesMundo-pet = 'assets/images/mundo-pet.png';
@@ -43,6 +47,7 @@ class Assets {
   static const String lottiePaw = 'assets/lottie/paw.json';
   static const String lottieSearchingImage = 'assets/lottie/searching_image.json';
   static const String lottieShake-a-empty-box = 'assets/lottie/shake-a-empty-box.json';
+  static const String lottieShopping-bag = 'assets/lottie/shopping-bag.json';
   static const String lottieShopping-cart = 'assets/lottie/shopping-cart.json';
   static const String otherAnswer = 'assets/icons/other/answer.png';
   static const String otherAskQuestion = 'assets/icons/other/ask_question.png';

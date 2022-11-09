@@ -612,7 +612,11 @@ class DialogHelper {
                 color: Colors.transparent,
                 child: Container(
                   padding: const EdgeInsets.only(
-                      top: 10.0, right: 15.0, bottom: 15.0, left: 15.0),
+                    top: 10.0,
+                    right: 15.0,
+                    bottom: 15.0,
+                    left: 15.0,
+                  ),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -1052,54 +1056,58 @@ class DialogHelper {
                                 SizedBox(
                                   height: getProportionateScreenHeight(20.0),
                                 ),
-                                ItemButton(
-                                  title: "Eliminar dirección",
-                                  press: () async {
-                                    context.loaderOverlay.show();
-                                    Navigator.of(context).pop();
-                                    final response =
-                                        await shipmentBloc.onDeleteAddress(
-                                      addressId: shipmentBloc.address.id!,
-                                      headers: mainBloc.headers,
-                                    );
+                                shipmentBloc.isUpdate
+                                    ? ItemButton(
+                                        title: "Eliminar dirección",
+                                        press: () async {
+                                          context.loaderOverlay.show();
+                                          Navigator.of(context).pop();
+                                          final response = await shipmentBloc
+                                              .onDeleteAddress(
+                                            addressId: shipmentBloc.address.id!,
+                                            headers: mainBloc.headers,
+                                          );
 
-                                    if (response is ResponseApi) {
-                                      shipmentBloc.address = Address(
-                                        ubigeo: Ubigeo(),
-                                        lotNumber: 1,
-                                        dptoInt: 1,
-                                        addressDefault: false,
-                                      );
+                                          if (response is ResponseApi) {
+                                            shipmentBloc.address = Address(
+                                              ubigeo: Ubigeo(),
+                                              lotNumber: 1,
+                                              dptoInt: 1,
+                                              addressDefault: false,
+                                            );
 
-                                      final responseUserInformation =
-                                          await mainBloc.getUserInformation();
+                                            final responseUserInformation =
+                                                await mainBloc
+                                                    .getUserInformation();
 
-                                      if (responseUserInformation) {
-                                        mainBloc.informationUser =
-                                            responseUserInformation;
+                                            if (responseUserInformation) {
+                                              mainBloc.informationUser =
+                                                  responseUserInformation;
 
-                                        mainBloc.refreshMainBloc();
-                                        context.loaderOverlay.hide();
-                                        await GlobalSnackBar
-                                            .showInfoSnackBarIcon(
-                                          context,
-                                          response.message,
-                                        );
+                                              mainBloc.refreshMainBloc();
+                                              context.loaderOverlay.hide();
+                                              await GlobalSnackBar
+                                                  .showInfoSnackBarIcon(
+                                                context,
+                                                response.message,
+                                              );
 
-                                        return;
-                                      }
-                                    }
+                                              return;
+                                            }
+                                          }
 
-                                    context.loaderOverlay.hide();
-                                    await GlobalSnackBar.showWarningSnackBar(
-                                      context,
-                                      "Ups, vuelvalo a intentar más tarde",
-                                    );
+                                          context.loaderOverlay.hide();
+                                          await GlobalSnackBar
+                                              .showWarningSnackBar(
+                                            context,
+                                            "Ups, vuelvalo a intentar más tarde",
+                                          );
 
-                                    return;
-                                  },
-                                  icon: Icons.delete_forever_sharp,
-                                ),
+                                          return;
+                                        },
+                                        icon: Icons.delete_forever_sharp,
+                                      )
+                                    : const SizedBox(),
                                 SizedBox(
                                   height: getProportionateScreenHeight(20.0),
                                 ),
@@ -1165,7 +1173,8 @@ class DialogHelper {
                                               await mainBloc
                                                   .getUserInformation();
 
-                                          if (responseUserInformation is UserInformation) {
+                                          if (responseUserInformation
+                                              is UserInformation) {
                                             mainBloc.informationUser =
                                                 responseUserInformation;
                                             mainBloc.refreshMainBloc();
@@ -1343,52 +1352,59 @@ class DialogHelper {
                                 SizedBox(
                                   height: getProportionateScreenHeight(20.0),
                                 ),
-                                ItemButton(
-                                  title: "Eliminar teléfono",
-                                  press: () async {
-                                    context.loaderOverlay.show();
-                                    Navigator.of(context).pop();
-                                    final response =
-                                        await phoneBloc.onDeletePhone(
-                                      phoneId: phoneBloc.phone.id!,
-                                      headers: mainBloc.headers,
-                                    );
+                                phoneBloc.isUpdate
+                                    ? ItemButton(
+                                        title: "Eliminar teléfono",
+                                        press: () async {
+                                          context.loaderOverlay.show();
+                                          Navigator.of(context).pop();
+                                          final response =
+                                              await phoneBloc.onDeletePhone(
+                                            phoneId: phoneBloc.phone.id!,
+                                            headers: mainBloc.headers,
+                                          );
 
-                                    if (response is ResponseApi) {
-                                      phoneBloc.phone = Phone(
-                                        phoneDefault: false,
-                                        type: "phone",
-                                        areaCode: "51",
-                                      );
+                                          if (response is ResponseApi) {
+                                            phoneBloc.phone = Phone(
+                                              phoneDefault: false,
+                                              type: "phone",
+                                              areaCode: "51",
+                                            );
 
-                                      final responseUserInformation =
-                                          await mainBloc.getUserInformation();
+                                            final responseUserInformation =
+                                                await mainBloc
+                                                    .getUserInformation();
 
-                                      if (responseUserInformation is UserInformation) {
-                                        mainBloc.informationUser = responseUserInformation;
-                                        mainBloc.refreshMainBloc();
+                                            if (responseUserInformation
+                                                is UserInformation) {
+                                              mainBloc.informationUser =
+                                                  responseUserInformation;
+                                              mainBloc.refreshMainBloc();
 
-                                        context.loaderOverlay.hide();
+                                              context.loaderOverlay.hide();
 
-                                        await GlobalSnackBar.showInfoSnackBarIcon(
-                                          context,
-                                          response.message,
-                                        );
+                                              await GlobalSnackBar
+                                                  .showInfoSnackBarIcon(
+                                                context,
+                                                response.message,
+                                              );
 
-                                        return;
-                                      }
-                                    }
+                                              return;
+                                            }
+                                          }
 
-                                    context.loaderOverlay.hide();
-                                    await GlobalSnackBar.showWarningSnackBar(
-                                      context,
-                                      "Ups, vuelvalo a intentar más tarde",
-                                    );
+                                          context.loaderOverlay.hide();
+                                          await GlobalSnackBar
+                                              .showWarningSnackBar(
+                                            context,
+                                            "Ups, vuelvalo a intentar más tarde",
+                                          );
 
-                                    return;
-                                  },
-                                  icon: Icons.delete_forever_sharp,
-                                ),
+                                          return;
+                                        },
+                                        icon: Icons.delete_forever_sharp,
+                                      )
+                                    : const SizedBox(),
                                 SizedBox(
                                   height: getProportionateScreenHeight(20.0),
                                 ),
@@ -1423,6 +1439,9 @@ class DialogHelper {
                                             mainBloc.refreshMainBloc();
 
                                             context.loaderOverlay.hide();
+
+                                            print(
+                                                "Tiene estado de: ${response.status}");
 
                                             if (response.status == "success") {
                                               return await GlobalSnackBar

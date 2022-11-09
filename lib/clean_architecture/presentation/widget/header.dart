@@ -42,7 +42,7 @@ class _HeaderState extends State<Header> {
                   width: 40.0,
                   height: 40.0,
                   child: Image.asset(
-                    "assets/px-mn-white.png",
+                    "assets/images/logo.png",
                     fit: BoxFit.cover,
                   ),
                 )

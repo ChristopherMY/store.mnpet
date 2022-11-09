@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
@@ -460,7 +461,7 @@ class ProductBloc extends ChangeNotifier {
     print("**************");
 
     await swiperController.move(index);
-    if(isAppBar){
+    if (isAppBar) {
       indexPhotoViewer = index;
     }
 
@@ -468,10 +469,13 @@ class ProductBloc extends ChangeNotifier {
     // notifyListeners();
   }
 
-  Future<dynamic> onSaveShoppingCart({
-    required Map<String, String> headers,
-  }) async {
+  Future<dynamic> onSaveShoppingCart() async {
     stateOnlyCustomIndicatorText.value = ButtonState.loading;
+
+    Map<String, String> headers = {
+      "Content-type": "application/json",
+      "Custom-Origin": "app",
+    };
 
     final credentials = CredentialsAuth.fromMap(
       await hiveRepositoryInterface.read(
@@ -483,35 +487,38 @@ class ProductBloc extends ChangeNotifier {
 
     /// Si no hay token consedera la accion de trabajar con carrito de compras temporal
     if (credentials.token.isNotEmpty && credentials.token.isNotEmpty) {
-      Map<String, dynamic> buildCart = {
+      headers[HttpHeaders.authorizationHeader] = "Bearer ${credentials.token}";
+
+      Map<String, dynamic> bindingCart = {
         "product_id": product!.id!,
         "variation_id": variation.value.id,
         "quantity": quantity.value,
       };
 
-      final response = await cartRepositoryInterface.saveShoppingCart(
-        cart: buildCart,
+      // final response =
+      await cartRepositoryInterface.saveShoppingCart(
+        cart: bindingCart,
         headers: headers,
       );
 
-      if (response is String) {
-        if (kDebugMode) {
-          print(response);
-        }
-
-        stateOnlyCustomIndicatorText.value = ButtonState.idle;
-        return false;
-      }
-
-      if (response is! http.Response) {
-        stateOnlyCustomIndicatorText.value = ButtonState.idle;
-        return false;
-      }
-
-      if (response.statusCode == 200) {
-        stateOnlyCustomIndicatorText.value = ButtonState.idle;
-        return false;
-      }
+      // if (response is String) {
+      //   if (kDebugMode) {
+      //     print(response);
+      //   }
+      //
+      //   stateOnlyCustomIndicatorText.value = ButtonState.idle;
+      //   return false;
+      // }
+      //
+      // if (response is! http.Response) {
+      //   stateOnlyCustomIndicatorText.value = ButtonState.idle;
+      //   return false;
+      // }
+      //
+      // if (response.statusCode == 200) {
+      //   stateOnlyCustomIndicatorText.value = ButtonState.idle;
+      //   return false;
+      // }
 
       stateOnlyCustomIndicatorText.value = ButtonState.idle;
       return true;
@@ -523,17 +530,12 @@ class ProductBloc extends ChangeNotifier {
         ) ??
         "";
 
-    print("ShoppingCartId: $shoppingCartId");
-
     Map<String, dynamic> buildCart = {
       "product_id": product!.id!,
       "variation_id": variation.value.id,
       "quantity": quantity.value,
       "cart_id": shoppingCartId,
     };
-
-    print("Binding Cart");
-    print(buildCart);
 
     final response =
         await cartRepositoryInterface.onSaveShoppingCartTemp(cart: buildCart);

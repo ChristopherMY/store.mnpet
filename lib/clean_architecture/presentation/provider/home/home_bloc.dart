@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/category.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
@@ -17,7 +14,7 @@ class HomeBloc extends ChangeNotifier {
   ValueNotifier<List<MasterCategory>> categoriesList =
       ValueNotifier(<MasterCategory>[]);
 
-  static int _initialRange = 1;
+  static int _initialRange = 0;
   static int _finalRange = 20;
   static const _pageSize = 19;
   bool reloadPagination = false;
@@ -36,7 +33,7 @@ class HomeBloc extends ChangeNotifier {
 
   Future<void> fetchPage(int pageKey) async {
     if (reloadPagination) {
-      _initialRange = 1;
+      _initialRange = 0;
       _finalRange = 20;
       reloadPagination = !reloadPagination;
     }
@@ -46,65 +43,42 @@ class HomeBloc extends ChangeNotifier {
       finalRange: _finalRange,
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-      pagingController.error = response;
+    if (response.isEmpty) {
+      pagingController.error =
+          "Nos encontramos en mantenimiento, intentelo más tarde";
+      return;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final values = jsonDecode(response.body) as List;
-        if (values.isNotEmpty) {
-          _initialRange += 20;
-          _finalRange += 20;
+    if (response.isNotEmpty) {
+      _initialRange += 20;
+      _finalRange += 20;
 
-          List<Product> newItems =
-              values.map((product) => Product.fromMap(product)).toList().cast();
+      // List<Product> newItems =
+      //     values.map((product) => Product.fromMap(product)).toList().cast();
 
-          final isLastPage = newItems.length < _pageSize;
-          if (isLastPage) {
-            pagingController.appendLastPage(newItems);
-          } else {
-            final nextPageKey = pageKey + newItems.length;
-            pagingController.appendPage(newItems, nextPageKey);
-          }
-
-          return;
-        }
-
-        pagingController.error = "dwdw";
+      final isLastPage = response.length < _pageSize;
+      if (isLastPage) {
+        pagingController.appendLastPage(response);
+      } else {
+        final nextPageKey = pageKey + response.length;
+        pagingController.appendPage(response, nextPageKey);
       }
     }
 
     components = LoadStatus.normal;
   }
 
-  void handleInitComponents() async {
-    final collection = await Future.wait([homeRepositoryInterface.getCategoriesHome()]);
+  Future<void> handleInitComponents() async {
+    final collection =
+        await Future.wait([homeRepositoryInterface.getCategoriesHome()]);
 
     collection.forEachIndexed(
       (index, response) {
         switch (index) {
           case 0:
             {
-              if (response is String) {
-                if (kDebugMode) {
-                  print(response);
-                }
-              }
-
-              if (response is http.Response) {
-                if (response.statusCode == 200) {
-                  final categories = jsonDecode(response.body) as List;
-                  if (categories.isNotEmpty) {
-                    categoriesList.value = categories
-                        .map((category) => MasterCategory.fromMap(category))
-                        .toList()
-                        .cast();
-                  }
-                }
+              if (response.isNotEmpty) {
+                categoriesList.value = response;
               }
             }
             break;
@@ -114,5 +88,7 @@ class HomeBloc extends ChangeNotifier {
     );
   }
 
-  void refresh() {}
+  void refresh() {
+    notifyListeners();
+  }
 }

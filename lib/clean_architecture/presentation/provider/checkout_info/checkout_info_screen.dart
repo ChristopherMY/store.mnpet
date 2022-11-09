@@ -30,7 +30,10 @@ import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/button_crud.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
+import 'package:store_mundo_pet/clean_architecture/presentation/widget/loading_full_screen.dart';
 
 import '../../../domain/model/credit_card_brand.dart';
 import '../../../domain/model/custom_card_type_icon.dart';
@@ -154,7 +157,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                       children: [
                         SizedBox(
                           height: SizeConfig.screenHeight! -
-                              SizeConfig.screenHeight! * 0.27,
+                              SizeConfig.screenHeight! * 0.20,
                           child: PageView(
                             controller: checkoutInfoBloc.pageController,
                             physics: const NeverScrollableScrollPhysics(),
@@ -170,12 +173,11 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                 ),
                 Positioned(
                   bottom: 0,
-                  width: SizeConfig.screenWidth!,
                   right: 0,
+                  width: SizeConfig.screenWidth!,
                   child: ValueListenableBuilder(
                     valueListenable: mainBloc.informationCart,
                     builder: (_, cart, __) {
-                      print("Build informationCart");
                       if (cart is Cart) {
                         return Column(
                           children: [
@@ -189,10 +191,11 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                 child: ValueListenableBuilder(
                                   valueListenable:
                                       checkoutInfoBloc.tabsPaymentPage,
-                                  builder: (_,
-                                      List<TabPaymentPage> tabsPaymentPage,
-                                      __) {
-                                    print("Build tabsPaymentPage");
+                                  builder: (
+                                    _,
+                                    List<TabPaymentPage> tabsPaymentPage,
+                                    __,
+                                  ) {
                                     return Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
@@ -318,7 +321,6 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                         //     ),
                                         //   ),
                                         // ],
-
                                         );
                                   },
                                 ),
@@ -628,7 +630,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
         ),
       );
     } else {
-      return const Placeholder();
+      return const LoadingBagFullScreen();
     }
   }
 
@@ -677,51 +679,6 @@ class RowDetailPriceInfo extends StatelessWidget {
   }
 }
 
-class _ButtonCrud extends StatelessWidget {
-  const _ButtonCrud({
-    Key? key,
-    required this.onTap,
-    required this.titleButton,
-  }) : super(key: key);
-
-  final VoidCallback onTap;
-  final String titleButton;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: SizeConfig.screenWidth! - SizeConfig.screenWidth! * 0.59,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15.0),
-        child: Material(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
-          ),
-          elevation: 1,
-          clipBehavior: Clip.hardEdge,
-          child: InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 9.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  const Icon(
-                    CupertinoIcons.plus,
-                    size: 18.0,
-                  ),
-                  Text(titleButton)
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class OrderCheckoutScreen extends StatelessWidget {
   const OrderCheckoutScreen({Key? key}) : super(key: key);
 
@@ -751,7 +708,7 @@ class OrderCheckoutScreen extends StatelessWidget {
           ),
           SizedBox(height: getProportionateScreenHeight(20.0)),
           _OrderCheckoutShipping.init(context),
-          SizedBox(height: getProportionateScreenHeight(20.0)),
+          SizedBox(height: getProportionateScreenHeight(15.0)),
           _OrderCheckoutShippingPhone.init(context),
         ],
       ),
@@ -945,9 +902,11 @@ class _OrderCheckoutShippingState extends State<_OrderCheckoutShipping> {
             ),
           ),
         ),
-        _ButtonCrud(
+        ButtonCrud(
           onTap: () async {
             shipmentBloc.isUpdate = false;
+            shipmentBloc.address = addressDefault;
+
             await DialogHelper.showAddressDialog(context: context);
           },
           titleButton: "Añadir dirección",
@@ -977,13 +936,6 @@ class _OrderCheckoutShippingPhone extends StatefulWidget {
 
 class _OrderCheckoutShippingPhoneState
     extends State<_OrderCheckoutShippingPhone> {
-  String splitNumberJoin(String number) {
-    const int splitSize = 3;
-    RegExp exp = RegExp(r"\d{" + splitSize.toString() + "}");
-    Iterable<Match> matches = exp.allMatches(number);
-    return matches.map((m) => int.tryParse(m.group(0)!)).join(" ");
-  }
-
   @override
   Widget build(BuildContext context) {
     final phoneBloc = context.watch<PhoneBloc>();
@@ -1151,7 +1103,7 @@ class _OrderCheckoutShippingPhoneState
             ),
           ),
         ),
-        _ButtonCrud(
+        ButtonCrud(
           onTap: () async {
             phoneBloc.isUpdate = false;
             await DialogHelper.showPhonesDialog(context: context);
@@ -1182,143 +1134,161 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
     final checkoutInfoBloc = context.watch<CheckOutInfoBloc>();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-      child: Material(
-        color: Colors.white,
-        elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        child: Column(
-          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            CreditCardWidget(
-              glassmorphismConfig: Glassmorphism(
-                blurX: 1.0,
-                blurY: 1.0,
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[
-                    Color(0xFF464b5f),
-                    Color(0xFF464b5f),
-                  ],
-                  stops: <double>[
-                    0.3,
-                    0,
-                  ],
+      padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Proceso de pago",
+                  style: Theme.of(context).textTheme.bodyText1,
                 ),
-              ),
-              labelCardHolder: 'TITULAR DE LA TARJETA',
-              cardNumber: checkoutInfoBloc.cardNumber,
-              expiryDate: checkoutInfoBloc.expiryDate,
-              cardHolderName: checkoutInfoBloc.cardHolderName,
-              cvvCode: checkoutInfoBloc.cvvCode,
-              textStyle: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              ),
-              showBackView: checkoutInfoBloc.isCvvFocused,
-              obscureCardNumber: true,
-              obscureCardCvv: true,
-              isHolderNameVisible: true,
-              cardBgColor: const Color(0xFF464b5f),
-              chipColor: Colors.white,
-              isSwipeGestureEnabled: true,
-              onCreditCardWidgetChange: (CreditCardBrand creditCardBrand) {},
-              customCardTypeIcons: <CustomCardTypeIcon>[
-                CustomCardTypeIcon(
-                  cardType: CardType.visa,
-                  cardImage: Image.asset(
-                    'assets/banks/visa.png',
-                    height: 48,
-                    width: 48,
-                  ),
-                ),
-                CustomCardTypeIcon(
-                  cardType: CardType.mastercard,
-                  cardImage: Image.asset(
-                    'assets/banks/mastercard.png',
-                    height: 48,
-                    width: 48,
-                  ),
-                ),
-                CustomCardTypeIcon(
-                  cardType: CardType.discover,
-                  cardImage: Image.asset(
-                    'assets/banks/discover.png',
-                    height: 48,
-                    width: 48,
-                  ),
+                const SizedBox(height: 8.0),
+                Text(
+                  "* Ingresa los datos de tu tarjeta",
+                  style: Theme.of(context).textTheme.headline5,
                 ),
               ],
             ),
-            // Padding(
-            //   padding: const EdgeInsets.only(bottom: 25.0),
-            //   child:
-            //   Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            // const Padding(
-            //   padding:
-            //       EdgeInsets.symmetric(horizontal: 16.0, vertical: 15.0),
-            //   child: Text("Detalle de la tarjeta"),
-            // ),
-            CreditCardForm(
-              formKey: checkoutInfoBloc.formKey,
-              obscureCvv: true,
-              obscureNumber: false,
-              cardNumber: checkoutInfoBloc.cardNumber,
-              cvvCode: checkoutInfoBloc.cvvCode,
-              isHolderNameVisible: false,
-              isCardNumberVisible: true,
-              isExpiryDateVisible: true,
-              cardHolderName: checkoutInfoBloc.cardHolderName,
-              expiryDate: checkoutInfoBloc.expiryDate,
-              themeColor: Colors.blue,
-              textColor: Colors.black,
-              cvvValidationMessage: "Ingrese un CVV valido",
-              dateValidationMessage: "Fecha de expiración invalido",
-              numberValidationMessage: "Numero de tarjeta invalido",
-              cardNumberDecoration: const InputDecoration(
-                labelText: 'Número de tarjeta',
-                hintText: 'XXXX XXXX XXXX XXXX',
-                hintStyle: TextStyle(color: Colors.black),
-                labelStyle: TextStyle(color: Colors.black),
-                errorStyle: TextStyle(height: 0.0),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+          SizedBox(height: getProportionateScreenHeight(15.0)),
+          CreditCardWidget(
+            glassmorphismConfig: Glassmorphism(
+              blurX: 1.0,
+              blurY: 1.0,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  Color(0xFF464b5f),
+                  Color(0xFF464b5f),
+                ],
+                stops: <double>[
+                  0.3,
+                  0,
+                ],
               ),
-              expiryDateDecoration: const InputDecoration(
-                hintStyle: TextStyle(color: Colors.black),
-                labelStyle: TextStyle(color: Colors.black),
-                errorStyle: TextStyle(height: 0.0),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: 'Fecha de expiración',
-                hintText: 'XX/XX',
-              ),
-              cvvCodeDecoration: const InputDecoration(
-                hintStyle: TextStyle(color: Colors.black),
-                labelStyle: TextStyle(color: Colors.black),
-                errorStyle: TextStyle(height: 0.0),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: 'CVV',
-                hintText: 'XXX',
-              ),
-              cardHolderDecoration: const InputDecoration(
-                hintStyle: TextStyle(color: Colors.black),
-                labelStyle: TextStyle(color: Colors.black),
-                errorStyle: TextStyle(height: 0.0),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: 'Titular de la tarjeta',
-              ),
-              onCreditCardModelChange: checkoutInfoBloc.onCreditCardModelChange,
             ),
-            // ],
-            // ),
-            // ),
-          ],
-        ),
+            labelCardHolder: 'TITULAR DE LA TARJETA',
+            cardNumber: checkoutInfoBloc.cardNumber,
+            expiryDate: checkoutInfoBloc.expiryDate,
+            cardHolderName: checkoutInfoBloc.cardHolderName,
+            cvvCode: checkoutInfoBloc.cvvCode,
+            textStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+            ),
+            showBackView: checkoutInfoBloc.isCvvFocused,
+            obscureCardNumber: true,
+            obscureCardCvv: true,
+            isHolderNameVisible: false,
+            cardBgColor: const Color(0xFF464b5f),
+            chipColor: Colors.white,
+            isSwipeGestureEnabled: true,
+            onCreditCardWidgetChange: (CreditCardBrand creditCardBrand) {},
+            customCardTypeIcons: <CustomCardTypeIcon>[
+              CustomCardTypeIcon(
+                cardType: CardType.visa,
+                cardImage: Image.asset(
+                  'assets/banks/visa.png',
+                  height: 48,
+                  width: 48,
+                ),
+              ),
+              CustomCardTypeIcon(
+                cardType: CardType.mastercard,
+                cardImage: Image.asset(
+                  'assets/banks/mastercard.png',
+                  height: 48,
+                  width: 48,
+                ),
+              ),
+              CustomCardTypeIcon(
+                cardType: CardType.discover,
+                cardImage: Image.asset(
+                  'assets/banks/discover.png',
+                  height: 48,
+                  width: 48,
+                ),
+              ),
+              CustomCardTypeIcon(
+                cardType: CardType.americanExpress,
+                cardImage: Image.asset(
+                  'assets/banks/amex.png',
+                  height: 45,
+                  width: 45,
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+                // height: SizeConfig.screenHeight! * 0.40,
+                child: CreditCardForm(
+                  formKey: checkoutInfoBloc.formKey,
+                  obscureCvv: true,
+                  obscureNumber: false,
+                  cardNumber: checkoutInfoBloc.cardNumber,
+                  cvvCode: checkoutInfoBloc.cvvCode,
+                  isHolderNameVisible: false,
+                  isCardNumberVisible: true,
+                  isExpiryDateVisible: true,
+                  cardHolderName: checkoutInfoBloc.cardHolderName,
+                  expiryDate: checkoutInfoBloc.expiryDate,
+                  themeColor: Colors.blue,
+                  textColor: Colors.black,
+                  cvvValidationMessage: "Ingrese un CVV valido",
+                  dateValidationMessage: "Fecha de expiración invalido",
+                  numberValidationMessage: "Numero de tarjeta invalido",
+                  cardNumberDecoration: const InputDecoration(
+                    labelText: 'Número de tarjeta',
+                    hintText: 'Número de la tarjeta',
+                    hintStyle: TextStyle(color: Colors.black),
+                    labelStyle: TextStyle(color: Colors.black),
+                    errorStyle: TextStyle(height: 0.0),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                  ),
+                  expiryDateDecoration: const InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black),
+                    labelStyle: TextStyle(color: Colors.black),
+                    errorStyle: TextStyle(height: 0.0),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: 'Fecha de expiración',
+                    hintText: 'Fecha de expiración',
+                  ),
+                  cvvCodeDecoration: const InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black),
+                    labelStyle: TextStyle(color: Colors.black),
+                    errorStyle: TextStyle(height: 0.0),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: 'CVV',
+                    hintText: 'CVV',
+                  ),
+                  cardHolderDecoration: const InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black),
+                    labelStyle: TextStyle(color: Colors.black),
+                    errorStyle: TextStyle(height: 0.0),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: 'Titular de la tarjeta',
+                  ),
+                  onCreditCardModelChange:
+                      checkoutInfoBloc.onCreditCardModelChange,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: getProportionateScreenHeight(25.0)),
+        ],
       ),
     );
   }
@@ -1352,21 +1322,22 @@ class _TabPaymentPage extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           // color: tabPaymentPage.checked! ? Colors.black : Colors.white,
+          color: Colors.black,
           borderRadius: BorderRadius.circular(15.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black, //New
-              blurRadius: 1.0,
-              offset: Offset(0, 1),
-            )
-          ],
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            colors: <Color>[
-              Color(0xFF14ad9e),
-              kPrimaryColor,
-            ],
-          ),
+          // boxShadow: const [
+          //   BoxShadow(
+          //     color: Colors.black, //New
+          //     blurRadius: 1.0,
+          //     offset: Offset(0, 1),
+          //   )
+          // ],
+          // gradient: LinearGradient(
+          //   begin: Alignment.topLeft,
+          //   colors: <Color>[
+          //     Colors.black,
+          //     kPrimaryColor.withOpacity(.1),
+          //   ],
+          // ),
         ),
         child: Text(
           tabPaymentPage.title!,

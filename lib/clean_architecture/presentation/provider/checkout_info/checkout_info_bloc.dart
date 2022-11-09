@@ -20,7 +20,7 @@ import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snac
 class CheckOutInfoBloc extends ChangeNotifier {
   bool isExpanded = false;
 
-  final duration = const Duration(milliseconds: 200);
+  final duration = const Duration(milliseconds: 100);
 
   final colors = [
     Colors.grey.shade300,
@@ -28,7 +28,7 @@ class CheckOutInfoBloc extends ChangeNotifier {
   ];
 
   ValueNotifier<List<TabPaymentPage>> tabsPaymentPage = ValueNotifier([
-    TabPaymentPage(checked: true, title: "Envío",showIcon: false),
+    TabPaymentPage(checked: true, title: "Envío", showIcon: false),
     TabPaymentPage(checked: false, title: "Pagar", showIcon: true),
   ]);
 
@@ -70,7 +70,9 @@ class CheckOutInfoBloc extends ChangeNotifier {
         }
 
         GlobalSnackBar.showWarningSnackBar(
-            context, "Fecha de expiración vacía");
+          context,
+          "Fecha de expiración vacía",
+        );
         return;
       }
 
@@ -82,7 +84,10 @@ class CheckOutInfoBloc extends ChangeNotifier {
         }
 
         GlobalSnackBar.showWarningSnackBar(
-            context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+          context,
+          "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+        );
+
         return;
       }
 
@@ -103,16 +108,20 @@ class CheckOutInfoBloc extends ChangeNotifier {
         }
 
         GlobalSnackBar.showWarningSnackBar(
-            context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+          context,
+          "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+        );
         return;
       }
 
-      await Future.microtask(() async {
-        await getInstallments(
-          cardToken: cardToken,
-          amount: double.parse(cartInformation.total!),
-        );
-      });
+      await Future.microtask(
+        () async {
+          await getInstallments(
+            cardToken: cardToken,
+            amount: double.parse(cartInformation.total!),
+          );
+        },
+      );
 
       if (installmentsDetail is! MercadoPagoPaymentMethodInstallments) {
         if (kDebugMode) {
@@ -121,7 +130,9 @@ class CheckOutInfoBloc extends ChangeNotifier {
         }
 
         GlobalSnackBar.showWarningSnackBar(
-            context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+          context,
+          "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+        );
         return;
       }
 
@@ -131,7 +142,9 @@ class CheckOutInfoBloc extends ChangeNotifier {
         }
 
         GlobalSnackBar.showWarningSnackBar(
-            context, "Registre su dirección de envío para continuar");
+          context,
+          "Registre su dirección de envío para continuar",
+        );
         return;
       }
 
@@ -145,7 +158,10 @@ class CheckOutInfoBloc extends ChangeNotifier {
         }
 
         GlobalSnackBar.showWarningSnackBar(
-            context, "Seleccione una dirección de envío por defecto");
+          context,
+          "Seleccione una dirección de envío por defecto",
+        );
+
         return;
       }
 
@@ -426,10 +442,10 @@ class CheckOutInfoBloc extends ChangeNotifier {
       curve: Curves.easeIn,
     );
 
-    for(int i = 0; i < tabsPaymentPage.value.length; i++){
-      copyTabsPaymentPage[i] = copyTabsPaymentPage[i].copyWith(checked: i == index);
+    for (int i = 0; i < tabsPaymentPage.value.length; i++) {
+      copyTabsPaymentPage[i] =
+          copyTabsPaymentPage[i].copyWith(checked: i == index);
     }
-
 
     tabsPaymentPage.value = copyTabsPaymentPage;
   }

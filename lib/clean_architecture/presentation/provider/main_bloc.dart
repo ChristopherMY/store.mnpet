@@ -90,14 +90,17 @@ class MainBloc extends ChangeNotifier {
       }
 
       if (indexSelected.value == 1) {
+        print(credentials);
         if (credentials is! CredentialsAuth) {
           //  sessionAccount.value = Session.inactive;
           if (informationCart.value is! Cart) {
+            print("Carrito de compras sin cuenta");
             handleGetShoppingCartNotAccount();
             return;
           }
         } else {
           if (informationCart.value is! Cart) {
+            print("Carrito de compras con cuenta");
             handleGetShoppingCart();
             return;
           }
@@ -392,12 +395,12 @@ class MainBloc extends ChangeNotifier {
 
   Future<CredentialsAuth> loadCredentialsAuth() async {
     return await Future.microtask(
-          () async {
+      () async {
         return CredentialsAuth.fromMap(
           await hiveRepositoryInterface.read(
-            containerName: "authentication",
-            key: "credentials",
-          ) ??
+                containerName: "authentication",
+                key: "credentials",
+              ) ??
               {"email": "", "email_confirmed": false, "token": ""},
         );
       },
@@ -427,7 +430,7 @@ class MainBloc extends ChangeNotifier {
       headers[HttpHeaders.authorizationHeader] =
           "Bearer ${responseCredentials.token}";
 
-      // sessionAccount.value = Session.active;
+      sessionAccount.value = Session.active;
     }
   }
 
@@ -665,8 +668,9 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
-  Future<void> handleFnShoppingCart({bool enableLoader = false}) async {
+  Future<void> handleFnShoppingCart() async {
     if (sessionAccount.value == Session.active) {
+      print("ACCEDIO A SECCIONA COUNT VALUE");
       final cart = await getShoppingCart(
         districtId: residence.districtId!,
         headers: headers,
@@ -679,10 +683,12 @@ class MainBloc extends ChangeNotifier {
 
       return;
     }
-
+    print("NOOOO ACCEDIO A SECCIONA COUNT VALUE");
     /// Continue computing execution code
 
     final shoppingCartId = await handleGetShoppingCartId();
+
+
 
     final cart = await getShoppingCartTemp(
       districtId: residence.districtId!,
@@ -723,6 +729,8 @@ class MainBloc extends ChangeNotifier {
     } else {
       final shoppingCartId = await handleGetShoppingCartId();
 
+
+
       response = await cartRepositoryInterface.updateProductCartTemp(
         cartId: shoppingCartId,
         productId: productId,
@@ -747,6 +755,4 @@ class MainBloc extends ChangeNotifier {
         ) ??
         "";
   }
-
-
 }

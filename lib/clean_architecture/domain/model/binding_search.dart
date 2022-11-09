@@ -79,13 +79,12 @@ class BindingSearch {
       'limit': limit ?? 16,
       'brands': brands ?? <String>[],
       'categories': categories ?? <String>[],
-      'productTypes': productTypes ?? <String>[],
+      'product_types': productTypes ?? <String>[],
       'attributes': attributes ?? <String>[],
-      'attributesTerm': attributesTerm ?? <String>[],
+      'attributes_term': attributesTerm ?? <String>[],
       'keywords': keywords ?? <String>[],
       'min': min ?? 0.0,
       'max': max ?? 500.0,
-      'first_search': firstSearch ?? false,
     };
   }
 
@@ -97,13 +96,12 @@ class BindingSearch {
       limit: map['limit'] as int,
       brands: map['brands'] as List<String>,
       categories: map['categories'] as List<String>,
-      productTypes: map['productTypes'] as List<String>,
+      productTypes: map['product_types'] as List<String>,
       attributes: map['attributes'] as List<String>,
-      attributesTerm: map['attributesTerm'] as List<String>,
+      attributesTerm: map['attributes_term'] as List<String>,
       keywords: map['keywords'] as List<String>,
       min: map['min'] as double,
       max: map['max'] as double,
-      firstSearch: map['first_search'] as bool,
     );
   }
 }

@@ -1,25 +1,22 @@
-// import 'package:division/division.dart';
 import 'package:flutter/material.dart';
+import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 
-//const kPrimaryColor = Color(0xFF17C3B2);
-const kPrimaryColor = Color(0xFF17C3B2);
+// const kPrimaryColor = Color(0xFF17C3B2);
+const kPrimaryColor = Color(0xFFF68302);
 const kPrimaryColorRed = Color(0xFFFF777F);
-const kPrimaryLightColor = Color(0xFFFFECDF);
-//const kPrimaryBackgroundColor = Color(0xFFfafafa);
+
 const kDividerColor = Color(0xFFF0F0F0);
 
 const kPrimaryBackgroundColor = Color(0xFFF2F2F2);
 const kBackGroundColor = Color(0xFFF5F5F5);
-const kFilledTextFieldColor = Color(0xFFf0f2f4);
 const kSecondaryBackgroundColor = Color(0xFFF9F9F9);
 const kPrimaryGradientColor = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
   colors: [Color(0xFFFFA53E), Color(0xFFFF7643)],
 );
-const kColorStarRating = Color(0xFFFFD500);
-const kSecondaryColor = Color(0xFF979797);
+
 const kTextColor = Color(0xFF757575);
 const kBlackColor = Color(0xFF000000);
 const kRappiGreenColor = Color(0xFF29D884);
@@ -31,101 +28,20 @@ final headingStyle = TextStyle(
   fontSize: getProportionateScreenWidth(22),
   fontWeight: FontWeight.bold,
 );
-/*
-//Styling
-final contentStyle = (BuildContext context) => ParentStyle()
-  ..overflow.scrollable()
-  ..padding(vertical: 30, horizontal: 20)
-  ..minHeight(MediaQuery.of(context).size.height - (2 * 30));
 
-final titleStyle = TxtStyle()
-  ..bold()
-  ..fontSize(32)
-  ..margin(bottom: 20)
-  ..alignmentContent.centerLeft();
+String splitNumberJoin(String number) {
+  const int splitSize = 3;
+  RegExp exp = RegExp(r"\d{" + splitSize.toString() + "}");
+  Iterable<Match> matches = exp.allMatches(number);
+  return matches.map((m) => int.tryParse(m.group(0)!)).join(" ");
+}
 
-final ParentStyle userCardStyle = ParentStyle()
-//..height(175)
-  ..height(75)
-  ..padding(horizontal: 20.0, vertical: 10)
-  ..alignment.center()
-//..background.hex('#3977FF')
-  ..borderRadius(all: 20.0)
-  ..elevation(10, color: hex('#3977FF'));
-
-final ParentStyle userImageStyle = ParentStyle()
-  ..height(60)
-  ..width(60)
-  ..margin(right: 10.0)
-  ..borderRadius(all: 30)
-  ..background.hex('ffffff');
-
-final ParentStyle userStatsStyle = ParentStyle()..margin(vertical: 10.0);
-
-final TxtStyle nameTextStyle = TxtStyle()
-  ..textColor(Colors.white)
-  ..fontSize(18)
-  ..fontWeight(FontWeight.w600);
-
-final TxtStyle nameDescriptionTextStyle = TxtStyle()
-  ..textColor(Colors.white.withOpacity(0.6))
-  ..fontSize(12);
-
-final settingsItemStyle = (pressed) => ParentStyle()
-  ..elevation(pressed ? 0 : 50, color: Colors.grey)
-  ..scale(pressed ? 0.95 : 1.0)
-  ..alignmentContent.center()
-  ..height(70)
-  ..margin(vertical: 10)
-  ..borderRadius(all: 15)
-  ..background.hex('#ffffff')
-  ..ripple(true)
-  ..animate(150, Curves.easeOut);
-
-final settingsItemIconStyle = (Color color) => ParentStyle()
-  ..background.color(color)
-  ..margin(left: 15)
-  ..padding(all: 12)
-  ..borderRadius(all: 30);
-
-final TxtStyle itemTitleTextStyle = TxtStyle()
-  ..bold()
-  ..fontSize(16);
-
-final TxtStyle itemDescriptionTextStyle = TxtStyle()
-  ..textColor(Colors.black26)
-  ..bold()
-  ..fontSize(12);
-
-final settingsItemStyleToolBar = (pressed) => ParentStyle()
-  ..elevation(pressed ? 0 : 50, color: Colors.grey)
-  ..scale(pressed ? 0.95 : 1.0)
-  ..alignmentContent.center()
-  ..height(36)
-  ..margin(vertical: 0, right: 0)
-  ..padding(right: 0)
-  ..borderRadius(all: 15)
-  ..background.hex('#ffffff')
-  ..ripple(true)
-  ..animate(150, Curves.easeOut);
-
-final settingsItemIconStyleToolBarSearch = (Color color) => ParentStyle()
-  ..elevation(50, color: Color(0xFF07958D))
-  ..scale(1.08)
-  ..width(50)
-  ..height(31)
-  ..margin(right: 0, left: 0)
-  ..padding(left: 17, right: 17, top: 5, bottom: 4)
-  ..borderRadius(all: 15)
-  ..ripple(true)
-  ..linearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    stops: [.8, 1],
-    colors: [color, Colors.white],
-  )
-  ..animate(150, Curves.easeOut);
-*/
+final addressDefault = Address(
+  ubigeo: Ubigeo(),
+  lotNumber: 1,
+  dptoInt: 1,
+  addressDefault: false,
+);
 
 String parseDouble(String value) {
   final calc = double.parse(value).toStringAsFixed(2);
@@ -150,6 +66,7 @@ const String kShortPassError = "La contraseña es demasiado corta";
 const String kShortNumberPhoneError =
     "El numero de teléfono es demasiado corto";
 const String kMatchPassError = "Las contraseñas no coinciden";
+const String kMatchEmailError = "Los correos no coinciden";
 const String kNamelNullError = "Por favor escriba su nombre";
 const String kLastNameNullError = "Por favor escriba sus apellidos";
 const String kPhoneNumberNullError =

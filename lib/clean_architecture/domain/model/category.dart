@@ -4,10 +4,14 @@
 
 import 'dart:convert';
 
+import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
+
 MasterCategory masterCategoryFromMap(String str) =>
     MasterCategory.fromMap(json.decode(str));
 
 String masterCategoryToMap(MasterCategory data) => json.encode(data.toMap());
+
+const url = Environment.API_DAO;
 
 class MasterCategory {
   MasterCategory({
@@ -19,7 +23,6 @@ class MasterCategory {
     this.hexa,
     this.shortName,
     this.image,
-
   });
 
   final String? id;
@@ -44,7 +47,6 @@ class MasterCategory {
         shortName: json["short_name"] == null ? null : json["short_name"],
         image: json["image"] == null
             ? ImageCategory.fromMap({
-                "src": "https://via.placeholder.com/250x200",
                 "dimensions": {
                   "width": 0,
                   "height": 0,
@@ -52,7 +54,6 @@ class MasterCategory {
                 "aspectRatio": 1.25,
               })
             : ImageCategory.fromMap(json["image"]),
-
       );
 
   Map<String, dynamic> toMap() => {
@@ -66,7 +67,6 @@ class MasterCategory {
         "hexa": hexa == null ? null : hexa,
         "short_name": shortName == null ? null : shortName,
         "image": image == null ? null : image!.toMap(),
-
       };
 
   MasterCategory copyWith({
@@ -141,7 +141,9 @@ class ImageCategory {
 
   factory ImageCategory.fromMap(Map<String, dynamic> json) => ImageCategory(
         id: json["_id"] == null ? null : json["_id"],
-        src: json["src"] == null ? null : json["src"],
+        src: json["src"] == null
+            ? "https://via.placeholder.com/250x200"
+            : "$url/${json["src"]}",
         dimensions: json["dimensions"] == null
             ? null
             : Dimensions.fromMap(json["dimensions"]),

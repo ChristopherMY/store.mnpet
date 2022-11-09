@@ -2,7 +2,6 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
@@ -21,6 +20,7 @@ class CustomProgressButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final productBloc = context.watch<ProductBloc>();
     final mainBloc = context.read<MainBloc>();
+
     return ValueListenableBuilder(
       valueListenable: productBloc.stateOnlyCustomIndicatorText,
       builder: (context, ButtonState value, child) {
@@ -72,20 +72,17 @@ class CustomProgressButton extends StatelessWidget {
           },
           //onPressed: isDialog! ? onAddDialogCart : onAddCart,
           onPressed: () async {
-            final response = await productBloc.onSaveShoppingCart(headers: mainBloc.headers);
+
+            final response = await productBloc.onSaveShoppingCart();
 
             if (response is bool) {
               if (response) {
-                //TODO: Debe de esperar que el shopping cart termine de cargar para
-                // que muestre la cantidad de items en el carrito
-
-                mainBloc.handleFnShoppingCart(enableLoader: true);
+                 mainBloc.handleFnShoppingCart();
 
                 GlobalSnackBar.showInfoSnackBarIcon(
                   context,
                   "Tu producto a sido agregado exitosamente al carrito",
                 );
-
               } else {
                 GlobalSnackBar.showErrorSnackBarIcon(
                   context,
@@ -96,7 +93,6 @@ class CustomProgressButton extends StatelessWidget {
               if (buttonComesFromModal) {
                 Navigator.of(context).pop();
               }
-
             }
           },
           state: value,

@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_screen.dart';
 import 'package:store_mundo_pet/clean_architecture/presentation/widget/star_rating.dart';
 
-class TrendingItemMain extends StatelessWidget {
-  final _cloudFront = Environment.CLOUD_FRONT;
-
+class TrendingItemMain extends StatefulWidget {
   final Product product;
   final List<Color> gradientColors;
 
@@ -21,12 +20,37 @@ class TrendingItemMain extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<TrendingItemMain> createState() => _TrendingItemMainState();
+}
+
+class _TrendingItemMainState extends State<TrendingItemMain>
+    with TickerProviderStateMixin {
+  final _cloudFront = Environment.CLOUD_FRONT;
+  AnimationController? _controller;
+
+  @override
+  initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller!.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ProductScreen.init(context, product),
+            builder: (context) => ProductScreen.init(context, widget.product),
           ),
         );
       },
@@ -44,50 +68,87 @@ class TrendingItemMain extends StatelessWidget {
                 bottomRight: Radius.circular(8.0),
               ),
               child: AspectRatio(
-                aspectRatio: product.mainImage!.aspectRatio!,
+                aspectRatio: widget.product.mainImage is MainImage
+                    ? widget.product.mainImage!.aspectRatio!
+                    : 0.86,
                 // aspectRatio: doubleInRange(Random(), 0.88, 1.19),
                 child: ExtendedImage(
-                  fit: BoxFit.fill,
+                  fit: BoxFit.fitHeight,
                   clearMemoryCacheIfFailed: true,
                   enableMemoryCache: true,
-                  image: ExtendedResizeImage(
-                    ExtendedNetworkImageProvider(
-                      "$_cloudFront/${product.mainImage!.src!}",
-                      cache: true,
-                      timeLimit: const Duration(seconds: 3),
-                    ),
-                    compressionRatio: 0.75,
-                    maxBytes: 50,
-                    width: null,
-                    height: null,
+                  image: ExtendedNetworkImageProvider(
+                    widget.product.mainImage is MainImage
+                        ? "$_cloudFront/${widget.product.mainImage!.src!}"
+                        : "",
+                    cache: true,
+                    timeLimit: const Duration(seconds: 3),
                   ),
+                  loadStateChanged: (ExtendedImageState state) {
+                    switch (state.extendedImageLoadState) {
+                      case LoadState.loading:
+                        _controller!.reset();
+                        _controller!.forward();
+                        return FadeTransition(
+                          opacity: _controller!,
+                          child: const Align(
+                            alignment: Alignment.topCenter,
+                            child: LinearProgressIndicator(
+                              color: Colors.black,
+                              backgroundColor: Colors.black12,
+                            ),
+                          ),
+                        );
+                        break;
+
+                      case LoadState.completed:
+                        _controller!.forward();
+                        return FadeTransition(
+                          opacity: _controller!,
+                          child: ExtendedRawImage(
+                            image: state.extendedImageInfo?.image,
+                          ),
+                        );
+                        break;
+
+                      case LoadState.failed:
+                        _controller!.reset();
+                        return GestureDetector(
+                          onTap: () {
+                            state.reLoadImage();
+                          },
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: <Widget>[
+                              Image.asset(
+                                "assets/no-image.png",
+                                fit: BoxFit.fill,
+                              ),
+                              Positioned(
+                                bottom: 10.0,
+                                left: 0.0,
+                                right: 0.0,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5.0),
+                                  child: Text(
+                                    "Presione para volver a intentarlo",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize:
+                                          getProportionateScreenWidth(8.0),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                        break;
+                    }
+                  },
                 ),
               ),
             ),
-
-            // AspectRatio(
-            //   aspectRatio: product.mainImage!.aspectRatio!,
-            //   // aspectRatio: doubleInRange(Random(), 0.88, 1.19),
-            //   child: CachedNetworkImage(
-            //     imageUrl: "$_cloudFront/${product.mainImage!.src!}",
-            //     imageBuilder: (context, imageProvider) => Image(
-            //       image: imageProvider,
-            //     ),
-            //     placeholder: (context, url) => Container(
-            //       decoration: BoxDecoration(
-            //         shape: BoxShape.rectangle,
-            //         borderRadius: BorderRadius.circular(10.0),
-            //       ),
-            //     ),
-            //     errorWidget: (context, url, error) => Container(
-            //       decoration: BoxDecoration(30
-            //         shape: BoxShape.rectangle,
-            //         borderRadius: BorderRadius.circular(10.0),
-            //       ),
-            //       child: Image.asset("assets/no-image.png"),
-            //     ),
-            //   ),
-            // ),
             _productDetails(context)
           ],
         ),
@@ -96,7 +157,7 @@ class TrendingItemMain extends StatelessWidget {
   }
 
   _productDetails(context) {
-    double rating = product.rating! * 0.05;
+    double rating = widget.product.rating! * 0.05;
     return Padding(
       padding:
           const EdgeInsets.only(top: 1.5, right: 3.0, bottom: 6.0, left: 3.0),
@@ -104,14 +165,14 @@ class TrendingItemMain extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            product.categories![0].name!,
+            widget.product.categories![0].name!,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 12, color: Colors.black45),
           ),
           const SizedBox(height: 1),
           Text(
-            product.name!,
+            widget.product.name!,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyText2,
@@ -124,7 +185,7 @@ class TrendingItemMain extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      "S/ ${parseDouble(product.price!.sale!)}",
+                      "S/ ${parseDouble(widget.product.price!.sale!)}",
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -133,7 +194,7 @@ class TrendingItemMain extends StatelessWidget {
                     ),
                     const SizedBox(width: 3.0),
                     Text(
-                      parseDouble(product.price!.regular!),
+                      parseDouble(widget.product.price!.regular!),
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 11,

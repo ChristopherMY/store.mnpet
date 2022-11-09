@@ -69,10 +69,12 @@ class CartService implements CartRepositoryInterface {
         headers: headers,
         body: json.encode(cart),
       );
+
     } on Exception catch (e) {
       if (kDebugMode) {
         print(e);
       }
+
       return null;
     }
   }
