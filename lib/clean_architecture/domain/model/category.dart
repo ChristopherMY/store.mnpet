@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 
 MasterCategory masterCategoryFromMap(String str) =>
     MasterCategory.fromMap(json.decode(str));

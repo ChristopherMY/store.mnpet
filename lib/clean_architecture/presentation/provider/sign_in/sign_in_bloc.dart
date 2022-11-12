@@ -4,10 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_auth.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 
 import '../../../helper/constants.dart';
 
@@ -27,6 +27,7 @@ class SignInBloc extends ChangeNotifier {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   bool loginState = false;
+  bool obscureTextNewPassword = true;
 
   void addError({required String error}) {
     List<String> values = List.from(errors.value);
@@ -114,11 +115,12 @@ class SignInBloc extends ChangeNotifier {
       containerName: "authentication",
       key: "credentials",
       value: credentials.toMap(),
-
     );
 
     return credentials;
+  }
 
-
+  void refreshBloc(){
+    notifyListeners();
   }
 }

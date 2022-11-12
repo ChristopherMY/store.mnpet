@@ -6,29 +6,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/general.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/cart_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/bottom_navigation_bar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/info_attributes.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/info_shipment.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/product_price.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/dotted_swiper.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/star_rating.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/general.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/cart/cart_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/bottom_navigation_bar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/info_attributes.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/info_shipment.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/product_price.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/dotted_swiper.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/star_rating.dart';
 
 import '../../../domain/usecase/page.dart';
 
@@ -46,10 +46,7 @@ class ProductScreen extends StatefulWidget {
           hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
         )
           ..isLoadingPage = true
-          ..initProductState(
-            slug: product.slug!,
-            galleryVideo: product.galleryVideo!,
-          );
+          ..initProductState(product: product);
       },
       builder: (context, child) => const ProductScreen._(),
     );
@@ -62,8 +59,9 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   @override
   void initState() {
-    final productBloc = context.read<ProductBloc>();
-    productBloc.init();
+    // final productBloc = context.read<ProductBloc>();
+    //  productBloc.init();
+
     super.initState();
   }
 
@@ -80,7 +78,7 @@ class _ProductScreenState extends State<ProductScreen> {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              const BuildAppBar(),
+              const _BuildAppBar(),
               //const CustomAppBar(),
               _buildInfo(context: context, product: product),
               /*
@@ -181,7 +179,10 @@ class _ProductScreenState extends State<ProductScreen> {
     );
   }
 
-  _buildInfo({required BuildContext context, required Product product}) {
+  _buildInfo({
+    required BuildContext context,
+    required Product product,
+  }) {
     return SliverToBoxAdapter(
       child: Material(
         color: Colors.white,
@@ -279,8 +280,8 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 }
 
-class BuildAppBar extends StatelessWidget {
-  const BuildAppBar({Key? key}) : super(key: key);
+class _BuildAppBar extends StatelessWidget {
+  const _BuildAppBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +311,7 @@ class BuildAppBar extends StatelessWidget {
         statusBarColor: Colors.white,
         statusBarIconBrightness: Brightness.dark,
       ),
-      expandedHeight: 411,
+      expandedHeight: 392,
       floating: false,
       pinned: true,
       snap: false,

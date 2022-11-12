@@ -24,20 +24,21 @@ class _LottieAnimationState extends State<LottieAnimation>
     // TODO: implement initState
     super.initState();
     _controller = AnimationController(vsync: this);
-    _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        iteration++;
-        if (iteration < 15) {
-          _controller.reset();
-          _controller.forward();
+    _controller.addStatusListener(
+      (status) {
+        if (status == AnimationStatus.completed) {
+          iteration++;
+          if (iteration < 20) {
+            _controller.reset();
+            _controller.forward();
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _controller.stop();
     _controller.dispose();
 

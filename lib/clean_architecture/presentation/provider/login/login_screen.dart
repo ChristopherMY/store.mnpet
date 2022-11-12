@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_in/sign_in_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/sign_in/sign_in_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -52,7 +52,7 @@ class LoginScreen extends StatelessWidget {
                   child: Column(
                     children: <Widget>[
                       Image.asset(
-                        "assets/images/mundo-negocio.png",
+                        "assets/images/logo-mn.png",
                         height: getProportionateScreenHeight(120.0),
                       ),
                       const SizedBox(height: 20),

@@ -7,10 +7,10 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/custom_toast.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/custom_toast.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 
 import '../../domain/usecase/page.dart';
 import '../provider/product/product_bloc.dart';
@@ -51,7 +51,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
   List<MainImage> gallery = <MainImage>[];
 
   List strings = [
-    "woadaipwdjwiaddawdad dwa dphawd auhdwh 9uhdaw87dya wdy8aw u8auda8 dw8",
+    " woadaipwdjwiaddawdad dwa dphawd auhdwh 9uhdaw87dya wdy8aw u8auda8 dw8",
     "-oakwdaj0idj a8wudaw8wdwada",
     "88wdaoid 9w9dw9 dwdw w",
     "88wdaoid 9w9dw9 dwdw w",
@@ -72,10 +72,12 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
 
     if (widget.isAppBar) {
       gallery = productBloc.product!.galleryHeader!;
-      pageController = PageController(initialPage: productBloc.indexPhotoViewer);
+      pageController =
+          PageController(initialPage: productBloc.indexPhotoViewer);
     } else {
       gallery = productBloc.product!.galleryDescription!;
-      pageController = PageController(initialPage: productBloc.indexPhotoViewerDescription);
+      pageController =
+          PageController(initialPage: productBloc.indexPhotoViewerDescription);
     }
 
     return Scaffold(
@@ -110,38 +112,44 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
             ),
             Positioned(
               top: 0,
-              height: 56,
+              height: getProportionateScreenHeight(79.0),
               width: SizeConfig.screenWidth,
               child: Transform.translate(
-                offset: Offset(0, -_controller.value * 64),
+                offset: Offset(0, -_controller.value * 67),
                 child: SizedBox(
-                  height: 56.0,
+                  height: getProportionateScreenHeight(79.0),
                   child: AppBar(
                     centerTitle: true,
                     backgroundColor: Colors.transparent,
-                    title: widget.managerTypePhotoViewer ==
-                            ManagerTypePhotoViewer.single
-                        ? Container(
-                            alignment: Alignment.center,
-                            color: Colors.transparent,
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: Text(
-                                "${0 + 1} / ${gallery.length}",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18.0,
-                                ),
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
+                    elevation: 0,
+
+                    leading: const BackButton(
+                      color: Colors.white,
+                    ),
+                    // title: widget.managerTypePhotoViewer ==
+                    //         ManagerTypePhotoViewer.single
+                    //     ? Container(
+                    //         alignment: Alignment.center,
+                    //         color: Colors.transparent,
+                    //         child: Padding(
+                    //           padding: const EdgeInsets.all(20.0),
+                    //           child: Text(
+                    //             "${0 + 1} / ${gallery.length}",
+                    //             style: const TextStyle(
+                    //               color: Colors.white,
+                    //               fontSize: 18.0,
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       )
+                    //     : const SizedBox.shrink(),
                     actions: [
                       IconButton(
                         onPressed: () {
                           final index = widget.isAppBar
                               ? productBloc.indexPhotoViewer
                               : productBloc.indexPhotoViewerDescription;
+
                           onDownload(
                             context: context,
                             fileUrl: "$_url/${gallery[index].src}",
@@ -154,60 +162,59 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
                 ),
               ),
             ),
-            widget.managerTypePhotoViewer == ManagerTypePhotoViewer.single
-                ? Positioned(
-                    bottom: 0,
-                    height: 100,
-                    width: SizeConfig.screenWidth,
-                    child: Transform.translate(
-                      offset: Offset(0, _controller.value * 100),
-                      child: Container(
-                        color: Colors.black87,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 15, right: 15),
-                            child: Text(
-                              strings[0],
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+            // if (widget.managerTypePhotoViewer == ManagerTypePhotoViewer.single)
+            //   Positioned(
+            //     bottom: 0,
+            //     height: 100,
+            //     width: SizeConfig.screenWidth,
+            //     child: Transform.translate(
+            //       offset: Offset(0, _controller.value * 100),
+            //       child: Container(
+            //         color: Colors.black87,
+            //         child: Align(
+            //           alignment: Alignment.center,
+            //           child: Padding(
+            //             padding: const EdgeInsets.only(left: 15, right: 15),
+            //             child: Text(
+            //               strings[0],
+            //               style: const TextStyle(
+            //                 fontSize: 15,
+            //                 color: Colors.white,
+            //               ),
+            //               textAlign: TextAlign.center,
+            //             ),
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            if (widget.managerTypePhotoViewer ==
+                ManagerTypePhotoViewer.navigation)
+              Positioned(
+                bottom: 0,
+                height: 50,
+                width: SizeConfig.screenWidth,
+                child: Transform.translate(
+                  offset: Offset(0, _controller.value * 100),
+                  child: Container(
+                    color: Colors.black87,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: SmoothPageIndicator(
+                        controller: pageController,
+                        count: gallery.length,
+                        effect: const WormEffect(
+                          dotHeight: 8,
+                          dotWidth: 8,
+                          activeDotColor: Colors.red,
+                          paintStyle: PaintingStyle.fill,
+                          type: WormType.normal,
                         ),
                       ),
                     ),
-                  )
-                : const SizedBox.shrink(),
-            widget.managerTypePhotoViewer == ManagerTypePhotoViewer.navigation
-                ? Positioned(
-                    bottom: 0,
-                    height: 50,
-                    width: SizeConfig.screenWidth,
-                    child: Transform.translate(
-                      offset: Offset(0, _controller.value * 100),
-                      child: Container(
-                        color: Colors.black87,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: SmoothPageIndicator(
-                            controller: pageController,
-                            count: gallery.length,
-                            effect: const WormEffect(
-                              dotHeight: 8,
-                              dotWidth: 8,
-                              activeDotColor: Colors.red,
-                              paintStyle: PaintingStyle.fill,
-                              type: WormType.normal,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

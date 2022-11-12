@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/change_email/change_email_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/change_email/change_email_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/form_error.dart';
 
 class ChangeEmailScreen extends StatefulWidget {
   const ChangeEmailScreen._({Key? key}) : super(key: key);

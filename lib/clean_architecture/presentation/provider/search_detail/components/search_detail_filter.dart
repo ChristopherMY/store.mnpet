@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_categories_section.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_find_attributes.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_section.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_categories_section.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_find_attributes.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_section.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
 class SearchDetailFilter extends StatelessWidget {
   const SearchDetailFilter._({Key? key}) : super(key: key);

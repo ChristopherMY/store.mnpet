@@ -1,6 +1,6 @@
-# store_mundo_pet
+# store_mundo_negocio
 
-Flutter clean architecture for store mundo pet
+Flutter clean architecture for store negocio
 
 ## Getting Started
 

@@ -4,13 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/binding_search.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/filter_product_detail.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/search_product_details.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/sort_option.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/binding_search.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/filter_product_detail.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/search_product_details.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/sort_option.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 
 class SearchDetailBloc extends ChangeNotifier {
   ProductRepositoryInterface productRepositoryInterface;

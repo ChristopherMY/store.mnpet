@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/custom_card_type_icon.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/credit_card_brand.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/credit_card_animation.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/custom_card_type_icon.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credit_card_brand.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/credit_card_animation.dart';
 
 import '../util/glassmorphism_config.dart';
 import 'credit_card_background.dart';

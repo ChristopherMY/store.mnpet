@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 
 // const kPrimaryColor = Color(0xFF17C3B2);
 const kPrimaryColor = Color(0xFFF68302);

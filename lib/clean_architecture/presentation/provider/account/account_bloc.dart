@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 
 import '../../../domain/repository/hive_repository.dart';
 

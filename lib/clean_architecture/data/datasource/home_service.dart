@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/category.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/home_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class HomeService implements HomeRepositoryInterface {
   final _url = Environment.API_DAO;

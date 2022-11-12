@@ -4,10 +4,10 @@
 
 import 'dart:convert';
 
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_credit_cart.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_customer.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_tax.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_transaction_detail.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_credit_cart.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_customer.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_tax.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_transaction_detail.dart';
 
 MercadoPagoPaymentPro mercadoPagoPaymentProFromMap(String str) =>
     MercadoPagoPaymentPro.fromMap(json.decode(str));

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
 
 class ProductPrice extends StatelessWidget {
   const ProductPrice({Key? key}) : super(key: key);

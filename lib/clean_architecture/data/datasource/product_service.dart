@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/comment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/comment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/repository/product_repository.dart';
@@ -93,7 +93,7 @@ class ProductService implements ProductRepositoryInterface {
       final encodeBody = json.encode(body);
 
       return await http.post(
-        Uri.parse("$_url/api/v1/shipment/calculate_product"),
+        Uri.parse("$_url/api/v1/shipment/calculate-product"),
         headers: headers,
         body: encodeBody,
       );

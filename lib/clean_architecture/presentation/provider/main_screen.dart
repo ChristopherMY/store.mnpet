@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/account/account_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/cart_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/home_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/account/account_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/cart/cart_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/home/home_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/home/home_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/splash/splash_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen._({Key? key}) : super(key: key);

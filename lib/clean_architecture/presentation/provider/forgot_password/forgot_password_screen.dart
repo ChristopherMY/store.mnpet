@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_forgot_password.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/keyboard.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/forgot_password/forgot_password_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/otp/opt_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/no_account_text.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_forgot_password.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/keyboard.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/forgot_password/forgot_password_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/otp/opt_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/form_error.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/no_account_text.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen._({Key? key}) : super(key: key);

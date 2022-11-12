@@ -172,8 +172,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
             Visibility(
               visible: widget.isCardNumberVisible,
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                margin: const EdgeInsets.only(left: 16, top: 16, right: 16),
+                margin: const EdgeInsets.only(left: 16, right: 16),
                 child: TextFormField(
                   key: widget.cardNumberKey,
                   obscureText: widget.obscureNumber,

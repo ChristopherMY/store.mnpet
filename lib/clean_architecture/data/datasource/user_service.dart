@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class UserService implements UserRepositoryInterface {
   final _url = Environment.API_DAO;

@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_forgot_password.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_forgot_password.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class ForgotPasswordBloc extends ChangeNotifier {
   AuthRepositoryInterface authRepositoryInterface;

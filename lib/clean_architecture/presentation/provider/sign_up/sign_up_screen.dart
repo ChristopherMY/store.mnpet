@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/components/sign_up_form.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/sing_up_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/sign_up/components/sign_up_form.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/sign_up/sing_up_bloc.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen._({Key? key}) : super(key: key);

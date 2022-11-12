@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/payment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/payment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/payment_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class PaymentService implements PaymentRepositoryInterface {
   final String _urlMercadoPago = "api.mercadopago.com";

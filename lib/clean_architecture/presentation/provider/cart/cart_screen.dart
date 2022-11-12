@@ -7,24 +7,24 @@ import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/cart_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/checkout_info/checkout_info_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/cart/cart_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/checkout_info/checkout_info_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
 import '../../widget/item_main_product.dart';
 
@@ -71,6 +71,7 @@ class _CartScreenState extends State<CartScreen> {
               triggerMode: RefreshIndicatorTriggerMode.onEdge,
               onRefresh: () async {
                 dynamic response;
+
                 if (mainBloc.sessionAccount.value == Session.active) {
                   response = await mainBloc.getShoppingCart(
                     districtId: mainBloc.residence.districtId!,
@@ -80,18 +81,22 @@ class _CartScreenState extends State<CartScreen> {
                   response = await mainBloc.getShoppingCartTemp(
                     districtId: mainBloc.residence.districtId!,
                   );
+
+                  if (response is Cart) {
+                    final shoppingCartId =
+                        await mainBloc.handleGetShoppingCartId();
+                    if (shoppingCartId.toString().isEmpty ||
+                        shoppingCartId != response.id) {
+                      await mainBloc.hiveRepositoryInterface.save(
+                        containerName: "shopping_temporal",
+                        key: "cartId",
+                        value: response.id,
+                      );
+                    }
+                  }
                 }
 
                 if (response is Cart) {
-                  final shoppingCartId = await mainBloc.handleGetShoppingCartId();
-                  if (shoppingCartId.toString().isEmpty) {
-                    await mainBloc.hiveRepositoryInterface.save(
-                      containerName: "shopping",
-                      key: "cartId",
-                      value: response.id,
-                    );
-                  }
-
                   mainBloc.informationCart.value = response;
                   mainBloc.cartLength.value = response.products!.length;
                 }
@@ -136,7 +141,7 @@ class _CartScreenState extends State<CartScreen> {
                                 children: const [
                                   Icon(
                                     CommunityMaterialIcons.cart_outline,
-                                    size: 85,
+                                    size: 85.0,
                                     color: Colors.black26,
                                   ),
                                   Text(
@@ -385,183 +390,180 @@ class CardItem extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10.0), // Image border
-              child: ExtendedImage.network(
-                "$url/${product.mainImage!.src!}",
-                fit: BoxFit.fill,
-                cache: true,
-                height: 100,
-                width: 100,
-                timeLimit: const Duration(seconds: 10),
-                enableMemoryCache: true,
-                enableLoadState: false,
+            Expanded(
+              flex: 1,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10.0), // Image border
+                child: ExtendedImage.network(
+                  "$url/${product.mainImage!.src!}",
+                  cache: true,
+                  timeLimit: const Duration(seconds: 10),
+                  enableMemoryCache: true,
+                  enableLoadState: false,
+                ),
               ),
             ),
             Expanded(
+              flex: 2,
               child: Container(
+                margin: const EdgeInsets.only(left: 10.0),
                 constraints: const BoxConstraints(minHeight: 135.0),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 5.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  product.name!,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 3,
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                ),
-                                const SizedBox(height: 10.0),
-                                product.hasVariations!
-                                    ? Column(
-                                        children: product.variation!.attributes!
-                                            .map((attribute) {
-                                              return Text(
-                                                "${attribute.name}: ${attribute.value!.label}",
-                                              );
-                                            })
-                                            .toList()
-                                            .cast(),
-                                      )
-                                    : const SizedBox(),
-                              ],
-                            ),
-                          ),
-                          GestureDetector(
-                            child: const Icon(
-                              CupertinoIcons.trash_fill,
-                              size: 22.0,
-                            ),
-                            onTap: () async {
-                              final mainBloc =
-                                  Provider.of<MainBloc>(context, listen: false);
-                              context.loaderOverlay.show();
-
-                              final response =
-                                  await mainBloc.deleteItemShoppingCart(
-                                variationId:
-                                    product.general! == "variable_product"
-                                        ? product.variation!.id!
-                                        : "",
-                                productId: product.id!,
-                              );
-
-                              if (response is ResponseApi) {
-                                await mainBloc.handleFnShoppingCart();
-                                context.loaderOverlay.hide();
-                                await GlobalSnackBar.showInfoSnackBarIcon(
-                                  context,
-                                  response.message,
-                                );
-                              } else {
-                                context.loaderOverlay.hide();
-                                GlobalSnackBar.showErrorSnackBarIcon(
-                                  context,
-                                  "Tuvimos problemas, vuelva a intentarlo más tarde.",
-                                );
-                              }
-                            },
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 0.0),
-                            child: Text(
-                              "S/ ${double.parse(product.price!.sale!) * product.quantity!}",
-                              style: Theme.of(context).textTheme.bodyText1,
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              GestureDetector(
-                                child: const Icon(Icons.remove_circle_outline),
-                                onTap: () async {
-                                  context.loaderOverlay.show();
-                                  final mainBloc = context.read<MainBloc>();
-
-                                  if (product.quantity! > 0) {
-                                    final response =
-                                        await mainBloc.changeQuantity(
-                                      productId: product.id!,
-                                      quantity: product.quantity! - 1,
-                                      variationId:
-                                          product.general! == "variable_product"
-                                              ? product.variation!.id!
-                                              : "",
-                                    );
-
-                                    if (response is ResponseApi) {
-                                      await mainBloc.handleFnShoppingCart();
-
-                                      context.loaderOverlay.hide();
-
-                                      GlobalSnackBar.showInfoSnackBarIcon(
-                                        context,
-                                        response.message,
-                                      );
-                                    }
-                                  }
-                                },
+                              Text(
+                                product.name!,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 3,
+                                style: Theme.of(context).textTheme.bodyText1,
                               ),
-                              SizedBox(
-                                width: 35.0,
-                                child: Text(
-                                  product.quantity.toString(),
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyText2,
-                                ),
-                              ),
-                              GestureDetector(
-                                child: const Icon(Icons.add_circle_outline),
-                                onTap: () async {
-                                  context.loaderOverlay.show();
-                                  final mainBloc = context.read<MainBloc>();
-
-                                  if (product.quantity! > 0) {
-                                    final response =
-                                        await mainBloc.changeQuantity(
-                                      productId: product.id!,
-                                      quantity: product.quantity! + 1,
-                                      variationId:
-                                          product.general! == "variable_product"
-                                              ? product.variation!.id!
-                                              : "",
-                                    );
-
-                                    if (response is ResponseApi) {
-                                      await mainBloc.handleFnShoppingCart();
-
-                                      context.loaderOverlay.hide();
-
-                                      GlobalSnackBar.showInfoSnackBarIcon(
-                                        context,
-                                        response.message,
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
+                              const SizedBox(height: 10.0),
+                              product.hasVariations!
+                                  ? Column(
+                                      children: product.variation!.attributes!
+                                          .map((attribute) {
+                                            return Text(
+                                              "${attribute.name}: ${attribute.value!.label}",
+                                            );
+                                          })
+                                          .toList()
+                                          .cast(),
+                                    )
+                                  : const SizedBox(),
                             ],
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        GestureDetector(
+                          child: const Icon(
+                            CupertinoIcons.trash_fill,
+                            size: 22.0,
+                          ),
+                          onTap: () async {
+                            final mainBloc = context.read<MainBloc>();
+                            context.loaderOverlay.show();
+
+                            final response =
+                                await mainBloc.deleteItemShoppingCart(
+                              variationId:
+                                  product.general! == "variable_product"
+                                      ? product.variation!.id!
+                                      : "",
+                              productId: product.id!,
+                            );
+
+                            if (response is ResponseApi) {
+                              await mainBloc.handleFnShoppingCart();
+                              context.loaderOverlay.hide();
+                              await GlobalSnackBar.showInfoSnackBarIcon(
+                                context,
+                                response.message,
+                              );
+                            } else {
+                              context.loaderOverlay.hide();
+                              GlobalSnackBar.showErrorSnackBarIcon(
+                                context,
+                                "Tuvimos problemas, vuelva a intentarlo más tarde.",
+                              );
+                            }
+                          },
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                          child: Text(
+                            "S/ ${double.parse(product.price!.sale!) * product.quantity!}",
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            GestureDetector(
+                              child: const Icon(Icons.remove_circle_outline),
+                              onTap: () async {
+                                final mainBloc = context.read<MainBloc>();
+
+                                if (product.quantity! > 1) {
+                                  context.loaderOverlay.show();
+                                  final response =
+                                      await mainBloc.changeQuantity(
+                                    productId: product.id!,
+                                    quantity: product.quantity! - 1,
+                                    variationId:
+                                        product.general! == "variable_product"
+                                            ? product.variation!.id!
+                                            : "",
+                                  );
+
+                                  if (response is ResponseApi) {
+                                    await mainBloc.handleFnShoppingCart();
+
+                                    context.loaderOverlay.hide();
+
+                                    GlobalSnackBar.showInfoSnackBarIcon(
+                                      context,
+                                      response.message,
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                            SizedBox(
+                              width: 35.0,
+                              child: Text(
+                                product.quantity.toString(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyText2,
+                              ),
+                            ),
+                            GestureDetector(
+                              child: const Icon(Icons.add_circle_outline),
+                              onTap: () async {
+                                context.loaderOverlay.show();
+                                final mainBloc = context.read<MainBloc>();
+
+                                if (product.quantity! > 0) {
+                                  final response =
+                                      await mainBloc.changeQuantity(
+                                    productId: product.id!,
+                                    quantity: product.quantity! + 1,
+                                    variationId:
+                                        product.general! == "variable_product"
+                                            ? product.variation!.id!
+                                            : "",
+                                  );
+
+                                  if (response is ResponseApi) {
+                                    await mainBloc.handleFnShoppingCart();
+
+                                    context.loaderOverlay.hide();
+
+                                    GlobalSnackBar.showInfoSnackBarIcon(
+                                      context,
+                                      response.message,
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),

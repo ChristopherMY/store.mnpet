@@ -4,13 +4,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/info_shipment.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/info_shipment.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
 
 String cloudFront = Environment.API_DAO;
 

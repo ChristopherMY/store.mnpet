@@ -1,5 +1,5 @@
 
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_credit_cart.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_credit_cart.dart';
 
 class MercadoPagoCustomer {
 

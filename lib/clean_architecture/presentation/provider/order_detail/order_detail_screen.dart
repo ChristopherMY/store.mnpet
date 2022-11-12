@@ -2,14 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/order_detail.dart'
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/order_detail.dart'
     as od;
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/order/order_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loading_full_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order/order_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order_detail/order_detail_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
 const url = Environment.API_DAO;
 
@@ -25,8 +27,9 @@ class OrderDetailScreen extends StatefulWidget {
     required BuildContext context,
     required int paymentId,
   }) {
-    return ChangeNotifierProvider<OrderBloc>.value(
-      value: context.read<OrderBloc>(),
+    return ChangeNotifierProvider<OrderDetailBloc>(
+      create: (context) => OrderDetailBloc(
+          userRepositoryInterface: context.read<UserRepositoryInterface>()),
       builder: (_, __) => OrderDetailScreen._(paymentId: paymentId),
     );
   }
@@ -37,12 +40,12 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   void init() async {
-    final orderBloc = context.read<OrderBloc>();
-    final result = await orderBloc.getOrderDetailById(widget.paymentId);
+    final orderDetailBloc = context.read<OrderDetailBloc>();
+    final result = await orderDetailBloc.getOrderDetailById(widget.paymentId);
 
     if (result is od.OrderDetail) {
-      orderBloc.orderDetail = result;
-      orderBloc.refreshBloc();
+      orderDetailBloc.orderDetail = result;
+      orderDetailBloc.refreshBloc();
     }
   }
 
@@ -54,13 +57,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final orderBloc = context.watch<OrderBloc>();
+    final orderDetailBloc = context.watch<OrderDetailBloc>();
 
-    if (orderBloc.orderDetail is! od.OrderDetail) {
-      return const LoadingFullScreen();
+    if (orderDetailBloc.orderDetail is! od.OrderDetail) {
+      return const LoadingBagFullScreen();
     }
 
-    final orderDetail = orderBloc.orderDetail;
+    final orderDetail = orderDetailBloc.orderDetail;
 
     return Scaffold(
       backgroundColor: kBackGroundColor,
@@ -155,7 +158,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       return _OrderDetailCard(item: item);
                     },
                     separatorBuilder: (context, index) {
-                      return const SizedBox(height: 18);
+                      return const SizedBox(height: 18.0);
                     },
                   ),
 
@@ -336,15 +339,12 @@ class _OrderDetailCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                placeholder: (context, url) => SizedBox(
-                  height: 250,
-                  width: SizeConfig.screenWidth,
-                  child: const LottieAnimation(
-                    source: "assets/lottie/searching_image.json",
+                placeholder: (context, url) => Container(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.rectangle,
                   ),
                 ),
-                errorWidget: (context, url, error) =>
-                    Image.asset("assets/no-image.png", fit: BoxFit.cover),
+                errorWidget: (context, url, error) => Image.asset("assets/no-image.png", fit: BoxFit.cover),
               ),
             ),
           ),

@@ -1,4 +1,4 @@
-import 'package:store_mundo_pet/clean_architecture/domain/model/payment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/payment.dart';
 
 abstract class PaymentRepositoryInterface {
 

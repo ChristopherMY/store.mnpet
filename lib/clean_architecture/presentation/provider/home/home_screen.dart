@@ -1,20 +1,21 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/category.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/categories_list.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/header.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/home/home_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/categories_list.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/header.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
+import 'package:store_mundo_negocio/main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -42,8 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Stack(
       children: <Widget>[
         RefreshIndicator(
-          notificationPredicate: (ScrollNotification scrollNotification) =>
-              true,
+          notificationPredicate: (ScrollNotification scrollNotification) => true,
           triggerMode: RefreshIndicatorTriggerMode.onEdge,
           onRefresh: () async {
             homeBloc.reloadPagination = true;
@@ -83,7 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0, left: 0.0),
                     child: GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        final mainBloc = context.read<MainBloc>();
+                        mainBloc.onChangeIndexSelected(index: 1, context: context);
+                      },
                       child: const Icon(
                         Icons.shopping_basket_outlined,
                         color: Colors.black45,

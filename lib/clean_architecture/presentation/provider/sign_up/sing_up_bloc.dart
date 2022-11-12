@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class SignUpBloc extends ChangeNotifier {
   final AuthRepositoryInterface authRepositoryInterface;
@@ -45,6 +45,7 @@ class SignUpBloc extends ChangeNotifier {
   bool terms = false;
    */
   bool loginState = false;
+  bool obscureTextNewPassword = true;
 
   Color getColor(Set<MaterialState> states) {
     const Set<MaterialState> interactiveStates = <MaterialState>{
@@ -213,5 +214,9 @@ class SignUpBloc extends ChangeNotifier {
     }
 
     return false;
+  }
+
+  void refreshBloc(){
+    notifyListeners();
   }
 }

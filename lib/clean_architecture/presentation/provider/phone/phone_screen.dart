@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:roundcheckbox/roundcheckbox.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/phone/phone_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/phone/phone_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 import '../../widget/button_crud.dart';
 

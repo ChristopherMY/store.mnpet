@@ -1,8 +1,8 @@
 
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_card_holder.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_issuer.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment_method.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_security_code.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_card_holder.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_issuer.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment_method.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_security_code.dart';
 
 class MercadoPagoCreditCard {
 

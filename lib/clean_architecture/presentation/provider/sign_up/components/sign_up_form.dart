@@ -3,18 +3,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/keyboard.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/sing_up_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/keyboard.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/sign_up/sing_up_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/custom_suffix_icon.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/form_error.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({Key? key}) : super(key: key);
@@ -36,6 +37,7 @@ class _SignUpFormState extends State<SignUpForm> {
           TextFormField(
             controller: signUpBloc.nameController,
             keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.next,
             onChanged: signUpBloc.onChangeName,
             validator: signUpBloc.onValidationName,
             style: Theme.of(context).textTheme.bodyText2,
@@ -56,6 +58,7 @@ class _SignUpFormState extends State<SignUpForm> {
             controller: signUpBloc.lastnameController,
             keyboardType: TextInputType.emailAddress,
             onChanged: signUpBloc.onChangeLastName,
+            textInputAction: TextInputAction.next,
             validator: signUpBloc.onValidationLastName,
             style: Theme.of(context).textTheme.bodyText2,
             decoration: InputDecoration(
@@ -74,6 +77,7 @@ class _SignUpFormState extends State<SignUpForm> {
           TextFormField(
             controller: signUpBloc.emailController,
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
             onChanged: signUpBloc.onChangeEmail,
             validator: signUpBloc.onValidationEmail,
             style: Theme.of(context).textTheme.bodyText2,
@@ -92,7 +96,8 @@ class _SignUpFormState extends State<SignUpForm> {
           SizedBox(height: getProportionateScreenHeight(25.0)),
           TextFormField(
             controller: signUpBloc.passwordController,
-            obscureText: true,
+            obscureText: signUpBloc.obscureTextNewPassword,
+            textInputAction: TextInputAction.next,
             onChanged: signUpBloc.onChangePassword,
             validator: signUpBloc.onValidationPassword,
             style: Theme.of(context).textTheme.bodyText2,
@@ -106,6 +111,18 @@ class _SignUpFormState extends State<SignUpForm> {
               hintStyle: Theme.of(context).textTheme.bodyText2,
               floatingLabelBehavior: FloatingLabelBehavior.always,
               errorStyle: const TextStyle(height: 0),
+              suffixIcon: GestureDetector(
+                onTap: () {
+                  signUpBloc.obscureTextNewPassword =
+                  !signUpBloc.obscureTextNewPassword;
+                  signUpBloc.refreshBloc();
+                },
+                child: CustomSuffixIcon(
+                  svgIcon: signUpBloc.obscureTextNewPassword
+                      ? "assets/icons/eye_off_thin.svg"
+                      : "assets/icons/eye_thin.svg",
+                ),
+              ),
             ),
           ),
           // SizedBox(height: getProportionateScreenHeight(30)),
@@ -148,6 +165,7 @@ class _SignUpFormState extends State<SignUpForm> {
           TextFormField(
             controller: signUpBloc.numDocController,
             keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
             onChanged: signUpBloc.onChangeNumberDoc,
             validator: signUpBloc.onValidationNumberDoc,
             style: Theme.of(context).textTheme.bodyText2,

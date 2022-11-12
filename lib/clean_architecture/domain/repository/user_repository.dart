@@ -1,4 +1,4 @@
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 
 abstract class UserRepositoryInterface {
   const UserRepositoryInterface();

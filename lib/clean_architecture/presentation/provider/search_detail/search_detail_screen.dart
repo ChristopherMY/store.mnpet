@@ -3,20 +3,20 @@ import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/category.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/keyword.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/components/search_detail_filter.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_main_product_grid.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/lottie_animation.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/keyword.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/components/search_detail_filter.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product_grid.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
 class SearchDetailScreen extends StatefulWidget {
   const SearchDetailScreen._({

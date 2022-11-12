@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 
 Cart cartFromMap(String str) => Cart.fromMap(json.decode(str));
 

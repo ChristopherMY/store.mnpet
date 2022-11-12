@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class PhoneBloc extends ChangeNotifier {
   LocalRepositoryInterface localRepositoryInterface;

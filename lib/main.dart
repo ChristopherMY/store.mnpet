@@ -3,24 +3,24 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/data/datasource/auth_service.dart';
-import 'package:store_mundo_pet/clean_architecture/data/datasource/cart_service.dart';
-import 'package:store_mundo_pet/clean_architecture/data/datasource/hive_service.dart';
-import 'package:store_mundo_pet/clean_architecture/data/datasource/home_service.dart';
-import 'package:store_mundo_pet/clean_architecture/data/datasource/local_service.dart';
-import 'package:store_mundo_pet/clean_architecture/data/datasource/payment_service.dart';
-import 'package:store_mundo_pet/clean_architecture/data/datasource/product_service.dart';
-import 'package:store_mundo_pet/clean_architecture/data/datasource/user_service.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/data/datasource/auth_service.dart';
+import 'package:store_mundo_negocio/clean_architecture/data/datasource/cart_service.dart';
+import 'package:store_mundo_negocio/clean_architecture/data/datasource/hive_service.dart';
+import 'package:store_mundo_negocio/clean_architecture/data/datasource/home_service.dart';
+import 'package:store_mundo_negocio/clean_architecture/data/datasource/local_service.dart';
+import 'package:store_mundo_negocio/clean_architecture/data/datasource/payment_service.dart';
+import 'package:store_mundo_negocio/clean_architecture/data/datasource/product_service.dart';
+import 'package:store_mundo_negocio/clean_architecture/data/datasource/user_service.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/home_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/payment_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_screen.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
               return Consumer<MainBloc>(
                 builder: (context, provider, child) {
                   return MaterialApp(
-                    title: 'Mundo Pet',
+                    title: 'Mundo Negocio',
                     debugShowCheckedModeBanner: false,
                     theme: ThemeData.light().copyWith(
                       backgroundColor: Colors.white,

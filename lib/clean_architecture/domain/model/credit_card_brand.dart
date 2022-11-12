@@ -1,5 +1,5 @@
 
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 
 class CreditCardBrand {
   CreditCardBrand(this.brandName);

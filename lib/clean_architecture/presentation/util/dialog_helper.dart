@@ -5,28 +5,28 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/sort_option.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/phone/phone_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/custom_progress_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/info_attributes.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/item_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/sort_option.dart'
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/district.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/province.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/region.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/sort_option.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/phone/phone_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/custom_progress_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/info_attributes.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/form_error.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/sort_option.dart'
     as sort_option;
 
 class DialogHelper {
@@ -656,8 +656,8 @@ class DialogHelper {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextFormField(
-                                  initialValue:
-                                      shipmentBloc.address.addressName,
+                                  initialValue: shipmentBloc.address.addressName,
+                                  textInputAction: TextInputAction.next,
                                   onChanged: shipmentBloc.onChangeAddressName,
                                   validator:
                                       shipmentBloc.onValidationAddressName,
@@ -732,6 +732,7 @@ class DialogHelper {
                                   initialValue: shipmentBloc.address.direction,
                                   onChanged: shipmentBloc.onChangeDirection,
                                   validator: shipmentBloc.onValidationDirection,
+                                  textInputAction: TextInputAction.next,
                                   style: Theme.of(context).textTheme.bodyText2,
                                   decoration: InputDecoration(
                                     labelText: "Dirección",
@@ -754,6 +755,7 @@ class DialogHelper {
                                   initialValue: shipmentBloc.address.lotNumber!
                                       .toString(),
                                   keyboardType: TextInputType.number,
+                                  textInputAction: TextInputAction.next,
                                   inputFormatters: <TextInputFormatter>[
                                     FilteringTextInputFormatter.allow(
                                         numberValidatorReg),
@@ -782,6 +784,7 @@ class DialogHelper {
                                   onChanged: shipmentBloc.onChangeDPTO,
                                   initialValue:
                                       shipmentBloc.address.dptoInt.toString(),
+                                  textInputAction: TextInputAction.next,
                                   keyboardType: TextInputType.number,
                                   inputFormatters: <TextInputFormatter>[
                                     FilteringTextInputFormatter.allow(
@@ -811,6 +814,7 @@ class DialogHelper {
                                       shipmentBloc.address.urbanName = value,
                                   initialValue: shipmentBloc.address.urbanName,
                                   style: Theme.of(context).textTheme.bodyText2,
+                                  textInputAction: TextInputAction.next,
                                   decoration: InputDecoration(
                                     labelText: "Urbanización (opcional)",
                                     hintText: "Ingrese su urbanización",
@@ -833,6 +837,7 @@ class DialogHelper {
                                       .address.referenceName = value,
                                   initialValue:
                                       shipmentBloc.address.referenceName,
+                                  textInputAction: TextInputAction.next,
                                   style: Theme.of(context).textTheme.bodyText2,
                                   decoration: InputDecoration(
                                     labelText: "Referencia (opcional)",

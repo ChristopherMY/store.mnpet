@@ -9,31 +9,32 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/tab_payment_page.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/cart/cart_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/checkout_info/checkout_info_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/checkout_info/components/transaction_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/phone/phone_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/button_crud.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loading_full_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/tab_payment_page.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/payment_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/account/account_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/cart/cart_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/checkout_info/checkout_info_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/checkout_info/components/transaction_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/phone/phone_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/button_crud.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/expandable_page_view.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
 
 import '../../../domain/model/credit_card_brand.dart';
 import '../../../domain/model/custom_card_type_icon.dart';
@@ -155,17 +156,13 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        SizedBox(
-                          height: SizeConfig.screenHeight! -
-                              SizeConfig.screenHeight! * 0.20,
-                          child: PageView(
-                            controller: checkoutInfoBloc.pageController,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: const <Widget>[
-                              OrderCheckoutScreen(),
-                              PaymentCheckoutScreen()
-                            ],
-                          ),
+                        ExpandablePageView(
+                          controller: checkoutInfoBloc.pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: const <Widget>[
+                            OrderCheckoutScreen(),
+                            PaymentCheckoutScreen(),
+                          ],
                         ),
                       ],
                     ),
@@ -197,131 +194,89 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                     __,
                                   ) {
                                     return Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: List.generate(
-                                          tabsPaymentPage.length,
-                                          (index) {
-                                            final tabPaymentPage =
-                                                tabsPaymentPage[index];
-                                            return _TabPaymentPage(
-                                              onTap: () {
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: List.generate(
+                                        tabsPaymentPage.length,
+                                        (index) {
+                                          final tabPaymentPage =
+                                              tabsPaymentPage[index];
+                                          return _TabPaymentPage(
+                                            onTap: () async {
+                                              dynamic existsDefaultAddress;
+                                              dynamic existsDefaultPhone;
+
+                                              if (mainBloc.informationUser
+                                                  is UserInformation) {
+                                                UserInformation userInfo =
+                                                    mainBloc.informationUser;
+                                                List<Address> addresses =
+                                                    userInfo.addresses ?? [];
+                                                List<Phone> phones =
+                                                    userInfo.phones ?? [];
+
+                                                if (addresses.isNotEmpty) {
+                                                  existsDefaultAddress =
+                                                      addresses.firstWhereOrNull(
+                                                          (element) =>
+                                                              element
+                                                                  .addressDefault ==
+                                                              true);
+                                                }
+
+                                                if (phones.isNotEmpty) {
+                                                  existsDefaultPhone = phones
+                                                      .firstWhereOrNull(
+                                                          (element) =>
+                                                              element
+                                                                  .phoneDefault ==
+                                                              true);
+                                                }
+                                              }
+
+                                              if (existsDefaultAddress !=
+                                                      null &&
+                                                  existsDefaultAddress
+                                                      is Address &&
+                                                  existsDefaultPhone != null &&
+                                                  existsDefaultPhone is Phone) {
+                                                checkoutInfoBloc
+                                                    .handleChangeTabPaymentPage(
+                                                        1);
+
+                                                await Future.value(
+                                                  checkoutInfoBloc
+                                                      .pageController
+                                                      .animateToPage(
+                                                    checkoutInfoBloc
+                                                            .pageController
+                                                            .page!
+                                                            .toInt() +
+                                                        1,
+                                                    duration: const Duration(
+                                                        milliseconds: 400),
+                                                    curve: Curves.easeIn,
+                                                  ),
+                                                );
+
                                                 checkoutInfoBloc
                                                     .handleChangeTabPaymentPage(
                                                         index);
-                                              },
-                                              tabPaymentPage: tabPaymentPage,
-                                            );
-                                          },
-                                        )
-                                        //[
-                                        //   GestureDetector(
-                                        //     onTap: () async {
-                                        //       checkoutInfoBloc.isTabExpanded.value =
-                                        //           !checkoutInfoBloc
-                                        //               .isTabExpanded.value;
-                                        //
-                                        //       await checkoutInfoBloc.pageController
-                                        //           .animateToPage(
-                                        //         0,
-                                        //         duration:
-                                        //             const Duration(milliseconds: 400),
-                                        //         curve: Curves.easeIn,
-                                        //       );
-                                        //     },
-                                        //     child: ValueListenableBuilder(
-                                        //       valueListenable:
-                                        //           checkoutInfoBloc.isTabExpanded,
-                                        //       builder: (_, bool isTabExpanded, __) {
-                                        //         return AnimatedContainer(
-                                        //           duration: checkoutInfoBloc.duration,
-                                        //           width: isTabExpanded
-                                        //               ? getProportionateScreenWidth(
-                                        //                   50.0)
-                                        //               : getProportionateScreenWidth(
-                                        //                   45.0),
-                                        //           height: isTabExpanded
-                                        //               ? getProportionateScreenWidth(
-                                        //                   50.0)
-                                        //               : getProportionateScreenWidth(
-                                        //                   45.0),
-                                        //           alignment: Alignment.center,
-                                        //           clipBehavior: Clip.hardEdge,
-                                        //           decoration: BoxDecoration(
-                                        //             color: isTabExpanded
-                                        //                 ? Colors.black
-                                        //                 : Colors.white,
-                                        //             borderRadius:
-                                        //                 BorderRadius.circular(15.0),
-                                        //           ),
-                                        //           child: Text(
-                                        //             "Envío",
-                                        //             style: TextStyle(
-                                        //               color: isTabExpanded
-                                        //                   ? Colors.white
-                                        //                   : Colors.black,
-                                        //             ),
-                                        //           ),
-                                        //         );
-                                        //       },
-                                        //     ),
-                                        //   ),
-                                        //   const SizedBox(height: 10.0),
-                                        //   GestureDetector(
-                                        //     onTap: () async {
-                                        //       checkoutInfoBloc.isTabExpanded.value =
-                                        //           !checkoutInfoBloc
-                                        //               .isTabExpanded.value;
-                                        //
-                                        //       await checkoutInfoBloc.pageController
-                                        //           .animateToPage(
-                                        //         1,
-                                        //         duration:
-                                        //             const Duration(milliseconds: 400),
-                                        //         curve: Curves.easeIn,
-                                        //       );
-                                        //     },
-                                        //     child: ValueListenableBuilder(
-                                        //       valueListenable:
-                                        //           checkoutInfoBloc.isTabExpanded,
-                                        //       builder: (_, bool isTabExpanded, __) {
-                                        //         return AnimatedContainer(
-                                        //           duration: checkoutInfoBloc.duration,
-                                        //           width: isTabExpanded
-                                        //               ? getProportionateScreenWidth(
-                                        //                   45.0)
-                                        //               : getProportionateScreenWidth(
-                                        //                   50.0),
-                                        //           height: isTabExpanded
-                                        //               ? getProportionateScreenWidth(
-                                        //                   45.0)
-                                        //               : getProportionateScreenWidth(
-                                        //                   50.0),
-                                        //           alignment: Alignment.center,
-                                        //           clipBehavior: Clip.hardEdge,
-                                        //           decoration: BoxDecoration(
-                                        //             color: isTabExpanded
-                                        //                 ? Colors.white
-                                        //                 : Colors.black,
-                                        //             borderRadius:
-                                        //                 BorderRadius.circular(15.0),
-                                        //           ),
-                                        //           child: Text(
-                                        //             "Pagar",
-                                        //             style: TextStyle(
-                                        //               color: isTabExpanded
-                                        //                   ? Colors.black
-                                        //                   : Colors.white,
-                                        //             ),
-                                        //           ),
-                                        //         );
-                                        //       },
-                                        //     ),
-                                        //   ),
-                                        // ],
-                                        );
+                                                return;
+                                              }
+
+                                              GlobalSnackBar
+                                                  .showWarningSnackBar(
+                                                context,
+                                                "Complete los datos para continuar",
+                                              );
+                                            },
+                                            tabPaymentPage: tabPaymentPage,
+                                          );
+                                        },
+                                      ),
+                                    );
                                   },
                                 ),
                               ),
@@ -462,8 +417,6 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                   dynamic existsDefaultAddress;
                   dynamic existsDefaultPhone;
 
-                  // checkoutInfoBloc.pageController.jumpToPage(1);
-
                   if (mainBloc.informationUser is UserInformation) {
                     UserInformation userInfo = mainBloc.informationUser;
                     List<Address> addresses = userInfo.addresses ?? [];
@@ -507,112 +460,131 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                         break;
                       case 1:
                         {
-                          if (mainBloc.informationCart.value is Cart) {
-                            context.loaderOverlay.show();
-                            final response =
-                                await checkoutInfoBloc.handlePayment(
-                              cartInformation: mainBloc.informationCart.value,
-                              userInformation: mainBloc.informationUser,
-                              context: context,
-                            );
+                          if (checkoutInfoBloc.formKey.currentState!.validate()) {
+                            checkoutInfoBloc.formKey.currentState!.save();
 
-                            context.loaderOverlay.hide();
-
-                            if (response is! http.Response) {
-                              if (kDebugMode) {
-                                print("response NO PERTENECE A http.Response");
-                              }
-
-                              GlobalSnackBar.showWarningSnackBar(context,
-                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
-                              return;
-                            }
-
-                            if (response is String) {
-                              if (kDebugMode) {
-                                print(response);
-                              }
-
-                              GlobalSnackBar.showWarningSnackBar(
-                                context,
-                                "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                            if (mainBloc.informationCart.value is Cart) {
+                              context.loaderOverlay.show();
+                              final response = await checkoutInfoBloc.handlePayment(
+                                cartInformation: mainBloc.informationCart.value,
+                                userInformation: mainBloc.informationUser,
+                                context: context,
                               );
-                              return;
-                            }
 
-                            final decode = json.decode(response.body);
+                              context.loaderOverlay.hide();
 
-                            if (!mounted) return;
-
-                            if (response.statusCode == 501) {
-                              print("data Error");
+                              print('RESPONSE');
                               print(response);
 
-                              if (decode['error']['status'] == 400) {
-                                final errorText = checkoutInfoBloc
-                                    .badRequestProcess(response);
+                              if (response is! http.Response) {
+                                if (kDebugMode) {
+                                  print(
+                                      "response NO PERTENECE A http.Response");
+                                }
+
+                                print("****1*****");
+
+                                GlobalSnackBar.showWarningSnackBar(context,
+                                    "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+                                return;
+                              }
+
+                              if (response is String) {
+                                if (kDebugMode) {
+                                  print(response);
+                                }
+
+                                print("****2*****");
+
+                                GlobalSnackBar.showWarningSnackBar(
+                                  context,
+                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                                );
+
+                                return;
+                              }
+
+                              final decode = json.decode(response.body);
+
+                              if (!mounted) return;
+
+                              if (response.statusCode == 501) {
+                                print("data Error");
+                                print(response);
+
+                                if (decode['error']['status'] == 400) {
+                                  final errorText = checkoutInfoBloc
+                                      .badRequestProcess(response);
+
+                                  GlobalSnackBar.showErrorSnackBarIcon(
+                                    context,
+                                    errorText,
+                                  );
+
+                                  return;
+                                }
+
+                                if (checkoutInfoBloc.installmentsDetail
+                                    is! MercadoPagoPaymentMethodInstallments) {
+                                  GlobalSnackBar.showWarningSnackBar(context,
+                                      "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+                                  return;
+                                }
+
+                                final errorText =
+                                    checkoutInfoBloc.badTokenProcess(
+                                  status: decode['status'],
+                                  installments:
+                                      checkoutInfoBloc.installmentsDetail,
+                                );
 
                                 GlobalSnackBar.showErrorSnackBarIcon(
                                   context,
                                   errorText,
                                 );
 
-                                return;
-                              }
-
-                              if (checkoutInfoBloc.installmentsDetail
-                                  is! MercadoPagoPaymentMethodInstallments) {
-                                GlobalSnackBar.showWarningSnackBar(context,
-                                    "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
-                                return;
-                              }
-
-                              final errorText =
-                                  checkoutInfoBloc.badTokenProcess(
-                                status: decode['status'],
-                                installments:
-                                    checkoutInfoBloc.installmentsDetail,
-                              );
-
-                              GlobalSnackBar.showErrorSnackBarIcon(
-                                  context, errorText);
-
-                              print(
-                                  "PROBLEMAS AL REALIZAR EL PAGO ERROR CODE: ${response.statusCode}");
-
-                              return;
-                            }
-
-                            if (response.statusCode != 201) {
-                              if (kDebugMode) {
                                 print(
-                                    "response.statusCode status code fail is != 201 and contain ${response.statusCode}");
+                                    "PROBLEMAS AL REALIZAR EL PAGO ERROR CODE: ${response.statusCode}");
+
+
+                                return;
                               }
 
-                              GlobalSnackBar.showWarningSnackBar(
-                                context,
-                                "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-                              );
-                              return;
-                            }
+                              if (response.statusCode != 201) {
+                                if (kDebugMode) {
+                                  print("response.statusCode status code fail is != 201 and contain ${response.statusCode}");
+                                }
 
-                            MercadoPagoPayment infoPayment =
-                                MercadoPagoPayment.fromJsonMap(decode);
+                                print("response.body");
+                                print(response.body);
 
-                            print(infoPayment.status);
-                            print(infoPayment.statusDetail);
+                                GlobalSnackBar.showWarningSnackBar(
+                                  context,
+                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                                );
+                                return;
+                              }
 
-                            if (infoPayment.statusDetail == "accredited") {
-                              await mainBloc.handleGetShoppingCart();
+                              MercadoPagoPayment infoPayment =
+                                  MercadoPagoPayment.fromJsonMap(decode);
 
-                              await Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (_) => TransactionScreen(
-                                    mercadoPagoPayment: infoPayment,
+                              print(infoPayment.status);
+                              print(infoPayment.statusDetail);
+
+                              if (infoPayment.statusDetail == "accredited") {
+                                await mainBloc.handleGetShoppingCart();
+
+                                await Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (_) => TransactionScreen(
+                                      mercadoPagoPayment: infoPayment,
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }
                             }
+                          } else {
+                            print('invalid!');
                           }
                         }
                         break;
@@ -686,9 +658,6 @@ class OrderCheckoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      // decoration: BoxDecoration(
-      //   borderRadius: BorderRadius.circular(16.0),
-      // ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1156,84 +1125,88 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
             ),
           ),
           SizedBox(height: getProportionateScreenHeight(15.0)),
-          CreditCardWidget(
-            glassmorphismConfig: Glassmorphism(
-              blurX: 1.0,
-              blurY: 1.0,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[
-                  Color(0xFF464b5f),
-                  Color(0xFF464b5f),
-                ],
-                stops: <double>[
-                  0.3,
-                  0,
-                ],
+          Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: getProportionateScreenWidth(30.0)),
+            child: CreditCardWidget(
+              glassmorphismConfig: Glassmorphism(
+                blurX: 1.0,
+                blurY: 1.0,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[
+                    Color(0xFF464b5f),
+                    Color(0xFF464b5f),
+                  ],
+                  stops: <double>[
+                    0.3,
+                    0,
+                  ],
+                ),
               ),
+              labelCardHolder: 'TITULAR DE LA TARJETA',
+              cardNumber: checkoutInfoBloc.cardNumber,
+              expiryDate: checkoutInfoBloc.expiryDate,
+              cardHolderName: checkoutInfoBloc.cardHolderName,
+              cvvCode: checkoutInfoBloc.cvvCode,
+              textStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+              showBackView: checkoutInfoBloc.isCvvFocused,
+              obscureCardNumber: true,
+              obscureCardCvv: true,
+              isHolderNameVisible: false,
+              cardBgColor: const Color(0xFF464b5f),
+              chipColor: Colors.white,
+              isSwipeGestureEnabled: true,
+              onCreditCardWidgetChange: (CreditCardBrand creditCardBrand) {},
+              customCardTypeIcons: <CustomCardTypeIcon>[
+                CustomCardTypeIcon(
+                  cardType: CardType.visa,
+                  cardImage: Image.asset(
+                    'assets/banks/visa.png',
+                    height: 48,
+                    width: 48,
+                  ),
+                ),
+                CustomCardTypeIcon(
+                  cardType: CardType.mastercard,
+                  cardImage: Image.asset(
+                    'assets/banks/mastercard.png',
+                    height: 48,
+                    width: 48,
+                  ),
+                ),
+                CustomCardTypeIcon(
+                  cardType: CardType.discover,
+                  cardImage: Image.asset(
+                    'assets/banks/discover.png',
+                    height: 48,
+                    width: 48,
+                  ),
+                ),
+                CustomCardTypeIcon(
+                  cardType: CardType.americanExpress,
+                  cardImage: Image.asset(
+                    'assets/banks/amex.png',
+                    height: 45,
+                    width: 45,
+                  ),
+                ),
+              ],
             ),
-            labelCardHolder: 'TITULAR DE LA TARJETA',
-            cardNumber: checkoutInfoBloc.cardNumber,
-            expiryDate: checkoutInfoBloc.expiryDate,
-            cardHolderName: checkoutInfoBloc.cardHolderName,
-            cvvCode: checkoutInfoBloc.cvvCode,
-            textStyle: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
-            showBackView: checkoutInfoBloc.isCvvFocused,
-            obscureCardNumber: true,
-            obscureCardCvv: true,
-            isHolderNameVisible: false,
-            cardBgColor: const Color(0xFF464b5f),
-            chipColor: Colors.white,
-            isSwipeGestureEnabled: true,
-            onCreditCardWidgetChange: (CreditCardBrand creditCardBrand) {},
-            customCardTypeIcons: <CustomCardTypeIcon>[
-              CustomCardTypeIcon(
-                cardType: CardType.visa,
-                cardImage: Image.asset(
-                  'assets/banks/visa.png',
-                  height: 48,
-                  width: 48,
-                ),
-              ),
-              CustomCardTypeIcon(
-                cardType: CardType.mastercard,
-                cardImage: Image.asset(
-                  'assets/banks/mastercard.png',
-                  height: 48,
-                  width: 48,
-                ),
-              ),
-              CustomCardTypeIcon(
-                cardType: CardType.discover,
-                cardImage: Image.asset(
-                  'assets/banks/discover.png',
-                  height: 48,
-                  width: 48,
-                ),
-              ),
-              CustomCardTypeIcon(
-                cardType: CardType.americanExpress,
-                cardImage: Image.asset(
-                  'assets/banks/amex.png',
-                  height: 45,
-                  width: 45,
-                ),
-              ),
-            ],
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18.0),
-                ),
-                // height: SizeConfig.screenHeight! * 0.40,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Material(
+              color: Colors.white,
+              elevation: 1.0,
+              borderRadius: BorderRadius.circular(18.0),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    vertical: getProportionateScreenHeight(15.0)),
                 child: CreditCardForm(
                   formKey: checkoutInfoBloc.formKey,
                   obscureCvv: true,
@@ -1287,7 +1260,16 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
               ),
             ),
           ),
-          SizedBox(height: getProportionateScreenHeight(25.0)),
+          SizedBox(
+            height: getProportionateScreenHeight(15.0),
+          ),
+          const Align(
+            alignment: Alignment.center,
+            child: CopyRight(),
+          ),
+          SizedBox(
+            height: getProportionateScreenHeight(40.0),
+          ),
         ],
       ),
     );
@@ -1313,11 +1295,11 @@ class _TabPaymentPage extends StatelessWidget {
         duration: checkoutInfoBloc.duration,
         margin: const EdgeInsets.only(bottom: 10.0),
         width: tabPaymentPage.checked!
-            ? getProportionateScreenWidth(50.0)
-            : getProportionateScreenWidth(45.0),
+            ? getProportionateScreenWidth(60.0)
+            : getProportionateScreenWidth(55.0),
         height: tabPaymentPage.checked!
-            ? getProportionateScreenWidth(50.0)
-            : getProportionateScreenWidth(45.0),
+            ? getProportionateScreenWidth(60.0)
+            : getProportionateScreenWidth(55.0),
         alignment: Alignment.center,
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(

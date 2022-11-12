@@ -1,4 +1,4 @@
-name: store_mundo_pet
+name: store_mundo_negocio
 description: Flutter clean architecture for store mundo pet
 
 # The following line prevents the package from being accidentally published to
@@ -51,6 +51,7 @@ dependencies:
   confetti: ^0.7.0
   logger: ^1.1.0
   dio: ^4.0.6
+  webview_flutter: ^3.0.4
 
 dev_dependencies:
   flutter_test:

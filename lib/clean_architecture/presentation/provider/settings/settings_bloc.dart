@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class SettingsBloc extends ChangeNotifier {
   final UserRepositoryInterface userRepositoryInterface;

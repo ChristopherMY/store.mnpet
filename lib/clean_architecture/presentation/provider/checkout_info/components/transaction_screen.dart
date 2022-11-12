@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/ticket.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/ticket.dart';
 
 class TransactionScreen extends StatefulWidget {
   const TransactionScreen({
@@ -89,6 +89,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       //   titleSpacing: 0,
       // ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 15.0),
         child: SizedBox(
           height: SizeConfig.screenHeight,
           width: SizeConfig.screenWidth,
@@ -101,31 +102,37 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    SizedBox(height: getProportionateScreenHeight(15.0)),
                     Image.asset(
-                      "assets/images/mundo-pet.png",
+                      "assets/images/logo-mn.png",
                       width: getProportionateScreenWidth(220.0),
                     ),
                     SizedBox(
-                      height: getProportionateScreenHeight(30.0),
+                      height: getProportionateScreenHeight(20.0),
                     ),
-                    Ticket(
-                      width: SizeConfig.screenWidth! * 0.8,
-                      height: SizeConfig.screenHeight! * 0.64,
-                      color: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0,
-                        vertical: 24.0,
+                    Expanded(
+                      child: Ticket(
+                        width: SizeConfig.screenWidth! * 0.8,
+                        height: SizeConfig.screenHeight! * 0.64,
+                        color: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0,
+                          vertical: 24.0,
+                        ),
+                        child:
+                            TicketData(mercadoPagoPayment: mercadoPagoPayment),
+                        // ),
                       ),
-                      child: TicketData(mercadoPagoPayment: mercadoPagoPayment),
-                      // ),
                     ),
                     SizedBox(
-                      height: getProportionateScreenHeight(15.0),
+                      height: getProportionateScreenHeight(25.0),
                     ),
                     _ButtonIconTicket(
                       onTap: () {
                         // Navigator.of(context).popUntil((route) => false);
+
                         Navigator.of(context).pop();
+                        // _controllerCenter.stop();
                       },
                       icon: Icons.home_outlined,
                       title: "Ir a inicio",
@@ -283,7 +290,7 @@ class TicketData extends StatelessWidget {
             children: <Widget>[
               const Text(
                 "Descripción",
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.grey),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 4.0),

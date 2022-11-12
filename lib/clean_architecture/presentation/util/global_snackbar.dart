@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class GlobalSnackBar {
   static showWarningSnackBar(
@@ -78,7 +78,7 @@ class GlobalSnackBar {
             topLeft: Radius.circular(16.0),
             topRight: Radius.circular(16.0),
           ),
-        ),
+        ) ,
         backgroundColor: Colors.white,
         action: SnackBarAction(
           //textColor: const Color(0xFFFAF2FB),
@@ -146,13 +146,13 @@ class GlobalSnackBar {
         elevation: 0.0,
         //behavior: SnackBarBehavior.floating,
         content: Text(message),
-        duration: const Duration(seconds: 5000000),
+        duration: const Duration(seconds: 5),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(16.0),
             topRight: Radius.circular(16.0),
           ),
-        ),
+        ) ,
         action: SnackBarAction(
           //textColor: const Color(0xFFFAF2FB),
           label: 'OK',

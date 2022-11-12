@@ -1,19 +1,17 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/order.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/order/components/order_detail_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/order/order_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/loading_full_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/order.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order_detail/order_detail_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order/order_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_full_screen.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen._({Key? key}) : super(key: key);
@@ -42,8 +40,7 @@ class _OrderScreenState extends State<OrderScreen> {
     final orderBloc = context.read<OrderBloc>();
     final credentialsAuth = await mainBloc.loadCredentialsAuth();
 
-    orderBloc.headers[HttpHeaders.authorizationHeader] =
-        "Bearer ${credentialsAuth.token}";
+    orderBloc.headers[HttpHeaders.authorizationHeader] = "Bearer ${credentialsAuth.token}";
 
     final response = await orderBloc.getOrdersDetails();
 
@@ -52,11 +49,13 @@ class _OrderScreenState extends State<OrderScreen> {
       orderBloc.refreshBloc();
       return;
     }
+
     if (!mounted) return;
     GlobalSnackBar.showWarningSnackBar(
       context,
       "Ups, vuelva a intentarlo más tarde",
     );
+
   }
 
   @override
@@ -71,7 +70,7 @@ class _OrderScreenState extends State<OrderScreen> {
     final orderBloc = context.watch<OrderBloc>();
 
     if (orderBloc.orders is! List<Order>) {
-      return const LoadingFullScreen();
+      return const LoadingBagFullScreen();
     }
 
     return SafeArea(
@@ -138,9 +137,8 @@ class _OrderScreenState extends State<OrderScreen> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     child: _OrderDetail(order: order),
-                  ); 
+                  );
                 },
-
                 childCount: orderBloc.orders.length,
               ),
             ),
@@ -150,38 +148,38 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 }
-
-class _OrderCategory extends StatelessWidget {
-  const _OrderCategory({
-    Key? key,
-    required this.title,
-    required this.onSelected,
-  }) : super(key: key);
-
-  final String title;
-  final Function(bool) onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 15 / 2),
-      child: ChoiceChip(
-        selected: true,
-        selectedColor: Colors.black,
-        padding: const EdgeInsets.all(8.0),
-        backgroundColor: Colors.black,
-        label: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        onSelected: onSelected,
-      ),
-    );
-  }
-}
+//
+// class _OrderCategory extends StatelessWidget {
+//   const _OrderCategory({
+//     Key? key,
+//     required this.title,
+//     required this.onSelected,
+//   }) : super(key: key);
+//
+//   final String title;
+//   final Function(bool) onSelected;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.only(right: 15 / 2),
+//       child: ChoiceChip(
+//         selected: true,
+//         selectedColor: Colors.black,
+//         padding: const EdgeInsets.all(8.0),
+//         backgroundColor: Colors.black,
+//         label: Text(
+//           title,
+//           style: const TextStyle(
+//             color: Colors.white,
+//             fontWeight: FontWeight.w700,
+//           ),
+//         ),
+//         onSelected: onSelected,
+//       ),
+//     );
+//   }
+// }
 
 class _OrderDetail extends StatelessWidget {
   const _OrderDetail({
@@ -325,4 +323,3 @@ class _OrderDetail extends StatelessWidget {
     );
   }
 }
-

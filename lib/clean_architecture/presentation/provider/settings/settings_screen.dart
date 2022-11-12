@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/change_email/change_email_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/change_password/change_password_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/default_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/form_error.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/change_email/change_email_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/change_password/change_password_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/settings/settings_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/form_error.dart';
 
 import '../../widget/item_button.dart';
 

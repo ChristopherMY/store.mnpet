@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 
 import '../../../domain/repository/product_repository.dart';
 
@@ -45,9 +45,8 @@ class CartBloc extends ChangeNotifier {
 
   @override
   void dispose() {
-    pagingController.dispose();
     pagingController.removePageRequestListener(
-      (pageKey) {
+          (pageKey) {
         fetchPage(
           pageKey: pageKey,
           categories: [
@@ -59,6 +58,9 @@ class CartBloc extends ChangeNotifier {
         );
       },
     );
+
+    pagingController.dispose();
+
     super.dispose();
   }
 

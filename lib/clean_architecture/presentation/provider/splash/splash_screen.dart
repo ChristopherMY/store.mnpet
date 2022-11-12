@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/home/home_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/splash/splash_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/home/home_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/splash/splash_bloc.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen._({Key? key}) : super(key: key);
@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     //WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      initEventDecrement();
+       initEventDecrement();
     //});
   }
 
@@ -84,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage("assets/presentation/lettering_v3.png"),
+                      image: AssetImage("assets/presentation/presentation_origin.png"),
                       fit: BoxFit.contain,
                     ),
                   ),

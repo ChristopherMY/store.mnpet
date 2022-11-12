@@ -1,5 +1,5 @@
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_financial_institution.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_issuer.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_financial_institution.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_issuer.dart';
 
 class MercadoPagoPaymentMethod {
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/custom_progress_button.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/components/body/product_price.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/custom_progress_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/product_price.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   const CustomBottomNavigationBar({Key? key}) : super(key: key);

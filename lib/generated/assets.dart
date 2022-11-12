@@ -60,6 +60,7 @@ class Assets {
   static const String presentationLetteringMnPet = 'assets/presentation/lettering_mn_pet.png';
   static const String presentationLetteringV2 = 'assets/presentation/lettering_v2.png';
   static const String presentationLetteringV3 = 'assets/presentation/lettering_v3.png';
+  static const String presentationPresentationOrigin = 'assets/presentation/presentation_origin.png';
   static const String svgImage = 'assets/icons/svg/image.svg';
   static const String svgLocation = 'assets/icons/svg/location.svg';
 

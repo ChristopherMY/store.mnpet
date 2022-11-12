@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class QuestionAnswerScreen extends StatelessWidget {
   static String routeName = "/question_answer_screen";

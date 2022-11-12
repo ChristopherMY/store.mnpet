@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_forgot_password.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/auth_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_forgot_password.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
 
 class OtpBloc extends ChangeNotifier {
   AuthRepositoryInterface authRepositoryInterface;

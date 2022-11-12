@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class LocalService implements LocalRepositoryInterface {
   final _url = Environment.API_DAO;

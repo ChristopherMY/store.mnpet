@@ -4,22 +4,23 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/district.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/province.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/region.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information_local.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/login/login_screen.dart';
+import 'package:logger/logger.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/district.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/province.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/region.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information_local.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/login/login_screen.dart';
 
 class MainBloc extends ChangeNotifier {
   LocalRepositoryInterface localRepositoryInterface;
@@ -39,8 +40,7 @@ class MainBloc extends ChangeNotifier {
   ValueNotifier<Session> sessionAccount = ValueNotifier(Session.inactive);
   ValueNotifier<Account> account = ValueNotifier(Account.inactive);
   ValueNotifier<Home> home = ValueNotifier(Home.inactive);
-  ValueNotifier<ShoppingCart> shoppingCart =
-      ValueNotifier(ShoppingCart.inactive);
+  ValueNotifier<ShoppingCart> shoppingCart = ValueNotifier(ShoppingCart.inactive);
 
   ValueNotifier<int> indexSelected = ValueNotifier(0);
 
@@ -67,6 +67,8 @@ class MainBloc extends ChangeNotifier {
   String ubigeo = "";
 
   int countNavigateIterationScreen = 3;
+  bool loadingScreenAccount = false;
+
 
   dynamic informationUser;
   ValueNotifier<dynamic> informationCart = ValueNotifier(dynamic);
@@ -93,14 +95,17 @@ class MainBloc extends ChangeNotifier {
         print(credentials);
         if (credentials is! CredentialsAuth) {
           //  sessionAccount.value = Session.inactive;
+          print("Carrito de compras sin cuenta");
+
           if (informationCart.value is! Cart) {
-            print("Carrito de compras sin cuenta");
+            print("Carrito de sin items");
             handleGetShoppingCartNotAccount();
             return;
           }
         } else {
+          print("Carrito de compras con cuenta");
           if (informationCart.value is! Cart) {
-            print("Carrito de compras con cuenta");
+            print("Carrito de sin items x2");
             handleGetShoppingCart();
             return;
           }
@@ -114,6 +119,9 @@ class MainBloc extends ChangeNotifier {
           return;
         } else {
           if (informationUser is! UserInformation) {
+            loadingScreenAccount = true;
+            notifyListeners();
+
             getUserInformation().then(
               (loadInformation) {
                 if (loadInformation is UserInformation) {
@@ -121,6 +129,7 @@ class MainBloc extends ChangeNotifier {
                 }
 
                 account.value = Account.active;
+                loadingScreenAccount = false;
               },
             );
           }
@@ -329,6 +338,7 @@ class MainBloc extends ChangeNotifier {
     if (errors.value.isEmpty) {
       ubigeo =
           "${departmentName.value} - ${provinceName.value} - ${districtName.value}";
+
       final userInformationLocal = UserInformationLocal(
         department: departmentName.value,
         province: provinceName.value,
@@ -336,6 +346,9 @@ class MainBloc extends ChangeNotifier {
         districtId: districtId,
         ubigeo: ubigeo,
       );
+
+      print(userInformationLocal.toMap());
+      print("!********************!");
 
       await hiveRepositoryInterface.save(
         containerName: "shipment",
@@ -349,6 +362,9 @@ class MainBloc extends ChangeNotifier {
         quantity: quantity,
       );
 
+      Logger logger = Logger();
+      logger.i(response);
+
       if (response is String) {
         if (kDebugMode) {
           print(response);
@@ -357,13 +373,15 @@ class MainBloc extends ChangeNotifier {
         return null;
       }
 
-      if (response is http.Response) {
-        if (response.statusCode == 200) {
-          return double.parse(response.body.replaceAll('"', ""));
-        } else {
-          return null;
-        }
+      if (response is! http.Response) {
+        return null;
       }
+
+      if (response.statusCode != 200) {
+        return null;
+      }
+
+      return double.parse(response.body.replaceAll('"', ""));
     }
 
     return null;
@@ -445,12 +463,19 @@ class MainBloc extends ChangeNotifier {
       key: "residence",
     );
 
+    // await hiveRepositoryInterface.remove(
+    //   containerName: "shopping_temporal",
+    //   key: "cartId",
+    // );
+
     credentials = dynamic;
     informationCart.value = dynamic;
     informationUser = dynamic;
     headers[HttpHeaders.authorizationHeader] = '';
     sessionAccount.value = Session.inactive;
     account.value = Account.inactive;
+
+    notifyListeners();
   }
 
   Future<dynamic> getUserInformation() async {
@@ -506,6 +531,8 @@ class MainBloc extends ChangeNotifier {
     required String districtId,
     required Map<String, String> headers,
   }) async {
+    // print("headers");
+    // print(headers);
     final response = await cartRepositoryInterface.getShoppingCart(
       districtId: districtId,
       headers: headers,
@@ -565,6 +592,8 @@ class MainBloc extends ChangeNotifier {
 
   void handleGetShoppingCartNotAccount() async {
     final shoppingCartId = await handleGetShoppingCartId();
+    print("MAINBLOC");
+    print("shoppingCartId: $shoppingCartId");
 
     getShoppingCartTemp(
       districtId: residence.districtId!,
@@ -573,7 +602,7 @@ class MainBloc extends ChangeNotifier {
         if (cart is Cart) {
           if (shoppingCartId.toString().isEmpty) {
             await hiveRepositoryInterface.save(
-              containerName: "shopping",
+              containerName: "shopping_temporal",
               key: "cartId",
               value: cart.id,
             );
@@ -607,6 +636,9 @@ class MainBloc extends ChangeNotifier {
   Future<dynamic> changeShoppingCart() async {
     final shoppingCartId = await handleGetShoppingCartId();
 
+    print("shoppingCartId!!!!");
+    print(shoppingCartId);
+
     final response = await cartRepositoryInterface.moveShoppingCart(
       cartId: shoppingCartId,
       headers: headers,
@@ -629,7 +661,7 @@ class MainBloc extends ChangeNotifier {
 
   Future<void> handleRemoveShoppingCart() async {
     await hiveRepositoryInterface.remove(
-      containerName: "shopping",
+      containerName: "shopping_temporal",
       key: "cartId",
     );
   }
@@ -684,11 +716,10 @@ class MainBloc extends ChangeNotifier {
       return;
     }
     print("NOOOO ACCEDIO A SECCIONA COUNT VALUE");
+
     /// Continue computing execution code
 
     final shoppingCartId = await handleGetShoppingCartId();
-
-
 
     final cart = await getShoppingCartTemp(
       districtId: residence.districtId!,
@@ -702,7 +733,7 @@ class MainBloc extends ChangeNotifier {
       print(cart.toMap());
       if (shoppingCartId.toString().isEmpty) {
         await hiveRepositoryInterface.save(
-          containerName: "shopping",
+          containerName: "shopping_temporal",
           key: "cartId",
           value: cart.id,
         );
@@ -729,8 +760,6 @@ class MainBloc extends ChangeNotifier {
     } else {
       final shoppingCartId = await handleGetShoppingCartId();
 
-
-
       response = await cartRepositoryInterface.updateProductCartTemp(
         cartId: shoppingCartId,
         productId: productId,
@@ -750,7 +779,7 @@ class MainBloc extends ChangeNotifier {
 
   Future<String> handleGetShoppingCartId() async {
     return await hiveRepositoryInterface.read(
-          containerName: "shopping",
+          containerName: "shopping_temporal",
           key: "cartId",
         ) ??
         "";

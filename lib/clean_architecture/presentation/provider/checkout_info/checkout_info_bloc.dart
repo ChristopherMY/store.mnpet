@@ -5,17 +5,17 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/credit_card_model.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_card_token.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_document_type.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/tab_payment_page.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/payment_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credit_card_model.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_card_token.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_document_type.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/tab_payment_page.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/payment_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 class CheckOutInfoBloc extends ChangeNotifier {
   bool isExpanded = false;
@@ -63,7 +63,7 @@ class CheckOutInfoBloc extends ChangeNotifier {
     required UserInformation userInformation,
     required BuildContext context,
   }) async {
-    if (formKey.currentState!.validate()) {
+    // if (formKey.currentState!.validate()) {
       if (expiryDate.isEmpty) {
         if (kDebugMode) {
           print("expiryDate IS VOID");
@@ -94,13 +94,12 @@ class CheckOutInfoBloc extends ChangeNotifier {
       expirationMonth = int.parse(list[0]);
       expirationYear = "20${list[1]}";
 
+      print("identificationNumber: ${userInformation.document!.value!}");
+
       final tokenDetail = await getToken(
         identificationNumber: userInformation.document!.value!,
         userInformation: userInformation,
       );
-
-      // print("TOKEN DETAIL");
-      // print(tokenDetail);
 
       if (tokenDetail is! MercadoPagoCardToken) {
         if (kDebugMode) {
@@ -209,10 +208,10 @@ class CheckOutInfoBloc extends ChangeNotifier {
         issuerId: installmentsDetail.issuer!.id!,
         headers: headers,
       );
-    } else {
-      /// TODO: No important;
-      print('invalid!');
-    }
+    // } else {
+    //   /// TODO: No important;
+    //   print('invalid!');
+    // }
   }
 
   void onCreditCardModelChange(CreditCardModel? creditCardModel) {

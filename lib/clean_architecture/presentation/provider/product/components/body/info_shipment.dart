@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/product/product_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/dialog_helper.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
 
 import '../../../../../domain/model/user_information_local.dart';
 
@@ -22,14 +22,22 @@ class InfoShipment extends StatelessWidget {
           context: context,
           onSaveShippingAddress: (_) async {
             final mainBloc = context.read<MainBloc>();
+
+            print("SLUG: ${productBloc.product!.slug!}");
+            print("QUANTIYU: ${productBloc.quantity.value}");
+
             final shippingPrice = await mainBloc.onSaveShippingAddress(
               slug: productBloc.product!.slug!,
               quantity: productBloc.quantity.value,
             );
 
+            // print("QUE PASA!!!!!!!!");
+
             if (shippingPrice is double) {
               productBloc.shippingPrice.value = shippingPrice;
               productBloc.refreshUbigeo(slug: productBloc.product!.slug!);
+
+              print("SIII esta entrando!!!!!");
 
               const snackBar = SnackBar(
                 content: Text('Dirección guardada correctamente'),
@@ -40,7 +48,10 @@ class InfoShipment extends StatelessWidget {
               ScaffoldMessenger.of(_).showSnackBar(snackBar);
 
               Navigator.pop(_);
+              return;
             }
+
+            print("No esta entrando!!!!!");
           },
         );
       },

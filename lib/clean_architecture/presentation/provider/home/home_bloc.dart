@@ -1,10 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/category.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/home_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/home_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 
 class HomeBloc extends ChangeNotifier {
   final HomeRepositoryInterface homeRepositoryInterface;

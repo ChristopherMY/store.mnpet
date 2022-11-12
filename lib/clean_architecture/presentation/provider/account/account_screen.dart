@@ -4,17 +4,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/usecase/page.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/order/order_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/settings/settings_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/contact/contact_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order/order_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/privacy/privacy_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/settings/settings_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
 import '../shipment/shipment_screen.dart';
 import 'account_bloc.dart';
@@ -71,188 +74,208 @@ class _AccountScreenState extends State<AccountScreen> {
               }
             }
           },
-          child: Stack(children: [
-            // sessionAccount == Session.normal
-            //     ?
-            CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  snap: false,
-                  floating: false,
-                  toolbarHeight: 56.0,
-                  backgroundColor: kBackGroundColor,
-                  systemOverlayStyle: const SystemUiOverlayStyle(
-                    statusBarColor: kBackGroundColor,
-                    statusBarIconBrightness: Brightness.dark,
-                  ),
-                  expandedHeight: getProportionateScreenHeight(56.0),
-                  actions: [
-                    account == Account.active
-                        ? Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        SettingsScreen.init(context),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      pinned: true,
+                      snap: false,
+                      floating: false,
+                      toolbarHeight: 56.0,
+                      backgroundColor: kBackGroundColor,
+                      systemOverlayStyle: const SystemUiOverlayStyle(
+                        statusBarColor: kBackGroundColor,
+                        statusBarIconBrightness: Brightness.dark,
+                      ),
+                      expandedHeight: getProportionateScreenHeight(56.0),
+                      actions: [
+                        account == Account.active
+                            ? Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            SettingsScreen.init(context),
+                                      ),
+                                    );
+                                  },
+                                  child: const Icon(
+                                    Icons.settings,
+                                    color: Colors.black,
                                   ),
-                                );
-                              },
-                              child: const Icon(
-                                Icons.settings,
-                                color: Colors.black,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  ],
-                ),
-                SliverToBoxAdapter(
-                  child: HeaderInformation(
-                    accountActive: account == Account.active,
-                  ),
-                ),
-                SliverVisibility(
-                  visible: account == Account.active,
-                  sliver: const SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 20.0,
-                      horizontal: 25.0,
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ],
                     ),
-                    sliver: SliverToBoxAdapter(
-                      child: Text(
-                        "Mi perfil",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                    SliverToBoxAdapter(
+                      child: HeaderInformation(
+                        accountActive: account == Account.active,
+                      ),
+                    ),
+                    SliverVisibility(
+                      visible: account == Account.active,
+                      sliver: const SliverPadding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 20.0,
+                          horizontal: 25.0,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Text(
+                            "Mi perfil",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                SliverVisibility(
-                  visible: account == Account.active,
-                  sliver: SliverToBoxAdapter(
-                    child: TargetOption(
-                      title: "Mis Direcciones",
-                      subTitle: "Mis direcciones de envío",
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const ShipmentScreen(),
-                          ),
-                        );
-                      },
-                      icon: Icons.directions,
+                    SliverVisibility(
+                      visible: account == Account.active,
+                      sliver: SliverToBoxAdapter(
+                        child: TargetOption(
+                          title: "Mis Direcciones",
+                          subTitle: "Mis direcciones de envío",
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const ShipmentScreen(),
+                              ),
+                            );
+                          },
+                          icon: Icons.directions,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                SliverVisibility(
-                  visible: account == Account.active,
-                  sliver: SliverToBoxAdapter(
-                    child: TargetOption(
-                      title: "Mis órdenes",
-                      subTitle: 'Detalle de órdenes',
-                      onTap: () {
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) {
-                              return OrderScreen.init(context);
-                            },
-                          ),
-                        );
-                      },
-                      icon: Icons.local_shipping_outlined,
+                    SliverVisibility(
+                      visible: account == Account.active,
+                      sliver: SliverToBoxAdapter(
+                        child: TargetOption(
+                          title: "Mis órdenes",
+                          subTitle: 'Detalle de órdenes',
+                          onTap: () {
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) {
+                                  return OrderScreen.init(context);
+                                },
+                              ),
+                            );
+                          },
+                          icon: Icons.local_shipping_outlined,
+                        ),
+                      ),
                     ),
-                  ),
+                    // SliverVisibility(
+                    //   visible: value,
+                    //   sliver: SliverToBoxAdapter(
+                    //     child: TargetOption(
+                    //       title: "Mis Tarjetas",
+                    //       subTitle: 'Detalle de tarjetas guardadas',
+                    //       onTap: () {
+                    //         Navigator.of(context).push(
+                    //           MaterialPageRoute(
+                    //             builder: (context) => const CreditCartScreen(),
+                    //           ),
+                    //         );
+                    //       },
+                    //       icon: Icons.credit_score,
+                    //       // Icons.credit_card
+                    //     ),
+                    //   ),
+                    // ),
+                    const SliverPadding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 20.0,
+                        horizontal: 25.0,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: Text(
+                          "Ayuda",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: TargetOption(
+                        title: "Cambios y devoluciones",
+                        subTitle: 'Políticas de cambios y devoluciones',
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return ContactScreen.init(context);
+                              },
+                            ),
+                          );
+                        },
+                        icon: Icons.store_mall_directory_outlined,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: TargetOption(
+                        title: "Privacidad",
+                        subTitle: 'Terminos y condiciones',
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) {
+                                return PrivacyScreen.init(context);
+                              },
+                            ),
+                          );
+                        },
+                        icon: Icons.question_mark_rounded,
+                      ),
+                    ),
+                    SliverVisibility(
+                      visible: account == Account.active,
+                      sliver: SliverToBoxAdapter(
+                        child: TargetOption(
+                          title: "Cerrar sesión",
+                          subTitle: "Cerrar sesión en este dispositivo",
+                          onTap: mainBloc.signOut,
+                          icon: CommunityMaterialIcons.logout,
+                        ),
+                      ),
+                    ),
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: getProportionateScreenHeight(25.0),
+                          top: getProportionateScreenHeight(25.0),
+                        ),
+                        child: const CopyRight(),
+                      ),
+                    ),
+                  ],
                 ),
-                // SliverVisibility(
-                //   visible: value,
-                //   sliver: SliverToBoxAdapter(
-                //     child: TargetOption(
-                //       title: "Mis Tarjetas",
-                //       subTitle: 'Detalle de tarjetas guardadas',
-                //       onTap: () {
-                //         Navigator.of(context).push(
-                //           MaterialPageRoute(
-                //             builder: (context) => const CreditCartScreen(),
-                //           ),
-                //         );
-                //       },
-                //       icon: Icons.credit_score,
-                //       // Icons.credit_card
-                //     ),
-                //   ),
-                // ),
-                const SliverPadding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 20.0,
-                    horizontal: 25.0,
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      "Ayuda",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+              ),
+              if (mainBloc.loadingScreenAccount)
+                const Positioned.fill(
+                  child: Material(
+                    color: Colors.black12,
+                    child: Center(
+                      child: LottieAnimation(
+                        source: "assets/lottie/shopping-bag.json",
                       ),
                     ),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: TargetOption(
-                    title: "Contacto",
-                    subTitle: 'Horario de atención',
-                    onTap: () {},
-                    icon: Icons.phone,
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: TargetOption(
-                    title: "Privacidad",
-                    subTitle: 'Terminos y condiciones',
-                    onTap: () {},
-                    icon: Icons.question_mark_rounded,
-                  ),
-                ),
-                SliverVisibility(
-                  visible: account == Account.active,
-                  sliver: SliverToBoxAdapter(
-                    child: TargetOption(
-                      title: "Cerrar sesión",
-                      subTitle: "Cerrar sesión en este dispositivo",
-                      onTap: mainBloc.signOut,
-                      icon: CommunityMaterialIcons.logout,
-                    ),
-                  ),
-                ),
-
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  fillOverscroll: true,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: getProportionateScreenHeight(25.0),
-                      top: getProportionateScreenHeight(25.0),
-                    ),
-                    child: const CopyRight(),
-                  ),
-                ),
-              ],
-            ),
-            // : const Positioned.fill(
-            //     child: Center(
-            //       child: LottieAnimation(
-            //         source: "assets/lottie/paw.json",
-            //       ),
-            //     ),
-            //   ),
-            //   ),
-          ]),
+            ],
+          ),
         );
       },
     );

@@ -9,17 +9,17 @@ import 'package:http/http.dart' as http;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/cart.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/credentials_auth.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/user_information_local.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/model/vimeo_video_config.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/cart_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/local_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/domain/repository/product_repository.dart';
-import 'package:store_mundo_pet/clean_architecture/presentation/widget/photoview_wrapper.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information_local.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/vimeo_video_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/photoview_wrapper.dart';
 
 import '../../../domain/usecase/page.dart';
 import '../../widget/vimeo_player.dart';
@@ -42,6 +42,7 @@ class ProductBloc extends ChangeNotifier {
 
   static int _initialRange = 1;
   static int _finalRange = 20;
+
   static const _pageSize = 19;
 
   final PagingController<int, Product> pagingController =
@@ -77,17 +78,23 @@ class ProductBloc extends ChangeNotifier {
 
   final SwiperController swiperController = SwiperController();
 
-  void init() {
-    pagingController.addPageRequestListener((pageKey) async {
-      await fetchRelatedProductsPagination(
-        categories: product!.categories!,
-        pageKey: pageKey,
-      );
-    });
+  Future<void> fetchPagination(int pageKey) async {
+    await fetchRelatedProductsPagination(
+      categories: product!.categories!,
+      pageKey: pageKey,
+    );
+  }
+
+  void handleInitPagination() {
+    pagingController.addPageRequestListener(fetchPagination);
   }
 
   @override
   void dispose() {
+    _initialRange = 1;
+    _finalRange = 20;
+
+    pagingController.removePageRequestListener(fetchPagination);
     pagingController.dispose();
     super.dispose();
   }
@@ -105,6 +112,7 @@ class ProductBloc extends ChangeNotifier {
     if (response is http.Response) {
       if (response.statusCode == 200) {
         product = productFromMap(response.body);
+
         if (product!.general != "simple_product") {
           handleInitVariation(product: product!);
           handleLoadVariableComponents(product: product!);
@@ -112,6 +120,8 @@ class ProductBloc extends ChangeNotifier {
         } else {
           handleLoadSimpleComponents(product: product!);
         }
+
+        handleInitPagination();
 
         handleBuildHeaderContent(product: product!);
       }
@@ -122,6 +132,11 @@ class ProductBloc extends ChangeNotifier {
     required List<Brand> categories,
     required int pageKey,
   }) async {
+    print("CATEGORIES!!");
+    print(categories.first.name);
+    print("_finalRange: $_finalRange");
+    print("_initialRange: $_initialRange");
+
     final response =
         await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
@@ -140,6 +155,9 @@ class ProductBloc extends ChangeNotifier {
     if (response is http.Response) {
       if (response.statusCode == 200) {
         final products = jsonDecode(response.body) as List;
+        print("RESPONSE!!!!");
+        print(products);
+
         if (products.isNotEmpty) {
           List<Product> newItems =
               products.map((e) => Product.fromMap(e)).toList().cast();
@@ -197,16 +215,10 @@ class ProductBloc extends ChangeNotifier {
           (image) => Hero(
             tag: image.id!,
             child: CachedNetworkImage(
-              fit: BoxFit.cover,
+              fit: BoxFit.fitHeight,
               imageUrl: "$cloudFront/${image.src}",
-              imageBuilder: (context, imageProvider) => Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: imageProvider,
-                    //fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+              imageBuilder: (context, imageProvider) =>
+                  Image(image: imageProvider),
               placeholder: (context, url) => const SizedBox.shrink(),
               errorWidget: (context, url, error) =>
                   Image.asset("assets/no-image.png"),
@@ -525,7 +537,7 @@ class ProductBloc extends ChangeNotifier {
     }
 
     String shoppingCartId = await hiveRepositoryInterface.read(
-          containerName: "shopping",
+          containerName: "shopping_temporal",
           key: "cartId",
         ) ??
         "";
@@ -564,7 +576,7 @@ class ProductBloc extends ChangeNotifier {
     if (responseApi.id!.isNotEmpty) {
       if (shoppingCartId.isEmpty) {
         await hiveRepositoryInterface.save(
-          containerName: "shopping",
+          containerName: "shopping_temporal",
           key: "cartId",
           value: responseApi.id,
         );
@@ -576,14 +588,13 @@ class ProductBloc extends ChangeNotifier {
   }
 
   void initProductState({
-    required String slug,
-    required List<GalleryVideo> galleryVideo,
+    required Product product,
   }) async {
     await Future.wait(
       [
-        loadVimeoVideoConfig(galleryVideo: galleryVideo),
-        loadProductDetails(slug: slug),
-        refreshUbigeo(slug: slug),
+        loadVimeoVideoConfig(galleryVideo: product.galleryVideo!),
+        loadProductDetails(slug: product.slug!),
+        refreshUbigeo(slug: product.slug!),
       ],
     );
 
@@ -668,6 +679,48 @@ class ProductBloc extends ChangeNotifier {
     required bool isAppBar,
     required ManagerTypePhotoViewer managerTypePhotoViewer,
   }) {
+    if (product!.galleryVideo!.isNotEmpty) {
+      final variavle = product!.galleryVideo!.length - 1;
+
+      print(variavle);
+      print(indexPhotoViewer);
+
+      if (variavle <= indexPhotoViewer) {
+        Navigator.of(context).push(
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 600),
+            reverseTransitionDuration: const Duration(milliseconds: 600),
+            barrierDismissible: false,
+            opaque: true,
+            //barrierColor: Colors.white,
+            transitionsBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child,
+            ) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            pageBuilder: (_, __, ___) {
+              return ChangeNotifierProvider<ProductBloc>.value(
+                value: Provider.of<ProductBloc>(context),
+                child: GalleryPhotoViewWrapper(
+                  managerTypePhotoViewer: managerTypePhotoViewer,
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.black,
+                  ),
+                  isAppBar: isAppBar,
+                  scrollDirection: Axis.horizontal,
+                ),
+              );
+            },
+          ),
+        );
+      }
+
+      return;
+    }
+
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 600),

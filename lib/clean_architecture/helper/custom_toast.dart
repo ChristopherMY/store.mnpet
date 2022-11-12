@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:store_mundo_pet/clean_architecture/helper/colors.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/colors.dart';
 
 class CustomToast {
   late FToast fToast;
