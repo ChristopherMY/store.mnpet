@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/keyword.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
@@ -200,35 +201,38 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   horizontal: 8.0,
                   vertical: 10.0,
                 ),
-                sliver: PagedSliverMasonryGrid(
-                  crossAxisCount: searchDetailBloc.isGridList ? 2 : 1,
-                  pagingController: searchDetailBloc.pagingController,
-                  mainAxisSpacing: 3,
-                  builderDelegate: PagedChildBuilderDelegate<Product>(
-                    itemBuilder: (context, item, index) {
-                      if (searchDetailBloc.isGridList) {
-                        return TrendingItemMain(
+                sliver: SliverAnimatedSwitcher(
+                  duration: kThemeAnimationDuration,
+                  child: PagedSliverMasonryGrid(
+                    crossAxisCount: searchDetailBloc.isGridList ? 2 : 1,
+                    pagingController: searchDetailBloc.pagingController,
+                    mainAxisSpacing: 3,
+                    builderDelegate: PagedChildBuilderDelegate<Product>(
+                      itemBuilder: (context, item, index) {
+                        if (searchDetailBloc.isGridList) {
+                          return TrendingItemMain(
+                            product: item,
+                            gradientColors: const [
+                              Color(0xFFF28767),
+                              Color(0xFFFFA726),
+                            ],
+                          );
+                        }
+
+                        return TrendingItemMainGrid(
                           product: item,
                           gradientColors: const [
                             Color(0xFFF28767),
                             Color(0xFFFFA726),
                           ],
                         );
-                      }
-
-                      return TrendingItemMainGrid(
-                        product: item,
-                        gradientColors: const [
-                          Color(0xFFF28767),
-                          Color(0xFFFFA726),
-                        ],
-                      );
-                    },
-                    noItemsFoundIndicatorBuilder: (context) {
-                      return const LottieAnimation(
-                        source: "assets/lottie/shake-a-empty-box.json",
-                      );
-                    },
+                      },
+                      noItemsFoundIndicatorBuilder: (context) {
+                        return const LottieAnimation(
+                          source: "assets/lottie/shake-a-empty-box.json",
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

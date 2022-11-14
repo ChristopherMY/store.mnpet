@@ -50,14 +50,12 @@ class CustomProgressButton extends StatelessWidget {
             ),
             ButtonState.fail: const Text(
               "Ups, algo salio mal",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
             ),
             ButtonState.success: const Text(
               "Producto añadido",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
-            )
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
+            ),
           },
           progressIndicator: const CircularProgressIndicator(
             backgroundColor: Colors.white,
@@ -72,7 +70,6 @@ class CustomProgressButton extends StatelessWidget {
           },
           //onPressed: isDialog! ? onAddDialogCart : onAddCart,
           onPressed: () async {
-
             final response = await productBloc.onSaveShoppingCart();
 
             if (response is bool) {
