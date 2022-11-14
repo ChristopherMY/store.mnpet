@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:roundcheckbox/roundcheckbox.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
@@ -161,7 +160,8 @@ class AddressesDetail extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(address.addressType!),
                                   Container(
@@ -210,7 +210,8 @@ class AddressesDetail extends StatelessWidget {
                                           radius: 15.0,
                                           backgroundColor: Colors.black,
                                           child: Icon(
-                                            CommunityMaterialIcons.pencil_outline,
+                                            CommunityMaterialIcons
+                                                .pencil_outline,
                                             size: 18.0,
                                             color: Colors.white,
                                           ),
@@ -220,7 +221,8 @@ class AddressesDetail extends StatelessWidget {
                                       GestureDetector(
                                         onTap: () async {
                                           context.loaderOverlay.show();
-                                          final response = await shipmentBloc.onDeleteAddress(
+                                          final response = await shipmentBloc
+                                              .onDeleteAddress(
                                             addressId: address.id!,
                                             headers: mainBloc.headers,
                                           );
@@ -292,7 +294,41 @@ class AddressesDetail extends StatelessWidget {
           ButtonCrud(
             onTap: () async {
               shipmentBloc.isUpdate = false;
-              shipmentBloc.address = addressDefault;
+              //*****************************
+              // Reset Selectors Pickers
+              //*****************************
+
+              for (var type in shipmentBloc.addressTypes) {
+                type['checked'] = false;
+              }
+
+              for (final region in mainBloc.extraRegions) {
+                region.checked = false;
+              }
+
+              for (final district in mainBloc.districts) {
+                district.checked = false;
+              }
+
+              for (final province in mainBloc.provinces) {
+                province.checked = false;
+              }
+
+              //*****************************
+              // Reset address
+              //*****************************
+
+              shipmentBloc.address = Address(
+                ubigeo: Ubigeo(
+                  department: "Seleccione un departamento",
+                  province: "Seleccione una provincia",
+                  district: "Seleccione un distrito",
+                ),
+                addressType: "Seleccione un tipo",
+                lotNumber: 1,
+                dptoInt: 1,
+                addressDefault: false,
+              );
 
               await DialogHelper.showAddressDialog(context: context);
             },

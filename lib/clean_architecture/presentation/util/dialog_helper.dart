@@ -656,7 +656,8 @@ class DialogHelper {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextFormField(
-                                  initialValue: shipmentBloc.address.addressName,
+                                  initialValue:
+                                      shipmentBloc.address.addressName,
                                   textInputAction: TextInputAction.next,
                                   onChanged: shipmentBloc.onChangeAddressName,
                                   validator:
@@ -706,9 +707,7 @@ class DialogHelper {
                                         children: <Widget>[
                                           Expanded(
                                             child: Text(
-                                              shipmentBloc
-                                                      .address.addressType ??
-                                                  "Seleccione un tipo",
+                                              shipmentBloc.address.addressType! ,
                                               style: const TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w400,
@@ -890,9 +889,7 @@ class DialogHelper {
                                         children: <Widget>[
                                           Expanded(
                                             child: Text(
-                                              shipmentBloc.address.ubigeo!
-                                                      .department ??
-                                                  "Seleccione un departamento",
+                                              shipmentBloc.address.ubigeo!.department!,
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodyText2,
@@ -944,8 +941,7 @@ class DialogHelper {
                                           Expanded(
                                             child: Text(
                                               shipmentBloc.address.ubigeo!
-                                                      .province ??
-                                                  "Seleccione una provincia",
+                                                      .province!,
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodyText2,
@@ -998,8 +994,7 @@ class DialogHelper {
                                           Expanded(
                                             child: Text(
                                               shipmentBloc.address.ubigeo!
-                                                      .district ??
-                                                  "Seleccione un distrito",
+                                                      .district!,
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodyText2,
@@ -1027,10 +1022,8 @@ class DialogHelper {
                                           MaterialStateProperty.resolveWith(
                                         shipmentBloc.getColor,
                                       ),
-                                      value:
-                                          shipmentBloc.address.addressDefault,
-                                      onChanged:
-                                          shipmentBloc.onChangeAddressDefault,
+                                      value: shipmentBloc.address.addressDefault,
+                                      onChanged: shipmentBloc.onChangeAddressDefault,
                                     ),
                                     Text(
                                       "Usar como dirección predeterminada",
@@ -1043,123 +1036,139 @@ class DialogHelper {
                                   valueListenable: shipmentBloc.errors,
                                   builder:
                                       (context, List<String> value, child) {
-                                    return Column(
-                                      children: [
-                                        value.isNotEmpty
-                                            ? SizedBox(
-                                                height:
-                                                    getProportionateScreenHeight(
-                                                  20.0,
+                                    return AnimatedSwitcher(
+                                      duration: const Duration(seconds: 1),
+                                      child: value.isNotEmpty
+                                          ? Column(
+                                              children: [
+                                                SizedBox(
+                                                  height:
+                                                      getProportionateScreenHeight(
+                                                          20.0),
                                                 ),
-                                              )
-                                            : const SizedBox(),
-                                        FormError(errors: value),
-                                      ],
+                                                FormError(errors: value),
+                                              ],
+                                            )
+                                          : const SizedBox(),
                                     );
                                   },
                                 ),
                                 SizedBox(
                                   height: getProportionateScreenHeight(20.0),
                                 ),
-                                shipmentBloc.isUpdate
-                                    ? ItemButton(
-                                        title: "Eliminar dirección",
-                                        press: () async {
-                                          context.loaderOverlay.show();
-                                          Navigator.of(context).pop();
-                                          final response = await shipmentBloc
-                                              .onDeleteAddress(
-                                            addressId: shipmentBloc.address.id!,
-                                            headers: mainBloc.headers,
-                                          );
+                                if (shipmentBloc.isUpdate)
+                                  ItemButton(
+                                    title: "Eliminar dirección",
+                                    press: () async {
+                                      context.loaderOverlay.show();
+                                      Navigator.of(context).pop();
+                                      final response =
+                                          await shipmentBloc.onDeleteAddress(
+                                        addressId: shipmentBloc.address.id!,
+                                        headers: mainBloc.headers,
+                                      );
 
-                                          if (response is ResponseApi) {
-                                            shipmentBloc.address = Address(
-                                              ubigeo: Ubigeo(),
-                                              lotNumber: 1,
-                                              dptoInt: 1,
-                                              addressDefault: false,
-                                            );
+                                      if (response is ResponseApi) {
+                                        shipmentBloc.address = Address(
+                                          ubigeo: Ubigeo(),
+                                          lotNumber: 1,
+                                          dptoInt: 1,
+                                          addressDefault: false,
+                                        );
 
-                                            final responseUserInformation =
-                                                await mainBloc
-                                                    .getUserInformation();
+                                        final responseUserInformation =
+                                            await mainBloc.getUserInformation();
 
-                                            if (responseUserInformation) {
-                                              mainBloc.informationUser =
-                                                  responseUserInformation;
+                                        if (responseUserInformation) {
+                                          mainBloc.informationUser =
+                                              responseUserInformation;
 
-                                              mainBloc.refreshMainBloc();
-                                              context.loaderOverlay.hide();
-                                              await GlobalSnackBar
-                                                  .showInfoSnackBarIcon(
-                                                context,
-                                                response.message,
-                                              );
-
-                                              return;
-                                            }
-                                          }
-
+                                          mainBloc.refreshMainBloc();
                                           context.loaderOverlay.hide();
                                           await GlobalSnackBar
-                                              .showWarningSnackBar(
+                                              .showInfoSnackBarIcon(
                                             context,
-                                            "Ups, vuelvalo a intentar más tarde",
+                                            response.message,
                                           );
 
                                           return;
-                                        },
-                                        icon: Icons.delete_forever_sharp,
-                                      )
-                                    : const SizedBox(),
+                                        }
+                                      }
+
+                                      context.loaderOverlay.hide();
+                                      await GlobalSnackBar.showWarningSnackBar(
+                                        context,
+                                        "Ups, vuelvalo a intentar más tarde",
+                                      );
+
+                                      return;
+                                    },
+                                    icon: Icons.delete_forever_sharp,
+                                  ),
                                 SizedBox(
                                   height: getProportionateScreenHeight(20.0),
                                 ),
                                 DefaultButton(
                                   text: "Continuar",
                                   press: () async {
+                                    if (shipmentBloc.address.addressType!.isEmpty ||
+                                        shipmentBloc.address.addressType! ==
+                                            "Seleccione un tipo") {
+                                      shipmentBloc.addError(
+                                          error: kAddressTypeNullError);
+                                    } else {
+                                      shipmentBloc.removeError(
+                                          error: kAddressTypeNullError);
+                                    }
+
+                                    if (shipmentBloc
+                                                .address.ubigeo!.department ==
+                                            "Seleccione un departamento" ||
+                                        shipmentBloc
+                                                .address.ubigeo!.department ==
+                                            "Seleccione") {
+                                      shipmentBloc.addError(
+                                        error: kDeparmentNullError,
+                                      );
+                                    } else {
+                                      shipmentBloc.removeError(
+                                        error: kDeparmentNullError,
+                                      );
+                                    }
+
+                                    if (shipmentBloc.address.ubigeo!.province ==
+                                            "Seleccione una provincia" ||
+                                        shipmentBloc.address.ubigeo!.province ==
+                                            "Seleccione") {
+                                      shipmentBloc.addError(
+                                        error: kProvinceNullError,
+                                      );
+                                    } else {
+                                      shipmentBloc.removeError(
+                                        error: kProvinceNullError,
+                                      );
+                                    }
+
+                                    if (shipmentBloc.address.ubigeo!.district ==
+                                            "Seleccione un distrito" ||
+                                        shipmentBloc.address.ubigeo!.district ==
+                                            "Seleccione") {
+                                      shipmentBloc.addError(
+                                        error: kDistrictNullError,
+                                      );
+                                    } else {
+                                      shipmentBloc.removeError(
+                                        error: kDistrictNullError,
+                                      );
+                                    }
+
                                     if (shipmentBloc.formKey.currentState!
                                         .validate()) {
-                                      shipmentBloc.formKey.currentState!.save();
-
-                                      shipmentBloc.address.ubigeo!.department ==
-                                                  "Seleccione un departamento" ||
-                                              shipmentBloc.address.ubigeo!
-                                                      .department ==
-                                                  "Seleccione"
-                                          ? shipmentBloc.addError(
-                                              error: kDeparmentNullError,
-                                            )
-                                          : shipmentBloc.removeError(
-                                              error: kDeparmentNullError);
-
-                                      shipmentBloc.address.ubigeo!.province ==
-                                                  "Seleccione una provincia" ||
-                                              shipmentBloc.address.ubigeo!
-                                                      .province ==
-                                                  "Seleccione"
-                                          ? shipmentBloc.addError(
-                                              error: kProvinceNullError,
-                                            )
-                                          : shipmentBloc.removeError(
-                                              error: kProvinceNullError,
-                                            );
-
-                                      shipmentBloc.address.ubigeo!.district ==
-                                                  "Seleccione un distrito" ||
-                                              shipmentBloc.address.ubigeo!
-                                                      .district ==
-                                                  "Seleccione"
-                                          ? shipmentBloc.addError(
-                                              error: kDistrictNullError,
-                                            )
-                                          : shipmentBloc.removeError(
-                                              error: kDistrictNullError,
-                                            );
-
                                       if (shipmentBloc.errors.value.isEmpty) {
+                                        shipmentBloc.formKey.currentState!
+                                            .save();
                                         context.loaderOverlay.show();
+
                                         Navigator.of(context).pop();
                                         final response =
                                             await shipmentBloc.onSave(
@@ -1185,7 +1194,10 @@ class DialogHelper {
                                             mainBloc.refreshMainBloc();
                                             context.loaderOverlay.hide();
 
-                                            if (response.message == "success") {
+                                            print("!!!!!response.message!!!!!!");
+                                            print(response.message);
+
+                                            if (response.status == "success") {
                                               return await GlobalSnackBar
                                                   .showInfoSnackBarIcon(
                                                 context,

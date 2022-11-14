@@ -9,7 +9,6 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/region.dart'
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
-
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 import '../../../domain/repository/user_repository.dart';
@@ -43,12 +42,7 @@ class ShipmentBloc extends ChangeNotifier {
     {"name": "Otro", "checked": false}
   ];
 
-  Address address = Address(
-    ubigeo: Ubigeo(),
-    lotNumber: 1,
-    dptoInt: 1,
-    addressDefault: false,
-  );
+  Address address = addressDefault;
 
   List<Province> provinces = <Province>[];
   List<District> districts = <District>[];
@@ -366,6 +360,4 @@ class ShipmentBloc extends ChangeNotifier {
 
     notifyListeners();
   }
-
-
 }

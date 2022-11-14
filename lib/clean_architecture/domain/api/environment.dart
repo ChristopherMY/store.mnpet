@@ -4,7 +4,6 @@ class Environment {
   static const String API_DAO = "https://pro.mundo-negocio.com";
   static const String CLOUD_FRONT = "https://pro.mundo-negocio.com";
 
-  // https://d6ypdlu64lib9.cloudfront.net
   static MercadoPagoCredentials mercadoPagoCredentials = MercadoPagoCredentials(
     publicKey: "APP_USR-f08670bc-042e-4015-bfd3-abf7abff1279",
     accessToken:

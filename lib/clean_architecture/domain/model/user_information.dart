@@ -144,7 +144,7 @@ class Address {
         addressName: json["address_name"] == null ? null : json["address_name"],
         referenceName:
             json["reference_name"] == null ? null : json["reference_name"],
-        addressType: json["address_type"] == null ? null : json["address_type"],
+        addressType: json["address_type"] == null ? "" : json["address_type"],
         lotNumber: json["lot_number"] == null ? null : json["lot_number"],
         dptoInt: json["dpto_int"] == null ? null : json["dpto_int"],
         urbanName: json["urban_name"] == null ? null : json["urban_name"],
@@ -163,7 +163,7 @@ class Address {
         "direction": direction == null ? null : direction,
         "address_name": addressName == null ? null : addressName,
         "reference_name": referenceName == null ? null : referenceName,
-        "address_type": addressType == null ? null : addressType,
+        "address_type": addressType == null ? "" : addressType,
         "lot_number": lotNumber == null ? null : lotNumber,
         "dpto_int": dptoInt == null ? null : dptoInt,
         "urban_name": urbanName == null ? null : urbanName,
@@ -192,21 +192,21 @@ class Ubigeo {
 
   factory Ubigeo.fromMap(Map<String, dynamic> json) => Ubigeo(
         departmentId:
-            json["department_id"] == null ? null : json["department_id"],
-        provinceId: json["province_id"] == null ? null : json["province_id"],
-        districtId: json["district_id"] == null ? null : json["district_id"],
-        department: json["department"] == null ? null : json["department"],
-        province: json["province"] == null ? null : json["province"],
-        district: json["district"] == null ? null : json["district"],
+            json["department_id"] == null ? "" : json["department_id"],
+        provinceId: json["province_id"] == null ? "" : json["province_id"],
+        districtId: json["district_id"] == null ? "" : json["district_id"],
+        department: json["department"] == null ? "" : json["department"],
+        province: json["province"] == null ? "" : json["province"],
+        district: json["district"] == null ? "" : json["district"],
       );
 
   Map<String, dynamic> toMap() => {
-        "department_id": departmentId == null ? null : departmentId,
-        "province_id": provinceId == null ? null : provinceId,
-        "district_id": districtId == null ? null : districtId,
-        "department": department == null ? null : department,
-        "province": province == null ? null : province,
-        "district": district == null ? null : district,
+        "department_id": departmentId == null ? "" : departmentId,
+        "province_id": provinceId == null ? "" : provinceId,
+        "district_id": districtId == null ? "" : districtId,
+        "department": department == null ? "" : department,
+        "province": province == null ? "" : province,
+        "district": district == null ? "" : district,
       };
 }
 

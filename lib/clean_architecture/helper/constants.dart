@@ -37,7 +37,12 @@ String splitNumberJoin(String number) {
 }
 
 final addressDefault = Address(
-  ubigeo: Ubigeo(),
+  ubigeo: Ubigeo(
+    department: "Seleccione un departamento",
+    province: "Seleccione una provincia",
+    district: "Seleccione un distrito",
+  ),
+  addressType: "",
   lotNumber: 1,
   dptoInt: 1,
   addressDefault: false,
