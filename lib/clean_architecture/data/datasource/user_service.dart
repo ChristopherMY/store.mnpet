@@ -311,4 +311,49 @@ class UserService implements UserRepositoryInterface {
       return e.toString();
     }
   }
+
+  @override
+  Future<dynamic> changeUserMail({
+    required Map<String, String> headers,
+    required Map<String, dynamic> bindings,
+  }) async {
+    try {
+      return await http.put(
+        Uri.parse(
+          "$_url/api/v1/users/ecommerce/email/change",
+        ),
+        headers: headers,
+        body: jsonEncode(bindings),
+      );
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return e.toString();
+    }
+  }
+
+  @override
+  Future<dynamic> changeUserPassword({
+    required Map<String, String> headers,
+    required Map<String, dynamic> bindings,
+  }) async {
+    try {
+      return await http.put(
+        Uri.parse(
+          "$_url/api/v1/users/ecommerce/password/change/",
+        ),
+        headers: headers,
+        body: jsonEncode(bindings),
+      );
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+
+      return e.toString();
+    }
+  }
+
 }

@@ -23,21 +23,16 @@ class InfoShipment extends StatelessWidget {
           onSaveShippingAddress: (_) async {
             final mainBloc = context.read<MainBloc>();
 
-            print("SLUG: ${productBloc.product!.slug!}");
-            print("QUANTIYU: ${productBloc.quantity.value}");
-
             final shippingPrice = await mainBloc.onSaveShippingAddress(
               slug: productBloc.product!.slug!,
               quantity: productBloc.quantity.value,
             );
 
-            // print("QUE PASA!!!!!!!!");
 
             if (shippingPrice is double) {
               productBloc.shippingPrice.value = shippingPrice;
               productBloc.refreshUbigeo(slug: productBloc.product!.slug!);
 
-              print("SIII esta entrando!!!!!");
 
               const snackBar = SnackBar(
                 content: Text('Dirección guardada correctamente'),
@@ -51,7 +46,6 @@ class InfoShipment extends StatelessWidget {
               return;
             }
 
-            print("No esta entrando!!!!!");
           },
         );
       },

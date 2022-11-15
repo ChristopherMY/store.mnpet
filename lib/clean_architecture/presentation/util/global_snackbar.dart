@@ -33,7 +33,7 @@ class GlobalSnackBar {
             topRight: Radius.circular(16.0),
           ),
         ),
-        backgroundColor: kPrimaryBackgroundColor,
+        backgroundColor: Colors.white,
         action: SnackBarAction(
           //textColor: const Color(0xFFFAF2FB),
           label: 'OK',
@@ -145,6 +145,7 @@ class GlobalSnackBar {
       SnackBar(
         elevation: 0.0,
         //behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.white,
         content: Text(message),
         duration: const Duration(seconds: 5),
         shape: const RoundedRectangleBorder(

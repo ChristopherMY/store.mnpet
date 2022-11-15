@@ -112,7 +112,7 @@ class ForgotPassForm extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyText2,
             decoration: InputDecoration(
               labelText: "Correo electrónico o número de documento",
-              hintText: "example@example.io / 87654321",
+              hintText: "Ingresen correo o número de documento",
               labelStyle: const TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.w400,

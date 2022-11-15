@@ -305,7 +305,6 @@ class HeaderInformation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mainBloc = context.watch<MainBloc>();
-    final accountBloc = context.watch<AccountBloc>();
 
     return Material(
       color: Colors.white,
@@ -376,11 +375,11 @@ class HeaderInformation extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: 5.0),
-                            Text(
-                              "# Codigo de referido",
-                              style: Theme.of(context).textTheme.bodyText2,
-                            ),
+                            // const SizedBox(height: 5.0),
+                            // Text(
+                            //   "# Codigo de referido",
+                            //   style: Theme.of(context).textTheme.bodyText2,
+                            // ),
                           ],
                         )
                       : Column(

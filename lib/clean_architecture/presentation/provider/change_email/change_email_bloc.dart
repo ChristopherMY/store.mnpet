@@ -1,6 +1,12 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 class ChangeEmailBloc extends ChangeNotifier {
   final UserRepositoryInterface userRepositoryInterface;
@@ -16,6 +22,7 @@ class ChangeEmailBloc extends ChangeNotifier {
 
   void addError({required String error}) {
     List<String> values = List.from(errors.value);
+
     if (!values.contains(error)) {
       values.add(error);
       errors.value = values;
@@ -31,16 +38,24 @@ class ChangeEmailBloc extends ChangeNotifier {
   }
 
   void onChangeEmail(String value) {
+    final emailValue = confirmEmailController.text;
+    if (emailValue == value) {
+      removeError(error: kMatchEmailError);
+    }
+
     if (value.isNotEmpty) {
       removeError(error: kEmailNullError);
-    } else if (emailValidatorRegExp.hasMatch(value)) {
+    }
+
+    if (emailValidatorRegExp.hasMatch(value)) {
       removeError(error: kInvalidEmailError);
     }
   }
 
   String? onValidationEmail(String? value) {
-    if (value!.isEmpty) {
-      addError(error: kEmailNullError);
+    final emailValue = confirmEmailController.text;
+    if (emailValue != value!) {
+      addError(error: kMatchEmailError);
       return "";
     }
 
@@ -49,10 +64,21 @@ class ChangeEmailBloc extends ChangeNotifier {
       return "";
     }
 
+    if (value.isEmpty) {
+      addError(error: kEmailNullError);
+      return "";
+    }
+
     return null;
   }
 
   void onChangeConfirmEmail(String value) {
+    final emailValue = emailController.text;
+
+    if (emailValue == value) {
+      removeError(error: kMatchEmailError);
+    }
+
     if (value.isNotEmpty) {
       removeError(error: kEmailNullError);
     }
@@ -84,8 +110,8 @@ class ChangeEmailBloc extends ChangeNotifier {
   }
 
   void onChangeCurrentPassword(String value) {
-    if (value.length >= 8) {
-      removeError(error: kShortPassError);
+    if (value.isNotEmpty) {
+      removeError(error: kPassNullError);
     }
   }
 
@@ -96,5 +122,12 @@ class ChangeEmailBloc extends ChangeNotifier {
     }
 
     return null;
+  }
+
+  void handleUpdateEmail({
+    required Map<String, String> headers,
+    required BuildContext context,
+  }) async {
+
   }
 }

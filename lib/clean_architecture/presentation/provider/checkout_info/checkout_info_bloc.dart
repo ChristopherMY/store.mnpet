@@ -65,10 +65,6 @@ class CheckOutInfoBloc extends ChangeNotifier {
   }) async {
     // if (formKey.currentState!.validate()) {
       if (expiryDate.isEmpty) {
-        if (kDebugMode) {
-          print("expiryDate IS VOID");
-        }
-
         GlobalSnackBar.showWarningSnackBar(
           context,
           "Fecha de expiración vacía",
@@ -79,10 +75,6 @@ class CheckOutInfoBloc extends ChangeNotifier {
       List<String> list = expiryDate.split('/');
 
       if (list.length != 2) {
-        if (kDebugMode) {
-          print("COMPLETAR CAMPO FECHA");
-        }
-
         GlobalSnackBar.showWarningSnackBar(
           context,
           "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
@@ -94,18 +86,12 @@ class CheckOutInfoBloc extends ChangeNotifier {
       expirationMonth = int.parse(list[0]);
       expirationYear = "20${list[1]}";
 
-      print("identificationNumber: ${userInformation.document!.value!}");
-
       final tokenDetail = await getToken(
         identificationNumber: userInformation.document!.value!,
         userInformation: userInformation,
       );
 
       if (tokenDetail is! MercadoPagoCardToken) {
-        if (kDebugMode) {
-          print("tokenDetail NO PERTENECE A MercadoPagoCardToken");
-        }
-
         GlobalSnackBar.showWarningSnackBar(
           context,
           "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
@@ -123,10 +109,6 @@ class CheckOutInfoBloc extends ChangeNotifier {
       );
 
       if (installmentsDetail is! MercadoPagoPaymentMethodInstallments) {
-        if (kDebugMode) {
-          print(
-              "installmentsDetail NO PERTAIN A MercadoPagoPaymentMethodInstallments");
-        }
 
         GlobalSnackBar.showWarningSnackBar(
           context,
@@ -136,9 +118,6 @@ class CheckOutInfoBloc extends ChangeNotifier {
       }
 
       if (userInformation.addresses!.isEmpty) {
-        if (kDebugMode) {
-          print("userInformation.addresses! ES AVOID, Length is 0");
-        }
 
         GlobalSnackBar.showWarningSnackBar(
           context,
@@ -152,9 +131,6 @@ class CheckOutInfoBloc extends ChangeNotifier {
       );
 
       if (existsDefaultAddress == null) {
-        if (kDebugMode) {
-          print("existsDefaultAddress ES NULL, Address no exists");
-        }
 
         GlobalSnackBar.showWarningSnackBar(
           context,
@@ -186,9 +162,6 @@ class CheckOutInfoBloc extends ChangeNotifier {
       );
 
       if (responseCredentials.token.isEmpty) {
-        if (kDebugMode) {
-          print("responseCredentials IS EMPTY");
-        }
 
         GlobalSnackBar.showWarningSnackBar(
             context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
@@ -235,34 +208,20 @@ class CheckOutInfoBloc extends ChangeNotifier {
     }
 
     if (response is! http.Response) {
-      if (kDebugMode) {
-        print("response NO PERTENECE A http.Response");
-      }
-
       return;
     }
 
     if (response.statusCode != 200) {
-      if (kDebugMode) {
-        print("response.statusCode  NO TIENE CODIGO 200");
-      }
-
       return;
     }
 
     final identificationTypes = json.decode(response.body) as List;
     if (identificationTypes.isEmpty) {
-      if (kDebugMode) {
-        print("identificationTypes IS EMPTY");
-      }
-
       return;
     }
 
     final result = MercadoPagoDocumentType.fromJsonList(identificationTypes);
     documentType = result.documentTypeList.first;
-
-    print(result.documentTypeList.first.toJson());
   }
 
   Future<dynamic> getToken({
@@ -270,9 +229,6 @@ class CheckOutInfoBloc extends ChangeNotifier {
     required UserInformation userInformation,
   }) async {
     if (documentType is! MercadoPagoDocumentType) {
-      if (kDebugMode) {
-        print("documentType NO PERTENECE A MercadoPagoDocumentType");
-      }
 
       return;
     }
@@ -297,17 +253,11 @@ class CheckOutInfoBloc extends ChangeNotifier {
     }
 
     if (response is! http.Response) {
-      if (kDebugMode) {
-        print("response NO PERTENECE A  http.Response");
-      }
 
       return;
     }
 
     if (response.statusCode != 201) {
-      if (kDebugMode) {
-        print("response.statusCode IS NOT 201");
-      }
 
       return;
     }
@@ -326,17 +276,11 @@ class CheckOutInfoBloc extends ChangeNotifier {
     );
 
     if (response is! http.Response) {
-      if (kDebugMode) {
-        print("Problema en la respuesta");
-      }
 
       return;
     }
 
     if (response.statusCode != 200) {
-      if (kDebugMode) {
-        print("response.statusCode IS NOT 200");
-      }
 
       return;
     }

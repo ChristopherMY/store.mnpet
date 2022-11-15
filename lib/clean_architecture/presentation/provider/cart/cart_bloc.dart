@@ -46,7 +46,7 @@ class CartBloc extends ChangeNotifier {
   @override
   void dispose() {
     pagingController.removePageRequestListener(
-          (pageKey) {
+      (pageKey) {
         fetchPage(
           pageKey: pageKey,
           categories: [

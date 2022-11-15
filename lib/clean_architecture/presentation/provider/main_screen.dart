@@ -49,8 +49,8 @@ class _MainScreenState extends State<MainScreen>
           const end = Offset.zero;
           const curve = Curves.decelerate;
 
-          var tween = Tween(begin: begin, end: end)
-              .chain(CurveTween(curve: curve));
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
           return FadeTransition(
             opacity: animation,

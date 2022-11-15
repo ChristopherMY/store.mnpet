@@ -241,19 +241,13 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                                       is Address &&
                                                   existsDefaultPhone != null &&
                                                   existsDefaultPhone is Phone) {
-                                                checkoutInfoBloc
-                                                    .handleChangeTabPaymentPage(
-                                                        1);
-
                                                 await Future.value(
                                                   checkoutInfoBloc
                                                       .pageController
                                                       .animateToPage(
                                                     checkoutInfoBloc
-                                                            .pageController
-                                                            .page!
-                                                            .toInt() +
-                                                        1,
+                                                        .pageController.page!
+                                                        .toInt(),
                                                     duration: const Duration(
                                                         milliseconds: 400),
                                                     curve: Curves.easeIn,
@@ -460,12 +454,14 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                         break;
                       case 1:
                         {
-                          if (checkoutInfoBloc.formKey.currentState!.validate()) {
+                          if (checkoutInfoBloc.formKey.currentState!
+                              .validate()) {
                             checkoutInfoBloc.formKey.currentState!.save();
 
                             if (mainBloc.informationCart.value is Cart) {
                               context.loaderOverlay.show();
-                              final response = await checkoutInfoBloc.handlePayment(
+                              final response =
+                                  await checkoutInfoBloc.handlePayment(
                                 cartInformation: mainBloc.informationCart.value,
                                 userInformation: mainBloc.informationUser,
                                 context: context,
@@ -546,13 +542,13 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                 print(
                                     "PROBLEMAS AL REALIZAR EL PAGO ERROR CODE: ${response.statusCode}");
 
-
                                 return;
                               }
 
                               if (response.statusCode != 201) {
                                 if (kDebugMode) {
-                                  print("response.statusCode status code fail is != 201 and contain ${response.statusCode}");
+                                  print(
+                                      "response.statusCode status code fail is != 201 and contain ${response.statusCode}");
                                 }
 
                                 print("response.body");

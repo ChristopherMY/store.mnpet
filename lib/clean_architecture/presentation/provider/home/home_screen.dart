@@ -33,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
       homeBloc.fetchPage(pageKey);
     });
 
+    print("Esta cargando home bloc");
+
     super.initState();
   }
 

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +31,7 @@ class _SignUpFormState extends State<SignUpForm> {
     return Form(
       key: signUpBloc.formKey,
       child: Column(
+        // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
             controller: signUpBloc.nameController,
@@ -114,7 +113,7 @@ class _SignUpFormState extends State<SignUpForm> {
               suffixIcon: GestureDetector(
                 onTap: () {
                   signUpBloc.obscureTextNewPassword =
-                  !signUpBloc.obscureTextNewPassword;
+                      !signUpBloc.obscureTextNewPassword;
                   signUpBloc.refreshBloc();
                 },
                 child: CustomSuffixIcon(
@@ -222,6 +221,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 builder: (context, bool value, child) {
                   return Checkbox(
                     checkColor: Colors.white,
+// tristate: false,
                     fillColor:
                         MaterialStateProperty.resolveWith(signUpBloc.getColor),
                     value: value,
@@ -272,12 +272,6 @@ class _SignUpFormState extends State<SignUpForm> {
                     "value": signUpBloc.numDocController.text,
                     "type": "DNI"
                   },
-                  // "phone": {
-                  //   "value": phoneNumber,
-                  //   "type": "phone",
-                  //   "area_code": "51",
-                  //   "default": true
-                  // },
                   "terms_conditions_confirmed":
                       signUpBloc.termsConditionsConfirmed.value
                 };
@@ -314,31 +308,42 @@ class _SignUpFormState extends State<SignUpForm> {
                   );
                 }
 
-                mainBloc.credentials = response;
-                mainBloc.headers[HttpHeaders.authorizationHeader] =
-                    "Bearer ${response.token}";
+                final responseSession = await mainBloc.loadSessionPromise();
+                if (responseSession) {
+                  final userInformation = await mainBloc.getUserInformation();
+                  if (!mounted) return;
 
-                final userInformation = await mainBloc.getUserInformation();
-                if (!mounted) return;
+                  if (userInformation is! UserInformation) {
+                    context.loaderOverlay.hide();
 
-                if (userInformation is! UserInformation) {
+                    return GlobalSnackBar.showErrorSnackBarIcon(
+                      context,
+                      "Tuvimos problemas, vuelva a intentarlo",
+                    );
+                  }
+
+                  /// Procedemos a cambiar
+                  await mainBloc.changeShoppingCart();
+                  await mainBloc.handleGetShoppingCart();
+
+                  mainBloc.informationUser = userInformation;
+                  mainBloc.sessionAccount.value = Session.active;
+                  mainBloc.account.value = Account.active;
+
+                  /// Count step to back
+                  int count = 0;
+                  Navigator.of(context).popUntil((route) =>
+                      count++ >= mainBloc.countNavigateIterationScreen);
+
                   context.loaderOverlay.hide();
-
-                  return GlobalSnackBar.showErrorSnackBarIcon(
-                    context,
-                    "Tuvimos problemas, vuelva a intentarlo",
-                  );
+                  return;
                 }
 
-                mainBloc.informationUser = userInformation;
-                mainBloc.account.value = Account.active;
-
-                /// Count step to back
-                int count = 0;
-                Navigator.of(context).popUntil((route) =>
-                    count++ >= mainBloc.countNavigateIterationScreen);
-
                 context.loaderOverlay.hide();
+                GlobalSnackBar.showWarningSnackBar(
+                  context,
+                  "Tenemos un problema, por favor inténtelo más tarde.",
+                );
               }
             },
           ),

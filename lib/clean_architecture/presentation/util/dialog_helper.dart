@@ -1194,8 +1194,6 @@ class DialogHelper {
                                             mainBloc.refreshMainBloc();
                                             context.loaderOverlay.hide();
 
-                                            print("!!!!!response.message!!!!!!");
-                                            print(response.message);
 
                                             if (response.status == "success") {
                                               return await GlobalSnackBar
@@ -1456,9 +1454,6 @@ class DialogHelper {
                                             mainBloc.refreshMainBloc();
 
                                             context.loaderOverlay.hide();
-
-                                            print(
-                                                "Tiene estado de: ${response.status}");
 
                                             if (response.status == "success") {
                                               return await GlobalSnackBar

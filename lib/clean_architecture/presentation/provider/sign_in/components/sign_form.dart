@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
@@ -33,8 +32,6 @@ class _SignFormState extends State<SignForm> {
 
       signInBloc.formKey.currentState!.save();
       KeyboardUtil.hideKeyboard(context);
-
-      /// Hasta aqui todo correcto
 
       final response = await signInBloc.signIn();
       if (!mounted) return;
@@ -70,28 +67,37 @@ class _SignFormState extends State<SignForm> {
         final responseUserInformation = await mainBloc.getUserInformation();
         if (!mounted) return;
 
-        if (responseUserInformation is UserInformation) {
-          mainBloc.informationUser = responseUserInformation;
+        if (responseUserInformation is! UserInformation) {
+          context.loaderOverlay.hide();
 
-          /// Procedemos a cambiar
-          await mainBloc.changeShoppingCart();
+          GlobalSnackBar.showErrorSnackBarIcon(
+            context,
+            "Tuvimos problemas, vuelva a intentarlo",
+          );
 
-          mainBloc.sessionAccount.value = Session.active;
-          mainBloc.account.value = Account.active;
-
-          mainBloc.refreshMainBloc();
-          int count = 0;
-
-          Navigator.of(context).popUntil((route) => count++ >= 2);
           return;
         }
 
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Tenemos un problema, por favor inténtelo más tarde.",
-        );
+        /// Procedemos a cambiar
+        await mainBloc.changeShoppingCart();
+        await mainBloc.handleGetShoppingCart();
 
+        mainBloc.informationUser = responseUserInformation;
+        mainBloc.sessionAccount.value = Session.active;
+        mainBloc.account.value = Account.active;
+
+        mainBloc.refreshMainBloc();
+        int count = 0;
+
+        Navigator.of(context).popUntil((route) => count++ >= 2);
+        return;
       }
+
+      context.loaderOverlay.hide();
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Tenemos un problema, por favor inténtelo más tarde.",
+      );
     }
   }
 

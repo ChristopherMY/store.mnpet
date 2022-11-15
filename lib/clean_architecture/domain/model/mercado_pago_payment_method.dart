@@ -40,7 +40,6 @@ class MercadoPagoPaymentMethod {
     jsonList.forEach((item) {
       final chat = MercadoPagoPaymentMethod.fromJsonMap(item);
       paymentMenthodList!.add(chat);
-      print('SE DICIONO METODO');
     });
   }
 

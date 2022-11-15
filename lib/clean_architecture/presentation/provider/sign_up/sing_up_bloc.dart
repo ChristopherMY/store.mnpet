@@ -188,17 +188,12 @@ class SignUpBloc extends ChangeNotifier {
       return false;
     }
 
-    if (response is! http.Response) {
-      return false;
-    }
+    if (response is! http.Response) return false;
 
     final decode = json.decode(response.body);
 
     if (response.statusCode == 200) {
       final credentials = CredentialsAuth.fromMap(decode);
-
-      print("credentials.toMap()");
-      print(credentials.toMap());
 
       await hiveRepositoryInterface.save(
         containerName: "authentication",
@@ -207,16 +202,16 @@ class SignUpBloc extends ChangeNotifier {
       );
 
       return credentials;
-    } else if (response.statusCode == 402) {
-      return ResponseApi.fromMap(decode);
-    } else if (response.statusCode == 404) {
+    }
+
+    if (response.statusCode == 402 || response.statusCode == 404) {
       return ResponseApi.fromMap(decode);
     }
 
     return false;
   }
 
-  void refreshBloc(){
+  void refreshBloc() {
     notifyListeners();
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,9 +5,10 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/change_email/change_email_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/change_password/change_password_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/settings/settings_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
@@ -50,7 +49,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       };
 
       final headers = mainBloc.headers;
-
       final response = await settingsBloc.userRepositoryInterface
           .updateUserInformation(binding: binding, headers: headers);
 
@@ -76,24 +74,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
           context,
           "Lo sentimos, vuelva a intentarlo otra vez",
         );
+
         return;
       }
 
       if (response.statusCode != 200) {
+        context.loaderOverlay.hide();
+
         GlobalSnackBar.showWarningSnackBar(
           context,
           "Lo sentimos, vuelva a intentarlo otra vez",
         );
-        context.loaderOverlay.hide();
+
         return;
       }
 
-      final responseDecode = json.decode(response.body);
-      final informationUser = UserInformation.fromMap(responseDecode);
+      // final responseDecode = json.decode(response.body);
+      // final responseApi = ResponseApi.fromMap(responseDecode);
+      // GlobalSnackBar.showInfoSnackBarIcon(context, responseApi.message);
 
-      mainBloc.informationUser = informationUser;
-      mainBloc.refreshMainBloc();
+      final response_ = await mainBloc.getUserInformation();
       context.loaderOverlay.hide();
+
+      if (response_ is UserInformation) {
+        mainBloc.informationUser = response_;
+        mainBloc.refreshMainBloc();
+
+        if (!mounted) return;
+        await GlobalSnackBar.showInfoSnackBarIcon(
+          context,
+          "Información actualizada.",
+        );
+      }
+
       Navigator.of(context).pop();
     }
   }
@@ -121,13 +134,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final mainBloc = context.read<MainBloc>();
 
     UserInformation userInformation = mainBloc.informationUser;
-
     return SafeArea(
       child: LoaderOverlay(
         child: Scaffold(
           appBar: AppBar(
-            iconTheme: const IconThemeData(color: Colors.black),
-            backgroundColor: Colors.white,
+            leading: const BackButton(
+              color: Colors.black,
+            ),
+            backgroundColor: kBackGroundColor,
             bottomOpacity: 0.0,
             elevation: 0.0,
             title: const Text(

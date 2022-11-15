@@ -24,12 +24,12 @@ class DotCustomSwiperPaginationBuilder extends SwiperPlugin {
   @override
   Widget build(BuildContext context, SwiperPluginConfig config) {
     final productBloc = context.watch<ProductBloc>();
-    if (config.itemCount > 20) {
-      if (kDebugMode) {
-        print(
-            "The itemCount is too big, we suggest use FractionPaginationBuilder instead of DotSwiperPaginationBuilder in this sitituation");
-      }
-    }
+    // if (config.itemCount > 20) {
+    //   if (kDebugMode) {
+    //     print(
+    //         "The itemCount is too big, we suggest use FractionPaginationBuilder instead of DotSwiperPaginationBuilder in this sitituation");
+    //   }
+    // }
     Color activeColor = this.activeColor;
     Color color = this.color;
 

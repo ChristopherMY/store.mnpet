@@ -14,6 +14,7 @@ import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_r
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/general.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/cart/cart_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/bottom_navigation_bar.dart';
@@ -311,7 +312,7 @@ class _BuildAppBar extends StatelessWidget {
         statusBarColor: Colors.white,
         statusBarIconBrightness: Brightness.dark,
       ),
-      expandedHeight: 392,
+      expandedHeight: getProportionateScreenHeight(392.0),
       floating: false,
       pinned: true,
       snap: false,

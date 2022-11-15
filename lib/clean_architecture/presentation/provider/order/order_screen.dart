@@ -7,11 +7,11 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/order.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order_detail/order_detail_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order/order_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order_detail/order_detail_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_full_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen._({Key? key}) : super(key: key);
@@ -40,7 +40,8 @@ class _OrderScreenState extends State<OrderScreen> {
     final orderBloc = context.read<OrderBloc>();
     final credentialsAuth = await mainBloc.loadCredentialsAuth();
 
-    orderBloc.headers[HttpHeaders.authorizationHeader] = "Bearer ${credentialsAuth.token}";
+    orderBloc.headers[HttpHeaders.authorizationHeader] =
+        "Bearer ${credentialsAuth.token}";
 
     final response = await orderBloc.getOrdersDetails();
 
@@ -55,7 +56,6 @@ class _OrderScreenState extends State<OrderScreen> {
       context,
       "Ups, vuelva a intentarlo más tarde",
     );
-
   }
 
   @override
@@ -128,6 +128,24 @@ class _OrderScreenState extends State<OrderScreen> {
             //----------------------
             // List Order Client
             //----------------------
+            if (orderBloc.orders.length == 0)
+              const SliverFillRemaining(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: LottieAnimation(
+                    source: "assets/lottie/shake-a-empty-box.json",
+                  ),
+                ),
+              ),
+
+            // SliverToBoxAdapter(
+            //   child: SizedBox(
+            //     height: 180,
+            //     width: 180,
+            //     child: LottieAnimation(
+            //         source: "assets/lottie/shake-a-empty-box.json"),
+            //   ),
+            // ),
 
             SliverList(
               delegate: SliverChildBuilderDelegate(

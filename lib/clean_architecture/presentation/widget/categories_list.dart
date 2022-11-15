@@ -30,7 +30,7 @@ class Categories extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: getProportionateScreenHeight(15.0),
-            horizontal: 15.0,
+            horizontal: getProportionateScreenHeight(15.0),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +74,7 @@ class Categories extends StatelessWidget {
                           },
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxWidth: getProportionateScreenWidth(55.0),
+                              maxWidth: getProportionateScreenWidth(59.0),
                             ),
                             child: Column(
                               children: <Widget>[

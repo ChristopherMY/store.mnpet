@@ -38,7 +38,7 @@ class CartScreen extends StatefulWidget {
         hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
         productRepositoryInterface: context.read<ProductRepositoryInterface>(),
       ),
-      builder: (_, __) => const CartScreen._(),
+      child: const CartScreen._(),
     );
   }
 
@@ -50,7 +50,6 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     final cartBloc = context.read<CartBloc>();
-    // final mainBloc = context.read<MainBloc>();
     cartBloc.initPage();
 
     super.initState();

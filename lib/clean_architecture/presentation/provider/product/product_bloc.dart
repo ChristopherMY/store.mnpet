@@ -132,10 +132,6 @@ class ProductBloc extends ChangeNotifier {
     required List<Brand> categories,
     required int pageKey,
   }) async {
-    print("CATEGORIES!!");
-    print(categories.first.name);
-    print("_finalRange: $_finalRange");
-    print("_initialRange: $_initialRange");
 
     final response =
         await productRepositoryInterface.getRelatedProductsPagination(
@@ -155,8 +151,6 @@ class ProductBloc extends ChangeNotifier {
     if (response is http.Response) {
       if (response.statusCode == 200) {
         final products = jsonDecode(response.body) as List;
-        print("RESPONSE!!!!");
-        print(products);
 
         if (products.isNotEmpty) {
           List<Product> newItems =
@@ -381,9 +375,6 @@ class ProductBloc extends ChangeNotifier {
     );
 
     if (response is String) {
-      if (kDebugMode) {
-        print("Problem on decrement quantity of product");
-      }
       shippingPrice.value = 0.00;
       return;
     }

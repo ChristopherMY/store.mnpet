@@ -531,8 +531,6 @@ class MainBloc extends ChangeNotifier {
     required String districtId,
     required Map<String, String> headers,
   }) async {
-    // print("headers");
-    // print(headers);
     final response = await cartRepositoryInterface.getShoppingCart(
       districtId: districtId,
       headers: headers,
@@ -592,8 +590,6 @@ class MainBloc extends ChangeNotifier {
 
   void handleGetShoppingCartNotAccount() async {
     final shoppingCartId = await handleGetShoppingCartId();
-    print("MAINBLOC");
-    print("shoppingCartId: $shoppingCartId");
 
     getShoppingCartTemp(
       districtId: residence.districtId!,
@@ -618,7 +614,7 @@ class MainBloc extends ChangeNotifier {
   }
 
   Future<void> handleGetShoppingCart() async {
-    getShoppingCart(
+    await getShoppingCart(
       districtId: residence.districtId!,
       headers: headers,
     ).then(
@@ -635,9 +631,6 @@ class MainBloc extends ChangeNotifier {
 
   Future<dynamic> changeShoppingCart() async {
     final shoppingCartId = await handleGetShoppingCartId();
-
-    print("shoppingCartId!!!!");
-    print(shoppingCartId);
 
     final response = await cartRepositoryInterface.moveShoppingCart(
       cartId: shoppingCartId,

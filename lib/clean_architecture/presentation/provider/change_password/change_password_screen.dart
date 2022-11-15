@@ -1,10 +1,18 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/change_password/change_password_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/custom_suffix_icon.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/form_error.dart';
@@ -29,7 +37,58 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   void handleSavePasswordAccount() async {
     final changePasswordBloc = context.read<ChangePasswordBloc>();
 
-    if (changePasswordBloc.formKey.currentState!.validate()) {}
+    if (changePasswordBloc.formKey.currentState!.validate()) {
+      final changePasswordBloc = context.read<ChangePasswordBloc>();
+      final mainBloc = context.read<MainBloc>();
+
+      if (changePasswordBloc.formKey.currentState!.validate()) {
+        changePasswordBloc.formKey.currentState!.save();
+        context.loaderOverlay.show();
+
+        final response =
+            await changePasswordBloc.userRepositoryInterface.changeUserPassword(
+          headers: headers,
+          bindings: {
+            "password": changePasswordBloc.newPasswordController.text,
+            "password_confirmation":
+                changePasswordBloc.confirmPasswordController.text,
+            "current_password":
+                changePasswordBloc.currentPasswordController.text,
+          },
+        );
+
+        if (response is Text) {
+          if (kDebugMode) {
+            print(response.toString());
+          }
+
+          return;
+        }
+
+        if (response is! http.Response) {
+          return;
+        }
+
+        context.loaderOverlay.hide();
+
+        if (response.statusCode == 200 || response.statusCode == 400) {
+          final decode = ResponseApi.fromMap(jsonDecode(response.body));
+
+          if (decode.status == "error") {
+            GlobalSnackBar.showWarningSnackBar(context, decode.message);
+            return;
+          }
+
+          GlobalSnackBar.showInfoSnackBarIcon(context, decode.message);
+          return;
+        }
+
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+        );
+      }
+    }
   }
 
   @override
@@ -46,7 +105,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           ),
           elevation: 0,
           title: const Text(
-            "Cambiar contraseña",
+            "Camb+iar contraseña",
             style: TextStyle(
               fontSize: 15,
               color: Colors.black,
