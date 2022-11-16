@@ -82,8 +82,7 @@ class _CartScreenState extends State<CartScreen> {
                   );
 
                   if (response is Cart) {
-                    final shoppingCartId =
-                        await mainBloc.handleGetShoppingCartId();
+                    final shoppingCartId = await mainBloc.handleGetShoppingCartId();
                     if (shoppingCartId.toString().isEmpty ||
                         shoppingCartId != response.id) {
                       await mainBloc.hiveRepositoryInterface.save(
@@ -93,6 +92,7 @@ class _CartScreenState extends State<CartScreen> {
                       );
                     }
                   }
+
                 }
 
                 if (response is Cart) {

@@ -48,5 +48,7 @@ class HomeService implements HomeRepositoryInterface {
       _logger.e(error);
       throw Exception("Exception occured: $error stackTrace: $stacktrace");
     }
+
   }
+
 }

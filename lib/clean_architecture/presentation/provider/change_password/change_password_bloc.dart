@@ -39,7 +39,9 @@ class ChangePasswordBloc extends ChangeNotifier {
   void onChangeNewPassword(String value) {
     if (value.length >= 8) {
       removeError(error: kShortPassError);
-    } else if (value.isNotEmpty) {
+    }
+
+    if (value.isNotEmpty) {
       removeError(error: kPassNullError);
     }
   }

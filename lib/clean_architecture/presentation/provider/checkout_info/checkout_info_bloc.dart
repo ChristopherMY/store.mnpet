@@ -313,10 +313,12 @@ class CheckOutInfoBloc extends ChangeNotifier {
       '325': 'Revisa la fecha',
       '326': 'Revisa la fecha',
     };
+
+    print("DATA!!!");
+    print(data['error']);
     print('CODIGO ERROR ${data['error']['cause'][0]['code']}');
 
-    if (paymentErrorCodeMap
-        .containsKey('${data['error']['cause'][0]['code']}')) {
+    if (paymentErrorCodeMap.containsKey('${data['error']['cause'][0]['code']}')) {
       return paymentErrorCodeMap['${data['error']['cause'][0]['code']}']!;
     }
 
@@ -329,7 +331,6 @@ class CheckOutInfoBloc extends ChangeNotifier {
     //     onPressed: () {},
     //   ),
     // );
-    //
     // ScaffoldMessenger.of(context).removeCurrentSnackBar();
     // ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }

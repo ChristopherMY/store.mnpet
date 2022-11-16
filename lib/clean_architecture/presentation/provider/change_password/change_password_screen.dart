@@ -45,17 +45,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         changePasswordBloc.formKey.currentState!.save();
         context.loaderOverlay.show();
 
-        final response =
-            await changePasswordBloc.userRepositoryInterface.changeUserPassword(
-          headers: headers,
+        final response = await changePasswordBloc.userRepositoryInterface.changeUserPassword(
+          headers: mainBloc.headers,
           bindings: {
             "password": changePasswordBloc.newPasswordController.text,
-            "password_confirmation":
-                changePasswordBloc.confirmPasswordController.text,
-            "current_password":
-                changePasswordBloc.currentPasswordController.text,
+            "password_confirmation": changePasswordBloc.confirmPasswordController.text,
+            "current_password": changePasswordBloc.currentPasswordController.text,
           },
         );
+
+        context.loaderOverlay.hide();
 
         if (response is Text) {
           if (kDebugMode) {
@@ -68,8 +67,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         if (response is! http.Response) {
           return;
         }
-
-        context.loaderOverlay.hide();
 
         if (response.statusCode == 200 || response.statusCode == 400) {
           final decode = ResponseApi.fromMap(jsonDecode(response.body));
@@ -105,7 +102,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           ),
           elevation: 0,
           title: const Text(
-            "Camb+iar contraseña",
+            "Cambiar contraseña",
             style: TextStyle(
               fontSize: 15,
               color: Colors.black,

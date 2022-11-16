@@ -342,7 +342,7 @@ class UserService implements UserRepositoryInterface {
     try {
       return await http.put(
         Uri.parse(
-          "$_url/api/v1/users/ecommerce/password/change/",
+          "$_url/api/v1/users/ecommerce/password/change/auth",
         ),
         headers: headers,
         body: jsonEncode(bindings),

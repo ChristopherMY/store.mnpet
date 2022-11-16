@@ -196,6 +196,12 @@ class PhonesDetail extends StatelessWidget {
           ButtonCrud(
             onTap: () async {
               phoneBloc.isUpdate = false;
+              phoneBloc.phone = Phone(
+                phoneDefault: false,
+                type: "phone",
+                areaCode: "51",
+              );
+
               await DialogHelper.showPhonesDialog(context: context);
             },
             titleButton: "Añadir teléfono",

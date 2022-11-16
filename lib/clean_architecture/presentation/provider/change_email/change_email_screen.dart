@@ -42,8 +42,9 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
       changeEmailBloc.formKey.currentState!.save();
       context.loaderOverlay.show();
 
-      final response = await changeEmailBloc.userRepositoryInterface.changeUserMail(
-        headers: headers,
+      final response =
+          await changeEmailBloc.userRepositoryInterface.changeUserMail(
+        headers: mainBloc.headers,
         bindings: {
           "email": changeEmailBloc.emailController.text,
           "confirmEmail": changeEmailBloc.confirmEmailController.text,
@@ -56,10 +57,12 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
           print(response.toString());
         }
 
+        context.loaderOverlay.hide();
         return;
       }
 
       if (response is! http.Response) {
+        context.loaderOverlay.hide();
         return;
       }
 
@@ -68,6 +71,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
 
         if (decode.status == "error") {
           GlobalSnackBar.showWarningSnackBar(context, decode.message);
+          context.loaderOverlay.hide();
           return;
         }
 
@@ -78,10 +82,12 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
         }
 
         mainBloc.refreshMainBloc();
+        context.loaderOverlay.hide();
         GlobalSnackBar.showInfoSnackBarIcon(context, decode.message);
         return;
       }
 
+      context.loaderOverlay.hide();
       GlobalSnackBar.showWarningSnackBar(
           context, "Ups tuvimos problemas, vuelva a intentarlo más tarde");
     }

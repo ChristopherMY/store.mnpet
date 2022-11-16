@@ -92,20 +92,13 @@ class MainBloc extends ChangeNotifier {
       }
 
       if (indexSelected.value == 1) {
-        print(credentials);
         if (credentials is! CredentialsAuth) {
-          //  sessionAccount.value = Session.inactive;
-          print("Carrito de compras sin cuenta");
-
           if (informationCart.value is! Cart) {
-            print("Carrito de sin items");
             handleGetShoppingCartNotAccount();
             return;
           }
         } else {
-          print("Carrito de compras con cuenta");
           if (informationCart.value is! Cart) {
-            print("Carrito de sin items x2");
             handleGetShoppingCart();
             return;
           }

@@ -35,6 +35,7 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/widget/butto
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/expandable_page_view.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
 import '../../../domain/model/credit_card_brand.dart';
 import '../../../domain/model/custom_card_type_icon.dart';
@@ -401,8 +402,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
               ),
             ),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
               child: DefaultButton(
                 text: 'Continuar',
                 color: Colors.white,
@@ -460,37 +460,24 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
 
                             if (mainBloc.informationCart.value is Cart) {
                               context.loaderOverlay.show();
-                              final response =
-                                  await checkoutInfoBloc.handlePayment(
+                              final response = await checkoutInfoBloc.handlePayment(
                                 cartInformation: mainBloc.informationCart.value,
                                 userInformation: mainBloc.informationUser,
                                 context: context,
                               );
 
-                              context.loaderOverlay.hide();
-
-                              print('RESPONSE');
-                              print(response);
-
                               if (response is! http.Response) {
-                                if (kDebugMode) {
-                                  print(
-                                      "response NO PERTENECE A http.Response");
-                                }
+                                context.loaderOverlay.hide();
+                                GlobalSnackBar.showWarningSnackBar(
+                                  context,
+                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                                );
 
-                                print("****1*****");
-
-                                GlobalSnackBar.showWarningSnackBar(context,
-                                    "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
                                 return;
                               }
 
                               if (response is String) {
-                                if (kDebugMode) {
-                                  print(response);
-                                }
-
-                                print("****2*****");
+                                context.loaderOverlay.hide();
 
                                 GlobalSnackBar.showWarningSnackBar(
                                   context,
@@ -503,27 +490,32 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                               final decode = json.decode(response.body);
 
                               if (!mounted) return;
+                              if (response.statusCode != 201) {
 
-                              if (response.statusCode == 501) {
-                                print("data Error");
-                                print(response);
+                                if (response.statusCode == 400) {
+                                  if (decode['error']['status'] == 400) {
+                                    final errorText = checkoutInfoBloc
+                                        .badRequestProcess(decode);
 
-                                if (decode['error']['status'] == 400) {
-                                  final errorText = checkoutInfoBloc
-                                      .badRequestProcess(response);
+                                    context.loaderOverlay.hide();
+                                    GlobalSnackBar.showErrorSnackBarIcon(
+                                      context,
+                                      errorText,
+                                    );
 
-                                  GlobalSnackBar.showErrorSnackBarIcon(
-                                    context,
-                                    errorText,
-                                  );
-
-                                  return;
+                                    return;
+                                  }
                                 }
 
                                 if (checkoutInfoBloc.installmentsDetail
                                     is! MercadoPagoPaymentMethodInstallments) {
-                                  GlobalSnackBar.showWarningSnackBar(context,
-                                      "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+
+                                  context.loaderOverlay.hide();
+                                  GlobalSnackBar.showWarningSnackBar(
+                                    context,
+                                    "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                                  );
+
                                   return;
                                 }
 
@@ -534,30 +526,17 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                       checkoutInfoBloc.installmentsDetail,
                                 );
 
+                                context.loaderOverlay.hide();
                                 GlobalSnackBar.showErrorSnackBarIcon(
                                   context,
                                   errorText,
                                 );
 
-                                print(
-                                    "PROBLEMAS AL REALIZAR EL PAGO ERROR CODE: ${response.statusCode}");
+                                // GlobalSnackBar.showWarningSnackBar(
+                                //   context,
+                                //   "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                                // );
 
-                                return;
-                              }
-
-                              if (response.statusCode != 201) {
-                                if (kDebugMode) {
-                                  print(
-                                      "response.statusCode status code fail is != 201 and contain ${response.statusCode}");
-                                }
-
-                                print("response.body");
-                                print(response.body);
-
-                                GlobalSnackBar.showWarningSnackBar(
-                                  context,
-                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-                                );
                                 return;
                               }
 
@@ -566,6 +545,8 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
 
                               print(infoPayment.status);
                               print(infoPayment.statusDetail);
+
+                              context.loaderOverlay.hide();
 
                               if (infoPayment.statusDetail == "accredited") {
                                 await mainBloc.handleGetShoppingCart();
@@ -711,166 +692,212 @@ class _OrderCheckoutShippingState extends State<_OrderCheckoutShipping> {
           height: 190,
           child: Padding(
             padding: const EdgeInsets.only(left: 0.0),
-            child: ListView(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.all(0),
-              children: List.generate(
-                mainBloc.informationUser!.addresses.length,
-                (index) {
-                  final address = mainBloc.informationUser!.addresses[index]!;
-                  return SizedBox(
-                    width: SizeConfig.screenWidth! -
-                        SizeConfig.screenWidth! * 0.13,
-                    child: Card(
-                      color: Colors.white,
-                      // margin: const EdgeInsets.all(5.0),
-                      elevation: 1,
-                      clipBehavior: Clip.hardEdge,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(address.addressType!),
-                                Container(
-                                  clipBehavior: Clip.hardEdge,
-                                  width: 25.0,
-                                  height: 25.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: address!.addressDefault!
-                                        ? Colors.green
-                                        : Colors.white,
-                                    border: Border.all(width: 0.5),
-                                  ),
-                                  child: Icon(
-                                    Icons.check,
-                                    size: 15.0,
-                                    color: address!.addressDefault!
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5.0),
-                            Text(
-                              "${address.ubigeo!.department} - ${address.ubigeo!.province} - ${address.ubigeo!.district}",
-                            ),
-                            const SizedBox(height: 5.0),
-                            Expanded(
-                              child: Text(address.direction!),
-                            ),
-                            Row(
-                              children: [
-                                const Spacer(),
-                                Row(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () async {
-                                        shipmentBloc.isUpdate = true;
-                                        shipmentBloc.address = address;
-
-                                        await DialogHelper.showAddressDialog(
-                                            context: context);
-                                      },
-                                      child: const CircleAvatar(
-                                        radius: 15.0,
-                                        backgroundColor: Colors.black,
-                                        child: Icon(
-                                          CommunityMaterialIcons.pencil_outline,
-                                          size: 18.0,
-                                          color: Colors.white,
+            child: AnimatedSwitcher(
+              duration: const Duration(seconds: 1),
+              child: mainBloc.informationUser!.addresses.length > 0
+                  ? ListView(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.all(0),
+                      children: List.generate(
+                        mainBloc.informationUser!.addresses.length,
+                        (index) {
+                          final address =
+                              mainBloc.informationUser!.addresses[index]!;
+                          return SizedBox(
+                            width: SizeConfig.screenWidth! -
+                                SizeConfig.screenWidth! * 0.13,
+                            child: Card(
+                              color: Colors.white,
+                              // margin: const EdgeInsets.all(5.0),
+                              elevation: 1,
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(address.addressType!),
+                                        Container(
+                                          clipBehavior: Clip.hardEdge,
+                                          width: 25.0,
+                                          height: 25.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: address!.addressDefault!
+                                                ? Colors.green
+                                                : Colors.white,
+                                            border: Border.all(width: 0.5),
+                                          ),
+                                          child: Icon(
+                                            Icons.check,
+                                            size: 15.0,
+                                            color: address!.addressDefault!
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 5.0),
-                                    GestureDetector(
-                                      onTap: () async {
-                                        context.loaderOverlay.show();
-                                        final response =
-                                            await shipmentBloc.onDeleteAddress(
-                                          addressId: address.id!,
-                                          headers: mainBloc.headers,
-                                        );
+                                    const SizedBox(height: 5.0),
+                                    Text(
+                                      "${address.ubigeo!.department} - ${address.ubigeo!.province} - ${address.ubigeo!.district}",
+                                    ),
+                                    const SizedBox(height: 5.0),
+                                    Expanded(
+                                      child: Text(address.direction!),
+                                    ),
+                                    Row(
+                                      children: [
+                                        const Spacer(),
+                                        Row(
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () async {
+                                                shipmentBloc.isUpdate = true;
+                                                shipmentBloc.address = address;
 
-                                        if (response is ResponseApi) {
-                                          shipmentBloc.address = Address(
-                                            ubigeo: Ubigeo(),
-                                            lotNumber: 1,
-                                            dptoInt: 1,
-                                            addressDefault: false,
-                                          );
+                                                await DialogHelper
+                                                    .showAddressDialog(
+                                                        context: context);
+                                              },
+                                              child: const CircleAvatar(
+                                                radius: 15.0,
+                                                backgroundColor: Colors.black,
+                                                child: Icon(
+                                                  CommunityMaterialIcons
+                                                      .pencil_outline,
+                                                  size: 18.0,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 5.0),
+                                            GestureDetector(
+                                              onTap: () async {
+                                                context.loaderOverlay.show();
+                                                final response =
+                                                    await shipmentBloc
+                                                        .onDeleteAddress(
+                                                  addressId: address.id!,
+                                                  headers: mainBloc.headers,
+                                                );
 
-                                          final responseUserInformation =
-                                              await mainBloc
-                                                  .getUserInformation();
+                                                if (response is ResponseApi) {
+                                                  shipmentBloc.address =
+                                                      Address(
+                                                    ubigeo: Ubigeo(),
+                                                    lotNumber: 1,
+                                                    dptoInt: 1,
+                                                    addressDefault: false,
+                                                  );
 
-                                          if (responseUserInformation
-                                              is UserInformation) {
-                                            mainBloc.informationUser =
-                                                responseUserInformation;
+                                                  final responseUserInformation =
+                                                      await mainBloc
+                                                          .getUserInformation();
 
-                                            mainBloc.refreshMainBloc();
-                                            context.loaderOverlay.hide();
+                                                  if (responseUserInformation
+                                                      is UserInformation) {
+                                                    mainBloc.informationUser =
+                                                        responseUserInformation;
 
-                                            if (!mounted) return;
-                                            await GlobalSnackBar
-                                                .showInfoSnackBarIcon(
-                                              context,
-                                              response.message,
-                                            );
+                                                    mainBloc.refreshMainBloc();
+                                                    context.loaderOverlay
+                                                        .hide();
 
-                                            return;
-                                          }
-                                        }
+                                                    if (!mounted) return;
+                                                    await GlobalSnackBar
+                                                        .showInfoSnackBarIcon(
+                                                      context,
+                                                      response.message,
+                                                    );
 
-                                        context.loaderOverlay.hide();
-                                        if (!mounted) return;
-                                        await GlobalSnackBar
-                                            .showWarningSnackBar(
-                                          context,
-                                          "Ups, vuelvalo a intentar más tarde",
-                                        );
+                                                    return;
+                                                  }
+                                                }
 
-                                        return;
-                                      },
-                                      child: const CircleAvatar(
-                                        radius: 15.0,
-                                        backgroundColor: Colors.black,
-                                        child: Icon(
-                                          CommunityMaterialIcons
-                                              .trash_can_outline,
-                                          size: 18.0,
-                                          color: Colors.white,
+                                                context.loaderOverlay.hide();
+                                                if (!mounted) return;
+                                                await GlobalSnackBar
+                                                    .showWarningSnackBar(
+                                                  context,
+                                                  "Ups, vuelvalo a intentar más tarde",
+                                                );
+
+                                                return;
+                                              },
+                                              child: const CircleAvatar(
+                                                radius: 15.0,
+                                                backgroundColor: Colors.black,
+                                                child: Icon(
+                                                  CommunityMaterialIcons
+                                                      .trash_can_outline,
+                                                  size: 18.0,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
+                    )
+                  : const LottieAnimation(
+                      source: "assets/lottie/no_data_preview.json",
                     ),
-                  );
-                },
-              ),
             ),
           ),
         ),
         ButtonCrud(
           onTap: () async {
             shipmentBloc.isUpdate = false;
-            shipmentBloc.address = addressDefault;
+            // shipmentBloc.address = addressDefault;
+
+            for (var type in shipmentBloc.addressTypes) {
+              type['checked'] = false;
+            }
+
+            for (final region in mainBloc.extraRegions) {
+              region.checked = false;
+            }
+
+            for (final district in mainBloc.districts) {
+              district.checked = false;
+            }
+
+            for (final province in mainBloc.provinces) {
+              province.checked = false;
+            }
+
+            //*****************************
+            // Reset address
+            //*****************************
+
+            shipmentBloc.address = Address(
+              ubigeo: Ubigeo(
+                department: "Seleccione un departamento",
+                province: "Seleccione una provincia",
+                district: "Seleccione un distrito",
+              ),
+              addressType: "Seleccione un tipo",
+              lotNumber: 1,
+              dptoInt: 1,
+              addressDefault: false,
+            );
 
             await DialogHelper.showAddressDialog(context: context);
           },
@@ -910,167 +937,188 @@ class _OrderCheckoutShippingPhoneState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 135,
+          height: 135.0,
           child: Padding(
             padding: const EdgeInsets.only(left: 0.0),
-            child: ListView(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              children: List.generate(
-                mainBloc.informationUser.phones.length,
-                (index) {
-                  final Phone phone = mainBloc.informationUser.phones[index];
-                  return SizedBox(
-                    width: SizeConfig.screenWidth! -
-                        SizeConfig.screenWidth! * 0.13,
-                    child: Card(
-                      color: Colors.white,
-                      // margin: const EdgeInsets.all(5.0),
-                      elevation: 2,
-                      clipBehavior: Clip.hardEdge,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Número de teléfono",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText1!,
+            child: AnimatedSwitcher(
+              duration: const Duration(microseconds: 500),
+              child: mainBloc.informationUser.phones.length > 0
+                  ? ListView(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      children: List.generate(
+                        mainBloc.informationUser.phones.length,
+                        (index) {
+                          final Phone phone =
+                              mainBloc.informationUser.phones[index]!;
+
+                          return SizedBox(
+                            width: SizeConfig.screenWidth! -
+                                SizeConfig.screenWidth! * 0.13,
+                            child: Card(
+                              color: Colors.white,
+                              // margin: const EdgeInsets.all(5.0),
+                              elevation: 2,
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                "Número de teléfono",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText1!,
+                                              ),
+                                              Container(
+                                                clipBehavior: Clip.hardEdge,
+                                                width: 25,
+                                                height: 25,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: phone.phoneDefault!
+                                                      ? Colors.green
+                                                      : Colors.white,
+                                                  border:
+                                                      Border.all(width: 0.5),
+                                                ),
+                                                child: Icon(
+                                                  Icons.check,
+                                                  size: 15.0,
+                                                  color: phone.phoneDefault!
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 5.0),
+                                          Text(
+                                              "+51 ${splitNumberJoin(phone.value!)}"),
+                                        ],
                                       ),
-                                      Container(
-                                        clipBehavior: Clip.hardEdge,
-                                        width: 25,
-                                        height: 25,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: phone.phoneDefault!
-                                              ? Colors.green
-                                              : Colors.white,
-                                          border: Border.all(width: 0.5),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () async {
+                                            phoneBloc.isUpdate = true;
+                                            phoneBloc.phone = phone;
+
+                                            await DialogHelper.showPhonesDialog(
+                                                context: context);
+                                          },
+                                          child: const CircleAvatar(
+                                            radius: 15.0,
+                                            backgroundColor: Colors.black,
+                                            child: Icon(
+                                              CommunityMaterialIcons
+                                                  .pencil_outline,
+                                              size: 18.0,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
-                                        child: Icon(
-                                          Icons.check,
-                                          size: 15.0,
-                                          color: phone.phoneDefault!
-                                              ? Colors.white
-                                              : Colors.black,
+                                        const SizedBox(width: 5.0),
+                                        GestureDetector(
+                                          onTap: () async {
+                                            context.loaderOverlay.show();
+                                            final response =
+                                                await phoneBloc.onDeletePhone(
+                                              phoneId: phone.id!,
+                                              headers: mainBloc.headers,
+                                            );
+
+                                            if (response is ResponseApi) {
+                                              phoneBloc.phone = Phone(
+                                                phoneDefault: false,
+                                                type: "phone",
+                                                areaCode: "51",
+                                              );
+
+                                              final responseUserInformation =
+                                                  await mainBloc
+                                                      .getUserInformation();
+
+                                              if (responseUserInformation
+                                                  is UserInformation) {
+                                                mainBloc.informationUser =
+                                                    responseUserInformation;
+                                                mainBloc.refreshMainBloc();
+
+                                                context.loaderOverlay.hide();
+
+                                                if (!mounted) return;
+                                                await GlobalSnackBar
+                                                    .showInfoSnackBarIcon(
+                                                  context,
+                                                  response.message,
+                                                );
+
+                                                return;
+                                              }
+                                            }
+
+                                            context.loaderOverlay.hide();
+                                            if (!mounted) return;
+                                            await GlobalSnackBar
+                                                .showWarningSnackBar(
+                                              context,
+                                              "Ups, vuelvalo a intentar más tarde",
+                                            );
+
+                                            return;
+                                          },
+                                          child: const CircleAvatar(
+                                            radius: 15.0,
+                                            backgroundColor: Colors.black,
+                                            child: Icon(
+                                              CommunityMaterialIcons
+                                                  .trash_can_outline,
+                                              size: 18.0,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 5.0),
-                                  Text("+51 ${splitNumberJoin(phone.value!)}"),
-                                ],
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    phoneBloc.isUpdate = true;
-                                    phoneBloc.phone = phone;
-
-                                    await DialogHelper.showPhonesDialog(
-                                        context: context);
-                                  },
-                                  child: const CircleAvatar(
-                                    radius: 15.0,
-                                    backgroundColor: Colors.black,
-                                    child: Icon(
-                                      CommunityMaterialIcons.pencil_outline,
-                                      size: 18.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 5.0),
-                                GestureDetector(
-                                  onTap: () async {
-                                    context.loaderOverlay.show();
-                                    final response =
-                                        await phoneBloc.onDeletePhone(
-                                      phoneId: phone.id!,
-                                      headers: mainBloc.headers,
-                                    );
-
-                                    if (response is ResponseApi) {
-                                      phoneBloc.phone = Phone(
-                                        phoneDefault: false,
-                                        type: "phone",
-                                        areaCode: "51",
-                                      );
-
-                                      final responseUserInformation =
-                                          await mainBloc.getUserInformation();
-
-                                      if (responseUserInformation
-                                          is UserInformation) {
-                                        mainBloc.informationUser =
-                                            responseUserInformation;
-                                        mainBloc.refreshMainBloc();
-
-                                        context.loaderOverlay.hide();
-
-                                        if (!mounted) return;
-                                        await GlobalSnackBar
-                                            .showInfoSnackBarIcon(
-                                          context,
-                                          response.message,
-                                        );
-
-                                        return;
-                                      }
-                                    }
-
-                                    context.loaderOverlay.hide();
-                                    if (!mounted) return;
-                                    await GlobalSnackBar.showWarningSnackBar(
-                                      context,
-                                      "Ups, vuelvalo a intentar más tarde",
-                                    );
-
-                                    return;
-                                  },
-                                  child: const CircleAvatar(
-                                    radius: 15.0,
-                                    backgroundColor: Colors.black,
-                                    child: Icon(
-                                      CommunityMaterialIcons.trash_can_outline,
-                                      size: 18.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
+                    )
+                  : const LottieAnimation(
+                      source: "assets/lottie/no_data_preview.json",
                     ),
-                  );
-                },
-              ),
             ),
           ),
         ),
         ButtonCrud(
           onTap: () async {
             phoneBloc.isUpdate = false;
+            phoneBloc.phone = Phone(
+              phoneDefault: false,
+              type: "phone",
+              areaCode: "51",
+            );
             await DialogHelper.showPhonesDialog(context: context);
           },
           titleButton: "Añadir teléfono",

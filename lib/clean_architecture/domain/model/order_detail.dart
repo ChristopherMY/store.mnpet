@@ -563,12 +563,12 @@ class VariationPrice {
     this.sale,
   });
 
-  final int? regular;
-  final int? sale;
+  final double? regular;
+  final double? sale;
 
   VariationPrice copyWith({
-    int? regular,
-    int? sale,
+    double? regular,
+    double? sale,
   }) =>
       VariationPrice(
         regular: regular ?? this.regular,
@@ -598,8 +598,7 @@ class VariationPrices {
   VariationPrices copyWith({
     Regular? regular,
     Regular? sale,
-  }) =>
-      VariationPrices(
+  }) => VariationPrices(
         regular: regular ?? this.regular,
         sale: sale ?? this.sale,
       );
@@ -613,6 +612,7 @@ class VariationPrices {
     "regular": regular == null ? null : regular!.toMap(),
     "sale": sale == null ? null : sale!.toMap(),
   };
+
 }
 
 class Regular {
@@ -621,12 +621,12 @@ class Regular {
     this.max,
   });
 
-  final int? min;
-  final int? max;
+  final double? min;
+  final double? max;
 
   Regular copyWith({
-    int? min,
-    int? max,
+    double? min,
+    double? max,
   }) =>
       Regular(
         min: min ?? this.min,

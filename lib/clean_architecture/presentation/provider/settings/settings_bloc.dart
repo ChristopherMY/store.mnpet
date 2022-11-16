@@ -79,4 +79,5 @@ class SettingsBloc extends ChangeNotifier {
   void refreshSettingsBloc() {
     notifyListeners();
   }
+
 }

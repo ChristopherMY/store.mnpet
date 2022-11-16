@@ -699,6 +699,7 @@ class DialogHelper {
                                             shipmentBloc.onChangeAddressTypes(
                                               index: index,
                                             );
+
                                             Navigator.of(context).pop();
                                           },
                                         );
@@ -707,7 +708,7 @@ class DialogHelper {
                                         children: <Widget>[
                                           Expanded(
                                             child: Text(
-                                              shipmentBloc.address.addressType! ,
+                                              shipmentBloc.address.addressType!,
                                               style: const TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w400,
@@ -889,7 +890,8 @@ class DialogHelper {
                                         children: <Widget>[
                                           Expanded(
                                             child: Text(
-                                              shipmentBloc.address.ubigeo!.department!,
+                                              shipmentBloc
+                                                  .address.ubigeo!.department!,
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodyText2,
@@ -940,8 +942,8 @@ class DialogHelper {
                                         children: <Widget>[
                                           Expanded(
                                             child: Text(
-                                              shipmentBloc.address.ubigeo!
-                                                      .province!,
+                                              shipmentBloc
+                                                  .address.ubigeo!.province!,
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodyText2,
@@ -993,8 +995,8 @@ class DialogHelper {
                                         children: <Widget>[
                                           Expanded(
                                             child: Text(
-                                              shipmentBloc.address.ubigeo!
-                                                      .district!,
+                                              shipmentBloc
+                                                  .address.ubigeo!.district!,
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodyText2,
@@ -1022,8 +1024,10 @@ class DialogHelper {
                                           MaterialStateProperty.resolveWith(
                                         shipmentBloc.getColor,
                                       ),
-                                      value: shipmentBloc.address.addressDefault,
-                                      onChanged: shipmentBloc.onChangeAddressDefault,
+                                      value:
+                                          shipmentBloc.address.addressDefault,
+                                      onChanged:
+                                          shipmentBloc.onChangeAddressDefault,
                                     ),
                                     Text(
                                       "Usar como dirección predeterminada",
@@ -1111,7 +1115,8 @@ class DialogHelper {
                                 DefaultButton(
                                   text: "Continuar",
                                   press: () async {
-                                    if (shipmentBloc.address.addressType!.isEmpty ||
+                                    if (shipmentBloc
+                                            .address.addressType!.isEmpty ||
                                         shipmentBloc.address.addressType! ==
                                             "Seleccione un tipo") {
                                       shipmentBloc.addError(
@@ -1193,7 +1198,6 @@ class DialogHelper {
                                                 responseUserInformation;
                                             mainBloc.refreshMainBloc();
                                             context.loaderOverlay.hide();
-
 
                                             if (response.status == "success") {
                                               return await GlobalSnackBar
@@ -1351,14 +1355,13 @@ class DialogHelper {
                                       (context, List<String> value, child) {
                                     return Column(
                                       children: [
-                                        value.isNotEmpty
-                                            ? SizedBox(
-                                                height:
-                                                    getProportionateScreenHeight(
-                                                  20.0,
-                                                ),
-                                              )
-                                            : const SizedBox(),
+                                        if (value.isNotEmpty)
+                                          SizedBox(
+                                            height:
+                                                getProportionateScreenHeight(
+                                              20.0,
+                                            ),
+                                          ),
                                         FormError(errors: value),
                                       ],
                                     );
@@ -1387,8 +1390,7 @@ class DialogHelper {
                                             );
 
                                             final responseUserInformation =
-                                                await mainBloc
-                                                    .getUserInformation();
+                                                await mainBloc.getUserInformation();
 
                                             if (responseUserInformation
                                                 is UserInformation) {
