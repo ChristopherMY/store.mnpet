@@ -1,32 +1,34 @@
+import '../../helper/http_response.dart';
+
 abstract class CartRepositoryInterface {
   // http.Response
-  Future<dynamic> saveShoppingCart({
+  Future<HttpResponse> saveShoppingCart({
     required Map<String, dynamic> cart,
     required Map<String, String> headers,
   });
 
   // Cart
-  Future<dynamic> getShoppingCart({
+  Future<HttpResponse> getShoppingCart({
     required String districtId,
     required Map<String, String> headers,
   });
 
   // Cart
-  Future<dynamic> moveShoppingCart({
+  Future<HttpResponse> moveShoppingCart({
     required String cartId,
     required Map<String, String> headers,
   });
 
 
   // http.response
-  Future<dynamic> deleteProductCart({
+  Future<HttpResponse> deleteProductCart({
     required String productId,
     required String variationId,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> updateProductCart({
+  Future<HttpResponse> updateProductCart({
     required String productId,
     required String variationId,
     required int quantity,
@@ -34,23 +36,23 @@ abstract class CartRepositoryInterface {
   });
 
   // http.Response
-  Future<dynamic> onSaveShoppingCartTemp({required Map<String, dynamic> cart});
+  Future<HttpResponse> onSaveShoppingCartTemp({required Map<String, dynamic> cart});
 
   // Cart
-  Future<dynamic> getShoppingCartTemp({
+  Future<HttpResponse> getShoppingCartTemp({
     required String districtId,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> deleteProductCartTemp({
+  Future<HttpResponse> deleteProductCartTemp({
     required String cartId,
     required String productId,
     required String variationId,
   });
 
   // http.response
-  Future<dynamic> updateProductCartTemp({
+  Future<HttpResponse> updateProductCartTemp({
     required String cartId,
     required String productId,
     required String variationId,

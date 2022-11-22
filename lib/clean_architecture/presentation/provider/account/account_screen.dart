@@ -17,6 +17,7 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/pri
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/settings/settings_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/copy_right.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
 import '../shipment/shipment_screen.dart';
@@ -578,42 +579,6 @@ class TargetOption extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class CopyRight extends StatelessWidget {
-  const CopyRight({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 45,
-          child: Image.asset(
-            "assets/images/logo-mn.png",
-          ),
-        ),
-        const Text(
-          "Versión 4.15.1",
-          style: TextStyle(
-            color: Colors.black38,
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(height: 5.0),
-        DefaultTextStyle(
-          style: const TextStyle(fontSize: 13, color: Colors.black),
-          child: Column(
-            children: const [
-              Text("© 2022 - 2022 mundopet.com.pe."),
-              Text("Todos los derechos reservados")
-            ],
-          ),
-        )
-      ],
     );
   }
 }

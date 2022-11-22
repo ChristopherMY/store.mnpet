@@ -178,7 +178,7 @@ class SignUpBloc extends ChangeNotifier {
   }
 
   Future<dynamic> registerUser({required Map<String, dynamic> user}) async {
-    final response = await authRepositoryInterface.createUser(user: user);
+    final response = await authRepositoryInterface.createUser(data: user);
 
     if (response is String) {
       if (kDebugMode) {

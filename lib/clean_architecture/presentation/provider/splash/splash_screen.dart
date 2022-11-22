@@ -80,12 +80,12 @@ class _SplashScreenState extends State<SplashScreen> {
             Align(
               alignment: Alignment.center,
               child: Padding(
-                padding: const EdgeInsets.all(0.0),
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
                 child: Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage("assets/presentation/presentation_origin.png"),
-                      fit: BoxFit.contain,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),

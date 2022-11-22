@@ -24,34 +24,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
             width: SizeConfig.screenWidth! * 0.515,
             child: const CustomProgressButton(buttonComesFromModal: false),
           ),
-/*
-                    Container(
-                      height: 60,
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      decoration: const BoxDecoration(
-                        color: kPrimaryColor,
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8.0),
-                        ),
-                      ),
-                      child: InkWell(
-                        onTap: () {},
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Icon(
-                              MaterialCommunityIcons.cart_outline,
-                              color: Colors.white,
-                            ),
-                            Text(
-                              "Añadir al carrito",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    */
         ],
       ),
     );

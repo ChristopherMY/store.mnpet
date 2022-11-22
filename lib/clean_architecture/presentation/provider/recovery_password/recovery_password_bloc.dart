@@ -1,11 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_forgot_password.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
-import 'package:http/http.dart' as http;
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/forgot_password/forgot_password_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 class RecoveryPasswordBloc extends ChangeNotifier {
   final AuthRepositoryInterface authRepositoryInterface;
@@ -73,28 +74,49 @@ class RecoveryPasswordBloc extends ChangeNotifier {
     return null;
   }
 
-  Future<dynamic> changePassword({
-    required String userId,
-    required String password,
-    required String passwordConfirmation,
-  }) async {
-    final response = await authRepositoryInterface.changePassword(
-      userId: userId,
-      password: password,
-      passwordConfirmation: passwordConfirmation,
-    );
+  void changePassword({required BuildContext context}) async {
+    if (formKey.currentState!.validate()) {
+      if (errors.value.isNotEmpty) return;
 
-    if(response is http.Response){
-      if(response.statusCode == 200){
-        final decode = json.decode(response.body);
-        return ResponseForgotPassword.fromMap(decode);
+      formKey.currentState!.save();
+      context.loaderOverlay.show();
+
+      final forgotPasswordBloc = context.read<ForgotPasswordBloc>();
+
+      final response = await authRepositoryInterface.changePassword(
+        userId: forgotPasswordBloc.responseForgotPassword.userId!,
+        password: passwordController.text,
+        passwordConfirmation: passwordConfirmController.text,
+      );
+
+      context.loaderOverlay.hide();
+
+      if (response != null) {
+        final responseForgotPass = ResponseForgotPassword.fromMap(response.data);
+        if (responseForgotPass.status == 'success') {
+          GlobalSnackBar.showInfoSnackBarIcon(
+            context,
+            responseForgotPass.message!,
+          );
+
+          context.loaderOverlay.hide();
+          int count = 0;
+          Navigator.of(context).popUntil((route) => count++ >= 3);
+          return;
+        }
+
+        GlobalSnackBar.showErrorSnackBarIcon(
+          context,
+          responseForgotPass.message!,
+        );
+
+        return;
       }
-    } else if(response is String){
-      if (kDebugMode) {
-        print(response);
-      }
+
+      GlobalSnackBar.showErrorSnackBarIcon(
+        context,
+        "Tuvimos problemas, vuelva a intentarlo más tarde.",
+      );
     }
-
-    return false;
   }
 }

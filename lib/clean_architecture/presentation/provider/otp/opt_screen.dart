@@ -5,11 +5,8 @@ import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_forgot_password.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
-import 'package:store_mundo_negocio/clean_architecture/helper/keyboard.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/forgot_password/forgot_password_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/otp/otp_bloc.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/recovery_password/recovery_password_screen.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 import '../../../helper/constants.dart';
 import '../../../helper/size_config.dart';
@@ -153,7 +150,8 @@ class OptScreen extends StatelessWidget {
                         GestureDetector(
                           onTap: () {
                             forgotPasswordBloc.emailPhoneController.clear();
-                            forgotPasswordBloc.responseForgotPassword = ResponseForgotPassword();
+                            forgotPasswordBloc.responseForgotPassword =
+                                ResponseForgotPassword();
 
                             otpBloc.timer.cancel();
                             Navigator.of(context).pop();
@@ -190,38 +188,12 @@ class OptScreen extends StatelessWidget {
                           "Código incorrecto, compruebe su código de verificación",
                       errorTextStyle: Theme.of(context).textTheme.bodyText1,
                       pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
-                      onCompleted: (pin) async {
-                        context.loaderOverlay.show();
-                        final response = await otpBloc.validateOtp(
+                      onCompleted: (pin) async{
+                        otpBloc.validateOtp(
                           pin: pin,
-                          userId:
-                              forgotPasswordBloc.responseForgotPassword.userId!,
+                          context: context,
+                          userId: forgotPasswordBloc.responseForgotPassword.userId!,
                         );
-
-                        if (response is ResponseForgotPassword) {
-                          if (response.status == 'success') {
-                            GlobalSnackBar.showInfoSnackBarIcon(
-                                context, response.message!);
-
-                            Route route = MaterialPageRoute(
-                              builder: (_) =>
-                                  RecoveryPasswordScreen.init(context),
-                            );
-                            context.loaderOverlay.hide();
-                            Navigator.push(context, route);
-                            return;
-                          }
-
-                          GlobalSnackBar.showErrorSnackBarIcon(
-                              context, response.message!);
-                        } else {
-                          GlobalSnackBar.showWarningSnackBar(context,
-                              "Tuvimos problemas, vuelva a intentarlo más tarde.");
-                        }
-
-                        context.loaderOverlay.hide();
-                        otpBloc.controller.clear();
-                        otpBloc.responseError.value = true;
                       },
                     ),
                     SizedBox(height: SizeConfig.screenHeight! * 0.04),
@@ -236,63 +208,28 @@ class OptScreen extends StatelessWidget {
                               'Solicitar reenvio de código:  ${value != 0 ? "espere $value segundos" : ""}',
                               style: Theme.of(context).textTheme.bodyText2,
                             ),
-                            value == 0
-                                ? InkWell(
-                                    onTap: () async {
-                                      KeyboardUtil.hideKeyboard(context);
-                                      context.loaderOverlay.show();
-
-                                      final response = await forgotPasswordBloc
-                                          .validateNumberDoc(
-                                        value: forgotPasswordBloc
-                                            .emailPhoneController.text,
-                                        valueType: forgotPasswordBloc.valueType,
-                                      );
-
-                                      if (response is ResponseForgotPassword) {
-                                        forgotPasswordBloc
-                                            .responseForgotPassword = response;
-                                        if (response.status == 'success') {
-                                          GlobalSnackBar.showInfoSnackBarIcon(
-                                            context,
-                                            response.message!,
-                                          );
-
-                                          otpBloc.responseError.value = false;
-                                          otpBloc.counter.value = 60;
-                                          otpBloc.startTimer();
-                                        } else {
-                                          GlobalSnackBar.showErrorSnackBarIcon(
-                                            context,
-                                            response.message!,
-                                          );
-                                        }
-                                      } else if (response is bool) {
-                                        GlobalSnackBar.showErrorSnackBarIcon(
-                                          context,
-                                          "Tuvimos problemas, vuelva a intentarlo más tarde",
-                                        );
-                                      }
-
-                                      context.loaderOverlay.hide();
-                                    },
-                                    child: Text(
-                                      "Reenviar código",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyText1!
-                                          .copyWith(color: kPrimaryColor),
-                                    ),
-                                  )
-                                : const SizedBox(),
+                            if (value == 0)
+                              InkWell(
+                                onTap: () {
+                                  forgotPasswordBloc.revalidateNumberDoc(
+                                      context: context);
+                                },
+                                child: Text(
+                                  "Reenviar código",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1!
+                                      .copyWith(color: kPrimaryColor),
+                                ),
+                              )
                           ],
                         );
                       },
                     ),
                     SizedBox(height: SizeConfig.screenHeight! * 0.02),
-                    ValueListenableBuilder(
+                    ValueListenableBuilder<bool>(
                       valueListenable: otpBloc.responseError,
-                      builder: (context, bool value, child) {
+                      builder: (context, value, child) {
                         if (value) {
                           return Text(
                             '* Código incorrecto, compruebe su código de verificación',

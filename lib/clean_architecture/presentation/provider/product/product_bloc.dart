@@ -10,15 +10,17 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information_local.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/vimeo_video_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/photoview_wrapper.dart';
 
 import '../../../domain/usecase/page.dart';
@@ -132,7 +134,6 @@ class ProductBloc extends ChangeNotifier {
     required List<Brand> categories,
     required int pageKey,
   }) async {
-
     final response =
         await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
@@ -472,7 +473,9 @@ class ProductBloc extends ChangeNotifier {
     // notifyListeners();
   }
 
-  Future<dynamic> onSaveShoppingCart() async {
+  void onSaveShoppingCart(BuildContext context) async {
+    final mainBloc = context.read<MainBloc>();
+
     stateOnlyCustomIndicatorText.value = ButtonState.loading;
 
     Map<String, String> headers = {
@@ -498,33 +501,38 @@ class ProductBloc extends ChangeNotifier {
         "quantity": quantity.value,
       };
 
-      // final response =
-      await cartRepositoryInterface.saveShoppingCart(
+      final responseApi = await cartRepositoryInterface.saveShoppingCart(
         cart: bindingCart,
         headers: headers,
       );
 
-      // if (response is String) {
-      //   if (kDebugMode) {
-      //     print(response);
-      //   }
-      //
-      //   stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      //   return false;
-      // }
-      //
-      // if (response is! http.Response) {
-      //   stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      //   return false;
-      // }
-      //
-      // if (response.statusCode == 200) {
-      //   stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      //   return false;
-      // }
+      if (responseApi.data == null) {
+        stateOnlyCustomIndicatorText.value = ButtonState.idle;
 
+        final statusCode = responseApi.error!.statusCode;
+        if (statusCode >= 400) {
+          if (statusCode == 400) {
+            final response = ResponseApi.fromMap(responseApi.data);
+
+            GlobalSnackBar.showErrorSnackBarIcon(
+              context,
+              response.message,
+            );
+            return;
+          }
+        }
+
+        GlobalSnackBar.showErrorSnackBarIcon(
+          context,
+          'Ups tuvimos un problema. Vuelva a intentarlo más tarde',
+        );
+
+        return;
+      }
+
+      await mainBloc.handleShoppingCart();
       stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      return true;
+      return;
     }
 
     String shoppingCartId = await hiveRepositoryInterface.read(
@@ -540,42 +548,45 @@ class ProductBloc extends ChangeNotifier {
       "cart_id": shoppingCartId,
     };
 
-    final response =
-        await cartRepositoryInterface.onSaveShoppingCartTemp(cart: buildCart);
-
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-
-      stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      return false;
-    }
-
-    if (response is! http.Response) {
-      stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      return false;
-    }
-
-    if (response.statusCode != 200) {
-      stateOnlyCustomIndicatorText.value = ButtonState.idle;
-      return false;
-    }
-
-    final responseApi = cartFromMap(response.body);
-
-    if (responseApi.id!.isNotEmpty) {
-      if (shoppingCartId.isEmpty) {
-        await hiveRepositoryInterface.save(
-          containerName: "shopping_temporal",
-          key: "cartId",
-          value: responseApi.id,
-        );
-      }
-    }
+    final responseApi = await cartRepositoryInterface.onSaveShoppingCartTemp(cart: buildCart);
 
     stateOnlyCustomIndicatorText.value = ButtonState.idle;
-    return true;
+
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode >= 400) {
+        if (statusCode == 400) {
+          final response = ResponseApi.fromMap(responseApi.data);
+          GlobalSnackBar.showErrorSnackBarIcon(
+            context,
+            response.message,
+          );
+
+          return;
+        }
+      }
+
+      GlobalSnackBar.showErrorSnackBarIcon(
+        context,
+        'Ups tuvimos un problema. Vuelva a intentarlo más tarde',
+      );
+
+      return;
+    }
+
+    // final cartMap = Cart.fromMap(responseApi.data);
+    // logger.w(cartMap);
+    //
+    // if (cartMap.id != shoppingCartId || shoppingCartId.isEmpty) {
+    //   print("REGISTRO ID: ${cartMap.id}");
+    //   await hiveRepositoryInterface.save(
+    //     containerName: "shopping_temporal",
+    //     key: "cartId",
+    //     value: cartMap.id,
+    //   );
+    // }
+
+    return;
   }
 
   void initProductState({

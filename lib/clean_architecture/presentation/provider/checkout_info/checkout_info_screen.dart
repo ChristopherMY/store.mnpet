@@ -21,7 +21,6 @@ import 'package:store_mundo_negocio/clean_architecture/domain/repository/payment
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/account/account_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/cart/cart_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/checkout_info/checkout_info_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/checkout_info/components/transaction_screen.dart';
@@ -32,6 +31,7 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/shi
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/button_crud.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/copy_right.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/expandable_page_view.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
@@ -402,7 +402,8 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
               child: DefaultButton(
                 text: 'Continuar',
                 color: Colors.white,
@@ -460,7 +461,8 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
 
                             if (mainBloc.informationCart.value is Cart) {
                               context.loaderOverlay.show();
-                              final response = await checkoutInfoBloc.handlePayment(
+                              final response =
+                                  await checkoutInfoBloc.handlePayment(
                                 cartInformation: mainBloc.informationCart.value,
                                 userInformation: mainBloc.informationUser,
                                 context: context,
@@ -491,7 +493,6 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
 
                               if (!mounted) return;
                               if (response.statusCode != 201) {
-
                                 if (response.statusCode == 400) {
                                   if (decode['error']['status'] == 400) {
                                     final errorText = checkoutInfoBloc
@@ -509,7 +510,6 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
 
                                 if (checkoutInfoBloc.installmentsDetail
                                     is! MercadoPagoPaymentMethodInstallments) {
-
                                   context.loaderOverlay.hide();
                                   GlobalSnackBar.showWarningSnackBar(
                                     context,
@@ -519,23 +519,27 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                   return;
                                 }
 
-                                final errorText =
-                                    checkoutInfoBloc.badTokenProcess(
-                                  status: decode['status'],
-                                  installments:
-                                      checkoutInfoBloc.installmentsDetail,
-                                );
+                                if (response.statusCode != 401) {
+                                  final errorText =
+                                      checkoutInfoBloc.badTokenProcess(
+                                    status: decode['status'],
+                                    installments:
+                                        checkoutInfoBloc.installmentsDetail,
+                                  );
 
-                                context.loaderOverlay.hide();
-                                GlobalSnackBar.showErrorSnackBarIcon(
+                                  context.loaderOverlay.hide();
+                                  GlobalSnackBar.showErrorSnackBarIcon(
+                                    context,
+                                    errorText,
+                                  );
+
+                                  return;
+                                }
+
+                                GlobalSnackBar.showWarningSnackBar(
                                   context,
-                                  errorText,
+                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
                                 );
-
-                                // GlobalSnackBar.showWarningSnackBar(
-                                //   context,
-                                //   "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-                                // );
 
                                 return;
                               }

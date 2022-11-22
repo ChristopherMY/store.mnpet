@@ -29,6 +29,8 @@ final headingStyle = TextStyle(
   fontWeight: FontWeight.bold,
 );
 
+const versionCodePlayStore = "1.0.2";
+
 String splitNumberJoin(String number) {
   const int splitSize = 3;
   RegExp exp = RegExp(r"\d{" + splitSize.toString() + "}");

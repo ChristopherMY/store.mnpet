@@ -40,7 +40,8 @@ class MainBloc extends ChangeNotifier {
   ValueNotifier<Session> sessionAccount = ValueNotifier(Session.inactive);
   ValueNotifier<Account> account = ValueNotifier(Account.inactive);
   ValueNotifier<Home> home = ValueNotifier(Home.inactive);
-  ValueNotifier<ShoppingCart> shoppingCart = ValueNotifier(ShoppingCart.inactive);
+  ValueNotifier<ShoppingCart> shoppingCart =
+      ValueNotifier(ShoppingCart.inactive);
 
   ValueNotifier<int> indexSelected = ValueNotifier(0);
 
@@ -68,7 +69,6 @@ class MainBloc extends ChangeNotifier {
 
   int countNavigateIterationScreen = 3;
   bool loadingScreenAccount = false;
-
 
   dynamic informationUser;
   ValueNotifier<dynamic> informationCart = ValueNotifier(dynamic);
@@ -393,9 +393,7 @@ class MainBloc extends ChangeNotifier {
       },
     );
 
-    if (responseCredentials.token.isEmpty) {
-      return false;
-    }
+    if (responseCredentials.token.isEmpty) return false;
 
     credentials = responseCredentials;
     headers[HttpHeaders.authorizationHeader] =
@@ -476,6 +474,8 @@ class MainBloc extends ChangeNotifier {
       headers: headers,
     );
 
+    //TODO: Todo esta esta para optimizar
+
     if (response is String) {
       if (kDebugMode) {
         print(response);
@@ -524,29 +524,14 @@ class MainBloc extends ChangeNotifier {
     required String districtId,
     required Map<String, String> headers,
   }) async {
-    final response = await cartRepositoryInterface.getShoppingCart(
+    final responseApi = await cartRepositoryInterface.getShoppingCart(
       districtId: districtId,
       headers: headers,
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
+    if (responseApi.data == null) return;
 
-      return false;
-    }
-
-    if (response is! http.Response) {
-      return false;
-    }
-
-    if (response.statusCode != 200) {
-      return false;
-    }
-
-    final decodeResponse = jsonDecode(response.body);
-    return Cart.fromMap(decodeResponse);
+    return Cart.fromMap(responseApi.data);
   }
 
   Future<dynamic> getShoppingCartTemp({
@@ -554,31 +539,20 @@ class MainBloc extends ChangeNotifier {
   }) async {
     final shoppingCartId = await handleGetShoppingCartId();
 
-    Map<String, String> headers = {'Custom-Cart': shoppingCartId};
+    Map<String, String> headers = {
+      "Content-type": "application/json",
+      "Custom-Origin": "app",
+      'Custom-Cart': shoppingCartId
+    };
 
-    final response = await cartRepositoryInterface.getShoppingCartTemp(
+    final responseApi = await cartRepositoryInterface.getShoppingCartTemp(
       districtId: districtId,
       headers: headers,
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
+    if (responseApi.data == null) return;
 
-      return false;
-    }
-
-    if (response is! http.Response) {
-      return false;
-    }
-
-    if (response.statusCode != 200) {
-      return false;
-    }
-
-    final decodeResponse = jsonDecode(response.body);
-    return Cart.fromMap(decodeResponse);
+    return Cart.fromMap(responseApi.data);
   }
 
   void handleGetShoppingCartNotAccount() async {
@@ -625,24 +599,14 @@ class MainBloc extends ChangeNotifier {
   Future<dynamic> changeShoppingCart() async {
     final shoppingCartId = await handleGetShoppingCartId();
 
-    final response = await cartRepositoryInterface.moveShoppingCart(
+    final responseApi = await cartRepositoryInterface.moveShoppingCart(
       cartId: shoppingCartId,
       headers: headers,
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
+    if (responseApi.data == null) return null;
 
-      return false;
-    }
-
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        return responseApiFromMap(response.body);
-      }
-    }
+    return ResponseApi.fromMap(responseApi.data);
   }
 
   Future<void> handleRemoveShoppingCart() async {
@@ -686,9 +650,8 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
-  Future<void> handleFnShoppingCart() async {
+  Future<void> handleShoppingCart() async {
     if (sessionAccount.value == Session.active) {
-      print("ACCEDIO A SECCIONA COUNT VALUE");
       final cart = await getShoppingCart(
         districtId: residence.districtId!,
         headers: headers,
@@ -697,23 +660,17 @@ class MainBloc extends ChangeNotifier {
       if (cart is Cart) {
         informationCart.value = cart;
         cartLength.value = cart.products!.length;
+        return;
       }
 
       return;
     }
-    print("NOOOO ACCEDIO A SECCIONA COUNT VALUE");
-
-    /// Continue computing execution code
 
     final shoppingCartId = await handleGetShoppingCartId();
 
     final cart = await getShoppingCartTemp(
       districtId: residence.districtId!,
     );
-
-    print("RESOLVIO!!!");
-    print("Cart");
-    print(cart);
 
     if (cart is Cart) {
       print(cart.toMap());

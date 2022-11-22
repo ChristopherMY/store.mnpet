@@ -23,83 +23,7 @@ class SignForm extends StatefulWidget {
 }
 
 class _SignFormState extends State<SignForm> {
-  void validateSession() async {
-    final signInBloc = context.read<SignInBloc>();
-    final mainBloc = context.read<MainBloc>();
-
-    if (signInBloc.formKey.currentState!.validate()) {
-      context.loaderOverlay.show();
-
-      signInBloc.formKey.currentState!.save();
-      KeyboardUtil.hideKeyboard(context);
-
-      final response = await signInBloc.signIn();
-      if (!mounted) return;
-
-      if (response is bool && response == false) {
-        context.loaderOverlay.hide();
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Lo sentimos, por favor inténtelo más tarde",
-        );
-
-        return;
-      }
-
-      if (response is ResponseAuth) {
-        context.loaderOverlay.hide();
-        GlobalSnackBar.showWarningSnackBar(context, response.message);
-        return;
-      }
-
-      if (response is! CredentialsAuth) {
-        context.loaderOverlay.hide();
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Lo sentimos, por favor inténtelo más tarde",
-        );
-        return;
-      }
-
-      final responseSession = await mainBloc.loadSessionPromise();
-
-      if (responseSession) {
-        final responseUserInformation = await mainBloc.getUserInformation();
-        if (!mounted) return;
-
-        if (responseUserInformation is! UserInformation) {
-          context.loaderOverlay.hide();
-
-          GlobalSnackBar.showErrorSnackBarIcon(
-            context,
-            "Tuvimos problemas, vuelva a intentarlo",
-          );
-
-          return;
-        }
-
-        /// Procedemos a cambiar
-        await mainBloc.changeShoppingCart();
-        await mainBloc.handleGetShoppingCart();
-
-        mainBloc.informationUser = responseUserInformation;
-        mainBloc.sessionAccount.value = Session.active;
-        mainBloc.account.value = Account.active;
-
-        mainBloc.refreshMainBloc();
-        int count = 0;
-
-        Navigator.of(context).popUntil((route) => count++ >= 2);
-        return;
-      }
-
-      context.loaderOverlay.hide();
-      GlobalSnackBar.showWarningSnackBar(
-        context,
-        "Tenemos un problema, por favor inténtelo más tarde.",
-      );
-    }
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +115,7 @@ class _SignFormState extends State<SignForm> {
           SizedBox(height: getProportionateScreenHeight(25.0)),
           DefaultButton(
             text: "Continuar",
-            press: validateSession,
+            press: () => signInBloc.signIn(context),
           ),
         ],
       ),

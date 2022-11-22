@@ -1,108 +1,94 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/http.dart';
+
+import '../../helper/http_response.dart';
 
 class AuthService implements AuthRepositoryInterface {
-  final _url = Environment.API_DAO;
+  final String _url = Environment.API_DAO;
+  final Http _dio = Http(logsEnabled: true);
 
   // https.Response
   @override
-  Future<dynamic> createUser({required Map<String, dynamic> user}) async {
-    try {
-      return await http.post(
-        Uri.parse("$_url/api/v1/users/ecommerce/register-native"),
-        headers: headers,
-        body: json.encode(user),
-      );
-    } on Exception catch (e) {
-      return e.toString();
-    }
-
+  Future<HttpResponse> createUser({
+    required Map<String, dynamic> data,
+  }) async {
+    return await _dio.request(
+      "$_url/api/v1/users/ecommerce/register-native",
+      method: "POST",
+      data: data,
+    );
   }
 
-  // https.Response
+  // HttpResponse
   @override
-  Future<dynamic> loginVerification({
+  Future<HttpResponse> loginVerification({
     required String email,
     required String password,
   }) async {
-    try {
-      return await http.post(
-        Uri.parse("$_url/api/v1/users/ecommerce/login"),
-        headers: headers,
-        body: json.encode({
-          "email": email,
-          "password": password,
-        }),
-      );
-    } on Exception catch (e) {
-      return e.toString();
-    }
+    return await _dio.request(
+      "$_url/api/v1/users/ecommerce/login",
+      method: "POST",
+      headers: headers,
+      data: {
+        "email": email,
+        "password": password,
+      },
+    );
   }
 
   @override
-  Future<dynamic> requestPasswordChange({
+  Future<HttpResponse> requestPasswordChange({
     required String value,
     required String valueType,
   }) async {
-    try {
-      Map<String, dynamic> bodyParams = {"value": value, "type": valueType};
-      final encode = json.encode(bodyParams);
+    Map<String, dynamic> bodyParams = {"value": value, "type": valueType};
 
-      return await http.post(
-        Uri.parse("$_url/api/v1/users/ecommerce/change-password"),
-        headers: headers,
-        body: encode,
-      );
-    } catch (e) {
-      return e.toString();
-    }
+    return await _dio.request(
+      "$_url/api/v1/users/ecommerce/password/change",
+      method: "POST",
+      headers: headers,
+      data: bodyParams,
+    );
   }
 
   @override
-  Future<dynamic> validateOtp({
+  Future<HttpResponse> validateOtp({
     required String otp,
     required String userId,
   }) async {
-    try {
-      Map<String, dynamic> bodyParams = {
-        "user_id": userId,
-        "otp_to_validate": otp
-      };
+    Map<String, dynamic> bodyParams = {
+      "user_id": userId,
+      "otp_to_validate": otp
+    };
 
-      final encode = json.encode(bodyParams);
-
-      return await http.post(
-        Uri.parse("$_url/api/v1/users/ecommerce/validate-otp"),
-        headers: headers,
-        body: encode,
-      );
-    } catch (e) {
-      return e.toString();
-    }
+    return await _dio.request(
+      "$_url/api/v1/users/ecommerce/password/otp",
+      headers: headers,
+      method: "POST",
+      data: bodyParams,
+    );
   }
 
   @override
-  Future changePassword({
+  Future<HttpResponse> changePassword({
     required String userId,
     required String password,
     required String passwordConfirmation,
-  }) async{
-    try {
-      Uri url = Uri.parse("$_url/api/v1/users/ecommerce/change-password");
-      Map<String, dynamic> bodyParams = {
-        "user_id": userId,
-        "password": password,
-        "password_confirmation": passwordConfirmation
-      };
+  }) async {
+    Map<String, dynamic> bodyParams = {
+      "user_id": userId,
+      "password": password,
+      "password_confirmation": passwordConfirmation
+    };
 
-      final encode = json.encode(bodyParams);
-      return await http.put(url, headers: headers, body: encode);
-    } on Exception catch (e){
-      return e.toString();
-    }
+    return await _dio.request(
+      "$_url/api/v1/users/ecommerce/password/change",
+      method: "PUT",
+      headers: headers,
+      data: bodyParams,
+    );
   }
 }

@@ -460,7 +460,7 @@ class CardItem extends StatelessWidget {
                             );
 
                             if (response is ResponseApi) {
-                              await mainBloc.handleFnShoppingCart();
+                              await mainBloc.handleShoppingCart();
                               context.loaderOverlay.hide();
                               await GlobalSnackBar.showInfoSnackBarIcon(
                                 context,
@@ -508,7 +508,7 @@ class CardItem extends StatelessWidget {
                                   );
 
                                   if (response is ResponseApi) {
-                                    await mainBloc.handleFnShoppingCart();
+                                    await mainBloc.handleShoppingCart();
 
                                     context.loaderOverlay.hide();
 
@@ -546,7 +546,7 @@ class CardItem extends StatelessWidget {
                                   );
 
                                   if (response is ResponseApi) {
-                                    await mainBloc.handleFnShoppingCart();
+                                    await mainBloc.handleShoppingCart();
 
                                     context.loaderOverlay.hide();
 

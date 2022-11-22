@@ -4,7 +4,6 @@ import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 import '../../product_bloc.dart';
 
@@ -50,11 +49,13 @@ class CustomProgressButton extends StatelessWidget {
             ),
             ButtonState.fail: const Text(
               "Ups, algo salio mal",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
             ),
             ButtonState.success: const Text(
               "Producto añadido",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w400),
             ),
           },
           progressIndicator: const CircularProgressIndicator(
@@ -68,28 +69,11 @@ class CustomProgressButton extends StatelessWidget {
             ButtonState.fail: kPrimaryColorRed,
             ButtonState.success: kPrimaryColor,
           },
-          //onPressed: isDialog! ? onAddDialogCart : onAddCart,
-          onPressed: () async {
-            final response = await productBloc.onSaveShoppingCart();
+          onPressed: () {
+            productBloc.onSaveShoppingCart(context);
 
-            if (response is bool) {
-              if (response) {
-                 mainBloc.handleFnShoppingCart();
-
-                GlobalSnackBar.showInfoSnackBarIcon(
-                  context,
-                  "Tu producto a sido agregado exitosamente al carrito",
-                );
-              } else {
-                GlobalSnackBar.showErrorSnackBarIcon(
-                  context,
-                  'Ups, tuvimos un problema. Vuelva a intentarlo más tarde',
-                );
-              }
-
-              if (buttonComesFromModal) {
-                Navigator.of(context).pop();
-              }
+            if (buttonComesFromModal) {
+              Navigator.of(context).pop();
             }
           },
           state: value,

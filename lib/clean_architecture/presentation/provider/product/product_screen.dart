@@ -69,75 +69,68 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   Widget build(BuildContext context) {
     final productBloc = context.watch<ProductBloc>();
-    if (productBloc.isLoadingPage) {
-      return const LoadingBagFullScreen();
-    } else {
-      final product = productBloc.product!;
-      return Scaffold(
-        backgroundColor: kBackGroundColor,
-        body: SafeArea(
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              const _BuildAppBar(),
-              //const CustomAppBar(),
-              _buildInfo(context: context, product: product),
-              /*
+    if (productBloc.isLoadingPage) return const LoadingBagFullScreen();
+
+    final product = productBloc.product!;
+    return Scaffold(
+      backgroundColor: kBackGroundColor,
+      body: SafeArea(
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            const _BuildAppBar(),
+            _buildInfo(context: context, product: product),
+            /*
                               _lineBreakSliver(),
                               _buildRatings(context: _scaffoldKey.currentContext, product: product),
                               _lineBreakSliver(),
                               _buildComments(context: _scaffoldKey.currentContext),
                             */
-              _lineBreakSliver(),
-              product.galleryDescription!.isNotEmpty ||
-                      product.galleryDescription!.isNotEmpty
-                  ? const BuildDescription()
-                  : const SliverToBoxAdapter(
-                      child: SizedBox(),
+            _lineBreakSliver(),
+            if (product.galleryDescription!.isNotEmpty) const BuildDescription(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Seguro que te gusta",
+                      style: Theme.of(context).textTheme.subtitle2,
+                      textAlign: TextAlign.start,
                     ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        "Seguro que te gusta",
-                        style: Theme.of(context).textTheme.subtitle2,
-                        textAlign: TextAlign.start,
-                      ),
-                      const SizedBox(height: 5)
-                    ],
-                  ),
+                    const SizedBox(height: 5)
+                  ],
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10.0,
-                  vertical: 10.0,
-                ),
-                sliver: PagedSliverMasonryGrid(
-                  crossAxisCount: 2,
-                  pagingController: productBloc.pagingController,
-                  builderDelegate: PagedChildBuilderDelegate<Product>(
-                    firstPageErrorIndicatorBuilder: (context) {
-                      return const LottieAnimation(
-                        source: "assets/lottie/lonely-404.json",
-                      );
-                    },
-                    itemBuilder: (context, item, index) {
-                      return TrendingItemMain(
-                        product: item,
-                        gradientColors: const [
-                          Color(0xFFF28767),
-                          Color(0xFFFFA726),
-                        ],
-                      );
-                    },
-                  ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10.0,
+                vertical: 10.0,
+              ),
+              sliver: PagedSliverMasonryGrid(
+                crossAxisCount: 2,
+                pagingController: productBloc.pagingController,
+                builderDelegate: PagedChildBuilderDelegate<Product>(
+                  firstPageErrorIndicatorBuilder: (context) {
+                    return const LottieAnimation(
+                      source: "assets/lottie/lonely-404.json",
+                    );
+                  },
+                  itemBuilder: (context, item, index) {
+                    return TrendingItemMain(
+                      product: item,
+                      gradientColors: const [
+                        Color(0xFFF28767),
+                        Color(0xFFFFA726),
+                      ],
+                    );
+                  },
                 ),
               ),
-              /*
+            ),
+            /*
                               SliverVisibility(
                                 visible: _show,
                                 sliver: SliverPersistentHeader(
@@ -162,13 +155,12 @@ class _ProductScreenState extends State<ProductScreen> {
                                 ),
                               ),
                           */
-            ],
-          ),
+          ],
         ),
-        bottomNavigationBar: const CustomBottomNavigationBar(),
-      );
-      // );
-    }
+      ),
+      bottomNavigationBar: const CustomBottomNavigationBar(),
+    );
+    // );
   }
 
   _lineBreakSliver() {

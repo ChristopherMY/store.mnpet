@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_forgot_password.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/recovery_password/recovery_password_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 class OtpBloc extends ChangeNotifier {
   AuthRepositoryInterface authRepositoryInterface;
@@ -42,30 +42,69 @@ class OtpBloc extends ChangeNotifier {
     );
   }
 
-  Future<dynamic> validateOtp({
+  void validateOtp({
     required String pin,
     required String userId,
+    required BuildContext context,
   }) async {
-    final response =
-        await authRepositoryInterface.validateOtp(otp: pin, userId: userId);
+    context.loaderOverlay.show();
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
+    final response = await authRepositoryInterface.validateOtp(
+      otp: pin,
+      userId: userId,
+    );
+
+    context.loaderOverlay.hide();
+
+    if (response != null) {
+      final responseForgotPassword =
+          ResponseForgotPassword.fromMap(response.data);
+
+      if (responseForgotPassword.status == 'success') {
+        GlobalSnackBar.showInfoSnackBarIcon(
+          context,
+          responseForgotPassword.message!,
+        );
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) {
+            return RecoveryPasswordScreen.init(context);
+          }),
+        );
+
+        return;
       }
 
-      return false;
-    }
+      GlobalSnackBar.showErrorSnackBarIcon(
+        context,
+        responseForgotPassword.message!,
+      );
 
-    if (response is! http.Response) {
-      return false;
-    }
+      context.loaderOverlay.hide();
+      controller.clear();
+      responseError.value = true;
+    } else {
+      String message = response.error!.message;
 
-    if (response.statusCode == 200) {
-      return false;
-    }
+      print("message");
+      print(message);
 
-    final decode = json.decode(response.body);
-    return ResponseForgotPassword.fromMap(decode);
+      // if (response.error!.statusCode == -1) {
+      //   message = "Bad network";
+      // }
+      //
+      // if (response.error!.statusCode == -403) {
+      //   message = "Invalid";
+      // }
+      //
+      // if (response.error!.statusCode == -404) {
+      //   message = "Not found";
+      // }
+
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Tuvimos problemas, vuelva a intentarlo más tarde.",
+      );
+    }
   }
 }

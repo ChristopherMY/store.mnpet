@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/response_forgot_password.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/forgot_password/forgot_password_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/recovery_password/recovery_password_bloc.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
 
 import '../../../helper/size_config.dart';
@@ -162,46 +161,8 @@ class RecoveryPasswordForm extends StatelessWidget {
           SizedBox(height: SizeConfig.screenHeight! * 0.02),
           DefaultButton(
             text: "Restablecer",
-            press: () async {
-              if (recoveryPasswordBloc.formKey.currentState!.validate()) {
-                context.loaderOverlay.show();
-                recoveryPasswordBloc.formKey.currentState!.save();
-
-                final response = await recoveryPasswordBloc.changePassword(
-                  userId: forgotPasswordBloc.responseForgotPassword.userId!,
-                  password: recoveryPasswordBloc.passwordController.text,
-                  passwordConfirmation: recoveryPasswordBloc.passwordConfirmController.text,
-                );
-
-                if (response is ResponseForgotPassword) {
-                  if (response.status == 'success') {
-                    GlobalSnackBar.showInfoSnackBarIcon(
-                      context,
-                      response.message!,
-                    );
-
-                    context.loaderOverlay.hide();
-                    int count = 0;
-                    Navigator.of(context).popUntil((route) => count++ >= 3);
-                    return;
-                  }
-
-                  GlobalSnackBar.showErrorSnackBarIcon(
-                    context,
-                    response.message!,
-                  );
-
-                  context.loaderOverlay.hide();
-                  return;
-                }
-
-                GlobalSnackBar.showErrorSnackBarIcon(
-                  context,
-                  "Tuvimos problemas, vuelva a intentarlo más tarde.",
-                );
-
-                context.loaderOverlay.hide();
-              }
+            press: () {
+              recoveryPasswordBloc.changePassword(context: context);
             },
           ),
         ],

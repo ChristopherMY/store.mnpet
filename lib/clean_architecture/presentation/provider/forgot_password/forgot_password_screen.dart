@@ -134,52 +134,7 @@ class ForgotPassForm extends StatelessWidget {
           DefaultButton(
             text: "Continue",
             press: () async {
-              if (forgotPasswordBloc.formKey.currentState!.validate()) {
-                forgotPasswordBloc.formKey.currentState!.save();
-                if (forgotPasswordBloc.errors.value.isEmpty) {
-                  KeyboardUtil.hideKeyboard(context);
-                  context.loaderOverlay.show();
-
-                  final response = await forgotPasswordBloc.validateNumberDoc(
-                    value: forgotPasswordBloc.emailPhoneController.text,
-                    valueType: forgotPasswordBloc.valueType,
-                  );
-
-                  if (response is ResponseForgotPassword) {
-                    forgotPasswordBloc.responseForgotPassword = response;
-                    if (response.status == 'success') {
-                      GlobalSnackBar.showInfoSnackBarIcon(
-                        context,
-                        response.message!,
-                      );
-
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => OptScreen.init(context),
-                        ),
-                      );
-                    } else {
-                      GlobalSnackBar.showErrorSnackBarIcon(
-                        context,
-                        response.message!,
-                      );
-                    }
-                  } else if (response is bool) {
-                    GlobalSnackBar.showErrorSnackBarIcon(
-                      context,
-                      "Tuvimos problemas, vuelva a intentarlo más tarde",
-                    );
-                  }
-
-                  context.loaderOverlay.hide();
-                }
-                // validationNumberDoc(
-                //   context: context,
-                //   value: valueField,
-                //   valueType: valueType,
-                // );
-
-              }
+              forgotPasswordBloc.validateNumberDoc(context: context);
             },
           ),
           SizedBox(height: SizeConfig.screenHeight! * 0.02),

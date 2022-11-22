@@ -1,11 +1,13 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_forgot_password.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/keyboard.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/otp/opt_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/otp/otp_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 class ForgotPasswordBloc extends ChangeNotifier {
   AuthRepositoryInterface authRepositoryInterface;
@@ -16,6 +18,7 @@ class ForgotPasswordBloc extends ChangeNotifier {
   ValueNotifier<List<String>> errors = ValueNotifier([]);
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   String valueType = "";
+
   ResponseForgotPassword responseForgotPassword = ResponseForgotPassword();
 
   void addError({required String error}) {
@@ -64,28 +67,98 @@ class ForgotPasswordBloc extends ChangeNotifier {
     return null;
   }
 
-  Future<dynamic> validateNumberDoc({
-    required String value,
-    required String valueType,
-  }) async {
+  void revalidateNumberDoc({required BuildContext context}) async {
+    KeyboardUtil.hideKeyboard(context);
+    context.loaderOverlay.show();
+
+    final otpBloc = context.read<OtpBloc>();
+
     final response = await authRepositoryInterface.requestPasswordChange(
-      value: value,
+      value: emailPhoneController.text,
       valueType: valueType,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decode = json.decode(response.body);
-        return ResponseForgotPassword.fromMap(decode);
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
+    context.loaderOverlay.hide();
+    if (response != null) {
+      responseForgotPassword = ResponseForgotPassword.fromMap(response.data);
+
+      if (responseForgotPassword.status == "success") {
+        GlobalSnackBar.showInfoSnackBarIcon(
+          context,
+          responseForgotPassword.message!,
+        );
+
+        otpBloc.responseError.value = false;
+        otpBloc.counter.value = 60;
+        otpBloc.startTimer();
+
+        return;
       }
     }
 
-    return false;
+    GlobalSnackBar.showErrorSnackBarIcon(
+      context,
+      responseForgotPassword.message!,
+    );
+    //
+    // if (response is bool) {
+    //   GlobalSnackBar.showErrorSnackBarIcon(
+    //     context,
+    //     "Tuvimos problemas, vuelva a intentarlo más tarde",
+    //   );
+    // }
   }
 
+  void validateNumberDoc({
+    required BuildContext context,
+  }) async {
+    if (formKey.currentState!.validate()) {
+      if (errors.value.isEmpty) {
+        formKey.currentState!.save();
+        KeyboardUtil.hideKeyboard(context);
 
+        context.loaderOverlay.show();
+
+        final response = await authRepositoryInterface.requestPasswordChange(
+          value: emailPhoneController.text,
+          valueType: valueType,
+        );
+
+        context.loaderOverlay.hide();
+        if (response != null) {
+          responseForgotPassword =
+              ResponseForgotPassword.fromMap(response.data);
+
+          if (responseForgotPassword.status == 'success') {
+            GlobalSnackBar.showInfoSnackBarIcon(
+              context,
+              responseForgotPassword.message!,
+            );
+
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => OptScreen.init(context),
+              ),
+            );
+
+            return;
+          }
+
+          GlobalSnackBar.showErrorSnackBarIcon(
+            context,
+            responseForgotPassword.message!,
+          );
+        } else {
+          String message = response.error!.message;
+          print("message!!!!!!!!!");
+          print(message);
+
+          GlobalSnackBar.showWarningSnackBar(
+            context,
+            "Ups tenemos un problema, vuelva a intentarlo más tarde.",
+          );
+        }
+      }
+    }
+  }
 }
