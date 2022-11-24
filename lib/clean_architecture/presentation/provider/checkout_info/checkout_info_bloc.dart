@@ -1,10 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credit_card_model.dart';
@@ -15,6 +12,7 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/tab_payment_
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/payment_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 class CheckOutInfoBloc extends ChangeNotifier {
@@ -64,127 +62,126 @@ class CheckOutInfoBloc extends ChangeNotifier {
     required BuildContext context,
   }) async {
     // if (formKey.currentState!.validate()) {
-      if (expiryDate.isEmpty) {
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Fecha de expiración vacía",
-        );
-        return;
-      }
+    if (expiryDate.isEmpty) {
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Fecha de expiración vacía",
+      );
+      return;
+    }
 
-      List<String> list = expiryDate.split('/');
+    List<String> list = expiryDate.split('/');
 
-      if (list.length != 2) {
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-        );
-
-        return;
-      }
-
-      expirationMonth = int.parse(list[0]);
-      expirationYear = "20${list[1]}";
-
-      final tokenDetail = await getToken(
-        identificationNumber: userInformation.document!.value!,
-        userInformation: userInformation,
+    if (list.length != 2) {
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
       );
 
-      if (tokenDetail is! MercadoPagoCardToken) {
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-        );
-        return;
-      }
+      return;
+    }
 
-      await Future.microtask(
-        () async {
-          await getInstallments(
-            cardToken: cardToken,
-            amount: double.parse(cartInformation.total!),
-          );
-        },
+    expirationMonth = int.parse(list[0]);
+    expirationYear = "20${list[1]}";
+
+    cardToken = await getToken(
+      context,
+      identificationNumber: userInformation.document!.value!,
+      userInformation: userInformation,
+    );
+
+    if (cardToken is! MercadoPagoCardToken) {
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
       );
 
-      if (installmentsDetail is! MercadoPagoPaymentMethodInstallments) {
+      return;
+    }
 
-        GlobalSnackBar.showWarningSnackBar(
+    await Future.microtask(
+      () async {
+        await getInstallments(
           context,
-          "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+          cardToken: cardToken,
+          amount: double.parse(cartInformation.total!),
         );
-        return;
-      }
+      },
+    );
 
-      if (userInformation.addresses!.isEmpty) {
-
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Registre su dirección de envío para continuar",
-        );
-        return;
-      }
-
-      final existsDefaultAddress = userInformation.addresses!.firstWhereOrNull(
-        (element) => element.addressDefault == true,
+    if (installmentsDetail is! MercadoPagoPaymentMethodInstallments) {
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
       );
 
-      if (existsDefaultAddress == null) {
+      return;
+    }
 
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Seleccione una dirección de envío por defecto",
+    if (userInformation.addresses!.isEmpty) {
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Registre su dirección de envío para continuar",
+      );
+
+      return;
+    }
+
+    final existsDefaultAddress = userInformation.addresses!.firstWhereOrNull(
+      (element) => element.addressDefault == true,
+    );
+
+    if (existsDefaultAddress == null) {
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Seleccione una dirección de envío por defecto",
+      );
+
+      return;
+    }
+
+    Map<String, String> headers = {
+      "Content-type": "application/json",
+      "Custom-Origin": "app",
+    };
+
+    final responseCredentials = await Future.microtask(
+      () async {
+        return CredentialsAuth.fromMap(
+          await hiveRepositoryInterface.read(
+                containerName: "authentication",
+                key: "credentials",
+              ) ??
+              {
+                "email": "",
+                "email_confirmed": false,
+                "token": "",
+              },
         );
+      },
+    );
 
-        return;
-      }
-
-      Map<String, String> headers = {
-        "Content-type": "application/json",
-        "Custom-Origin": "app",
-      };
-
-      final responseCredentials = await Future.microtask(
-        () async {
-          return CredentialsAuth.fromMap(
-            await hiveRepositoryInterface.read(
-                  containerName: "authentication",
-                  key: "credentials",
-                ) ??
-                {
-                  "email": "",
-                  "email_confirmed": false,
-                  "token": "",
-                },
-          );
-        },
+    if (responseCredentials.token.isEmpty) {
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
       );
 
-      if (responseCredentials.token.isEmpty) {
+      return;
+    }
 
-        GlobalSnackBar.showWarningSnackBar(
-            context, "Ups. Tuvimos un problema, vuelva a intentarlo más tarde");
+    headers[HttpHeaders.authorizationHeader] = "Bearer ${responseCredentials.token}";
 
-        return;
-      }
+    return await paymentRepositoryInterface.createPayment(
+      additionalInfoMessage: "N/A",
+      companyName: "N/A",
+      cardToken: cardToken.id,
+      installments: installmentsDetail.payerCosts!.first.installments!,
+      paymentMethodId: installmentsDetail.paymentMethodId!,
+      issuerId: installmentsDetail.issuer!.id!,
+      headers: headers,
+    );
 
-      headers[HttpHeaders.authorizationHeader] =
-          "Bearer ${responseCredentials.token}";
-
-      return await paymentRepositoryInterface.createPayment(
-        additionalInfoMessage: "N/A",
-        companyName: "N/A",
-        cardToken: cardToken.id,
-        installments: installmentsDetail.payerCosts!.first.installments!,
-        paymentMethodId: installmentsDetail.paymentMethodId!,
-        issuerId: installmentsDetail.issuer!.id!,
-        headers: headers,
-      );
-    // } else {
-    //   /// TODO: No important;
-    //   print('invalid!');
-    // }
   }
 
   void onCreditCardModelChange(CreditCardModel? creditCardModel) {
@@ -197,26 +194,35 @@ class CheckOutInfoBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  void getIdentificationTypes() async {
-    final response = await paymentRepositoryInterface.getIdentificationTypes();
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
+  void getIdentificationTypes(BuildContext context) async {
+    final responseApi =
+        await paymentRepositoryInterface.getIdentificationTypes();
+
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        GlobalSnackBar.showWarningSnackBar(context, "Public key not found.");
+        return;
+      }
+
+      if (statusCode == 401) {
+        GlobalSnackBar.showWarningSnackBar(
+            context, "The credentials are required.");
+        return;
+      }
+
+      if (statusCode == 404) {
+        GlobalSnackBar.showWarningSnackBar(
+            context, "Identification types not found.");
+        return;
       }
 
       return;
     }
 
-    if (response is! http.Response) {
-      return;
-    }
-
-    if (response.statusCode != 200) {
-      return;
-    }
-
-    final identificationTypes = json.decode(response.body) as List;
+    final identificationTypes = responseApi.data as List;
     if (identificationTypes.isEmpty) {
+      GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
       return;
     }
 
@@ -224,16 +230,20 @@ class CheckOutInfoBloc extends ChangeNotifier {
     documentType = result.documentTypeList.first;
   }
 
-  Future<dynamic> getToken({
+  Future<dynamic> getToken(
+    BuildContext context, {
     required String identificationNumber,
     required UserInformation userInformation,
   }) async {
     if (documentType is! MercadoPagoDocumentType) {
-
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        kOtherProblem,
+      );
       return;
     }
 
-    final response = await paymentRepositoryInterface.createCardToken(
+    final responseApi = await paymentRepositoryInterface.createCardToken(
       cvv: cvvCode,
       expirationYear: expirationYear,
       expirationMonth: expirationMonth,
@@ -244,50 +254,83 @@ class CheckOutInfoBloc extends ChangeNotifier {
           "${userInformation.name!.trim()} ${userInformation.lastname!.trim()}",
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        GlobalSnackBar.showWarningSnackBar(context, "Public key not found.");
+        return;
       }
 
+      if (statusCode == 401) {
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "The credentials are required.",
+        );
+        return;
+      }
+
+      if (statusCode == 404) {
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Identification types not found.",
+        );
+        return;
+      }
+
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        kOtherProblem,
+      );
       return;
     }
 
-    if (response is! http.Response) {
-
-      return;
-    }
-
-    if (response.statusCode != 201) {
-
-      return;
-    }
-
-    final decode = json.decode(response.body);
-    return cardToken = MercadoPagoCardToken.fromJsonMap(decode);
+    return MercadoPagoCardToken.fromJsonMap(responseApi.data);
   }
 
-  Future<void> getInstallments({
+  Future<void> getInstallments(
+    BuildContext context, {
     required MercadoPagoCardToken cardToken,
     required double amount,
   }) async {
-    final response = await paymentRepositoryInterface.getInstallments(
+    final responseApi = await paymentRepositoryInterface.getInstallments(
       bin: cardToken.firstSixDigits!,
       amount: amount,
     );
 
-    if (response is! http.Response) {
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        GlobalSnackBar.showWarningSnackBar(context, "Public key not found.");
+        return;
+      }
 
+      if (statusCode == 401) {
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "The credentials are required.",
+        );
+
+        return;
+      }
+
+      if (statusCode == 404) {
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Identification types not found.",
+        );
+
+        return;
+      }
+
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        kOtherProblem,
+      );
       return;
     }
 
-    if (response.statusCode != 200) {
-
-      return;
-    }
-
-    final decode = json.decode(response.body);
-
-    final result = MercadoPagoPaymentMethodInstallments.fromJsonList(decode);
+    final result =
+        MercadoPagoPaymentMethodInstallments.fromJsonList(responseApi.data);
     installmentsDetail = result.installmentList!.first;
   }
 
@@ -318,7 +361,8 @@ class CheckOutInfoBloc extends ChangeNotifier {
     print(data['error']);
     print('CODIGO ERROR ${data['error']['cause'][0]['code']}');
 
-    if (paymentErrorCodeMap.containsKey('${data['error']['cause'][0]['code']}')) {
+    if (paymentErrorCodeMap
+        .containsKey('${data['error']['cause'][0]['code']}')) {
       return paymentErrorCodeMap['${data['error']['cause'][0]['code']}']!;
     }
 

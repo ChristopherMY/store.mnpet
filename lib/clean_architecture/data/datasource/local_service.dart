@@ -1,11 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
-import 'package:http/http.dart' as http;
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/http.dart';
+
+import '../../helper/http_response.dart';
 
 class LocalService implements LocalRepositoryInterface {
-  final _url = Environment.API_DAO;
+  final String _url = Environment.API_DAO;
+  final Http _dio = Http(logsEnabled: true);
 
   @override
   Future<void> clearAllData() {
@@ -25,72 +27,42 @@ class LocalService implements LocalRepositoryInterface {
     throw UnimplementedError();
   }
 
-
   // List<District>
   @override
-  Future<dynamic> getDistricts({required String provinceId}) async {
-    try {
-      return await http.get(
-        Uri.parse("$_url/api/v1/districts/details/$provinceId"),
-        headers: headers,
-      );
-    } on Exception catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-
-      return e.toString();
-    }
+  Future<HttpResponse> getDistricts({required String provinceId}) async {
+    return await _dio.request(
+      "$_url/api/v1/districts/details/$provinceId",
+      method: "GET",
+      headers: headers,
+    );
   }
 
   // List<Province>
   @override
-  Future<dynamic> getProvinces({required String departmentId}) async {
-    try {
-      return await http.get(
-        Uri.parse("$_url/api/v1/provinces/details/$departmentId"),
-        headers: headers,
-      );
-    } on Exception catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-
-      return e.toString();
-    }
+  Future<HttpResponse> getProvinces({required String departmentId}) async {
+    return await _dio.request(
+      "$_url/api/v1/provinces/details/$departmentId",
+      method: "GET",
+      headers: headers,
+    );
   }
 
   // List<Region>
   @override
-  Future<dynamic> getRegions() async {
-    try {
-      return await http.get(
-        Uri.parse("$_url/api/v1/regions/departments"),
-        headers: headers,
-      );
-    } on Exception catch (e) {
-      if (kDebugMode) {
-        print("Error $e");
-      }
-
-      return e.toString();
-    }
+  Future<HttpResponse> getRegions() async {
+    return await _dio.request(
+      "$_url/api/v1/regions/departments",
+      method: "GET",
+      headers: headers,
+    );
   }
 
   @override
-  Future<dynamic> getKeywords() async{
-    try {
-      return await http.get(
-        Uri.parse("$_url/api/v1/search/keywords"),
-        headers: headers,
-      );
-    } on Exception catch (e) {
-      if (kDebugMode) {
-        print("Error $e");
-      }
-
-      return e.toString();
-    }
+  Future<HttpResponse> getKeywords() async {
+    return await _dio.request(
+      "$_url/api/v1/search/keywords",
+      method: "GET",
+      headers: headers,
+    );
   }
-
 }

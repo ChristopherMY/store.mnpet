@@ -1,9 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:roundcheckbox/roundcheckbox.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
@@ -12,7 +10,6 @@ import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/phone/phone_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 import '../../widget/button_crud.dart';
 
@@ -71,7 +68,8 @@ class PhonesDetail extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         "Número de teléfono",
@@ -128,49 +126,12 @@ class PhonesDetail extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 5.0),
                                 GestureDetector(
-                                  onTap: () async {
-                                    context.loaderOverlay.show();
-                                    final response =
-                                        await phoneBloc.onDeletePhone(
+                                  onTap: () {
+                                    phoneBloc.onDeletePhone(
+                                      context,
                                       phoneId: phone.id!,
                                       headers: mainBloc.headers,
                                     );
-
-                                    if (response is ResponseApi) {
-                                      phoneBloc.phone = Phone(
-                                        phoneDefault: false,
-                                        type: "phone",
-                                        areaCode: "51",
-                                      );
-
-                                      final responseUserInformation =
-                                          await mainBloc.getUserInformation();
-
-                                      if (responseUserInformation
-                                          is UserInformation) {
-                                        mainBloc.informationUser =
-                                            responseUserInformation;
-                                        mainBloc.refreshMainBloc();
-
-                                        context.loaderOverlay.hide();
-
-                                        await GlobalSnackBar
-                                            .showInfoSnackBarIcon(
-                                          context,
-                                          response.message,
-                                        );
-
-                                        return;
-                                      }
-                                    }
-
-                                    context.loaderOverlay.hide();
-                                    await GlobalSnackBar.showWarningSnackBar(
-                                      context,
-                                      "Ups, vuelvalo a intentar más tarde",
-                                    );
-
-                                    return;
                                   },
                                   child: const CircleAvatar(
                                     radius: 15.0,
@@ -244,36 +205,12 @@ class ItemPhone extends StatelessWidget {
                   height: 30.0,
                   child: RoundCheckBox(
                     onTap: (selected) async {
-                      context.loaderOverlay.show();
                       phone.phoneDefault = selected;
 
-                      final response = await phoneBloc.onChangeDefaultPhone(
+                      phoneBloc.onChangeDefaultPhone(
+                        context,
                         phoneId: phone.id!,
                         headers: mainBloc.headers,
-                      );
-
-                      if (response is ResponseApi) {
-                        final responseUserInformation =
-                            await mainBloc.getUserInformation();
-
-                        if (responseUserInformation is UserInformation) {
-                          mainBloc.informationUser = responseUserInformation;
-                          mainBloc.refreshMainBloc();
-
-                          await GlobalSnackBar.showInfoSnackBarIcon(
-                            context,
-                            response.message,
-                          );
-
-                          context.loaderOverlay.hide();
-                          return;
-                        }
-                      }
-
-                      context.loaderOverlay.hide();
-                      await GlobalSnackBar.showWarningSnackBar(
-                        context,
-                        "Ups, vuelvalo a intentar más tarde",
                       );
                     },
                     isChecked: phone.phoneDefault,

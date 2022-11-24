@@ -17,7 +17,7 @@ class SearchKeywordScreen extends StatelessWidget {
     return ChangeNotifierProvider<SearchKeywordBloc>(
       create: (context) => SearchKeywordBloc(
         localRepositoryInterface: context.read<LocalRepositoryInterface>(),
-      )..handleInitKeywords(),
+      )..handleInitKeywords(context),
       child: const SearchKeywordScreen._(),
     );
   }

@@ -1,15 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/order.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order/order_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order_detail/order_detail_screen.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
@@ -36,26 +32,9 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen> {
   void init() async {
-    final mainBloc = context.read<MainBloc>();
     final orderBloc = context.read<OrderBloc>();
-    final credentialsAuth = await mainBloc.loadCredentialsAuth();
 
-    orderBloc.headers[HttpHeaders.authorizationHeader] =
-        "Bearer ${credentialsAuth.token}";
-
-    final response = await orderBloc.getOrdersDetails();
-
-    if (response is List<Order>) {
-      orderBloc.orders = response;
-      orderBloc.refreshBloc();
-      return;
-    }
-
-    if (!mounted) return;
-    GlobalSnackBar.showWarningSnackBar(
-      context,
-      "Ups, vuelva a intentarlo más tarde",
-    );
+    orderBloc.getOrdersDetails(context);
   }
 
   @override

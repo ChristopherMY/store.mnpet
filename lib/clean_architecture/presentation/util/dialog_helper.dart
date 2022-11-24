@@ -10,9 +10,7 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/district.dar
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/region.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/sort_option.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
@@ -22,7 +20,6 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/pro
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/form_error.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_button.dart';
@@ -66,8 +63,9 @@ class DialogHelper {
                       onTap: () {
                         showDropdownRegions(
                           context: context,
-                          onChangeRegion: (index, stateAlertRegion, context) {
+                          onChangeRegion: (index, stateAlertRegion, __) {
                             mainBloc.onChangeRegion(
+                              context,
                               index: index,
                               stateAlertRegion: stateAlertRegion,
                             );
@@ -122,9 +120,11 @@ class DialogHelper {
                             context,
                           ) {
                             mainBloc.onChangeProvince(
+                              context,
                               index: index,
                               stateAlertProvince: stateAlertProvince,
                             );
+
                             Navigator.of(context).pop();
                           },
                         );
@@ -873,9 +873,10 @@ class DialogHelper {
                                         await showDropdownRegions(
                                           context: context,
                                           regions: mainBloc.extraRegions,
-                                          onChangeRegion: (index,
-                                              stateAlertRegion, context) {
+                                          onChangeRegion:
+                                              (index, stateAlertRegion, __) {
                                             shipmentBloc.onChangeRegion(
+                                              context,
                                               index: index,
                                               regions: mainBloc.extraRegions,
                                               stateAlertRegion:
@@ -927,9 +928,10 @@ class DialogHelper {
                                         await showDropdownProvinces(
                                           context: context,
                                           provinces: shipmentBloc.provinces,
-                                          onChangeProvince: (index,
-                                              stateAlertProvince, context) {
+                                          onChangeProvince:
+                                              (index, stateAlertProvince, __) {
                                             shipmentBloc.onChangeProvince(
+                                              context,
                                               index: index,
                                               stateAlertProvince:
                                                   stateAlertProvince,
@@ -1063,49 +1065,14 @@ class DialogHelper {
                                 if (shipmentBloc.isUpdate)
                                   ItemButton(
                                     title: "Eliminar dirección",
-                                    press: () async {
-                                      context.loaderOverlay.show();
-                                      Navigator.of(context).pop();
-                                      final response =
-                                          await shipmentBloc.onDeleteAddress(
+                                    press: () {
+                                      shipmentBloc.onDeleteAddress(
+                                        context,
                                         addressId: shipmentBloc.address.id!,
                                         headers: mainBloc.headers,
                                       );
 
-                                      if (response is ResponseApi) {
-                                        shipmentBloc.address = Address(
-                                          ubigeo: Ubigeo(),
-                                          lotNumber: 1,
-                                          dptoInt: 1,
-                                          addressDefault: false,
-                                        );
-
-                                        final responseUserInformation =
-                                            await mainBloc.getUserInformation();
-
-                                        if (responseUserInformation) {
-                                          mainBloc.informationUser =
-                                              responseUserInformation;
-
-                                          mainBloc.refreshMainBloc();
-                                          context.loaderOverlay.hide();
-                                          await GlobalSnackBar
-                                              .showInfoSnackBarIcon(
-                                            context,
-                                            response.message,
-                                          );
-
-                                          return;
-                                        }
-                                      }
-
-                                      context.loaderOverlay.hide();
-                                      await GlobalSnackBar.showWarningSnackBar(
-                                        context,
-                                        "Ups, vuelvalo a intentar más tarde",
-                                      );
-
-                                      return;
+                                      Navigator.of(context).pop();
                                     },
                                     icon: Icons.delete_forever_sharp,
                                   ),
@@ -1172,57 +1139,13 @@ class DialogHelper {
                                       if (shipmentBloc.errors.value.isEmpty) {
                                         shipmentBloc.formKey.currentState!
                                             .save();
-                                        context.loaderOverlay.show();
 
-                                        Navigator.of(context).pop();
-                                        final response =
-                                            await shipmentBloc.onSave(
+                                        shipmentBloc.onSave(
+                                          context,
                                           headers: mainBloc.headers,
                                         );
 
-                                        if (response is ResponseApi) {
-                                          shipmentBloc.address = Address(
-                                            ubigeo: Ubigeo(),
-                                            lotNumber: 1,
-                                            dptoInt: 1,
-                                            addressDefault: false,
-                                          );
-
-                                          final responseUserInformation =
-                                              await mainBloc
-                                                  .getUserInformation();
-
-                                          if (responseUserInformation
-                                              is UserInformation) {
-                                            mainBloc.informationUser =
-                                                responseUserInformation;
-                                            mainBloc.refreshMainBloc();
-                                            context.loaderOverlay.hide();
-
-                                            if (response.status == "success") {
-                                              return await GlobalSnackBar
-                                                  .showInfoSnackBarIcon(
-                                                context,
-                                                response.message,
-                                              );
-                                            }
-
-                                            return await GlobalSnackBar
-                                                .showErrorSnackBarIcon(
-                                              context,
-                                              response.message,
-                                            );
-                                          }
-                                        }
-
-                                        context.loaderOverlay.hide();
-                                        await GlobalSnackBar
-                                            .showWarningSnackBar(
-                                          context,
-                                          "Ups, vuelvalo a intentar más tarde",
-                                        );
-
-                                        return;
+                                        Navigator.of(context).pop();
                                       }
                                     }
                                   },
@@ -1370,58 +1293,20 @@ class DialogHelper {
                                 SizedBox(
                                   height: getProportionateScreenHeight(20.0),
                                 ),
-                                phoneBloc.isUpdate
-                                    ? ItemButton(
-                                        title: "Eliminar teléfono",
-                                        press: () async {
-                                          context.loaderOverlay.show();
-                                          Navigator.of(context).pop();
-                                          final response =
-                                              await phoneBloc.onDeletePhone(
-                                            phoneId: phoneBloc.phone.id!,
-                                            headers: mainBloc.headers,
-                                          );
+                                if (phoneBloc.isUpdate)
+                                  ItemButton(
+                                    title: "Eliminar teléfono",
+                                    press: () {
+                                      phoneBloc.onDeletePhone(
+                                        context,
+                                        phoneId: phoneBloc.phone.id!,
+                                        headers: mainBloc.headers,
+                                      );
 
-                                          if (response is ResponseApi) {
-                                            phoneBloc.phone = Phone(
-                                              phoneDefault: false,
-                                              type: "phone",
-                                              areaCode: "51",
-                                            );
-
-                                            final responseUserInformation =
-                                                await mainBloc.getUserInformation();
-
-                                            if (responseUserInformation
-                                                is UserInformation) {
-                                              mainBloc.informationUser =
-                                                  responseUserInformation;
-                                              mainBloc.refreshMainBloc();
-
-                                              context.loaderOverlay.hide();
-
-                                              await GlobalSnackBar
-                                                  .showInfoSnackBarIcon(
-                                                context,
-                                                response.message,
-                                              );
-
-                                              return;
-                                            }
-                                          }
-
-                                          context.loaderOverlay.hide();
-                                          await GlobalSnackBar
-                                              .showWarningSnackBar(
-                                            context,
-                                            "Ups, vuelvalo a intentar más tarde",
-                                          );
-
-                                          return;
-                                        },
-                                        icon: Icons.delete_forever_sharp,
-                                      )
-                                    : const SizedBox(),
+                                      Navigator.of(context).pop();
+                                    },
+                                    icon: Icons.delete_forever_sharp,
+                                  ),
                                 SizedBox(
                                   height: getProportionateScreenHeight(20.0),
                                 ),
@@ -1433,54 +1318,12 @@ class DialogHelper {
                                       phoneBloc.formKey.currentState!.save();
                                       if (phoneBloc.errors.value.isEmpty) {
                                         context.loaderOverlay.show();
-                                        Navigator.of(context).pop();
-                                        final response = await phoneBloc.onSave(
+                                        phoneBloc.onSave(
+                                          context,
                                           headers: mainBloc.headers,
                                         );
 
-                                        if (response is ResponseApi) {
-                                          phoneBloc.phone = Phone(
-                                            phoneDefault: false,
-                                            type: "phone",
-                                            areaCode: "51",
-                                          );
-
-                                          final responseUserInformation =
-                                              await mainBloc
-                                                  .getUserInformation();
-
-                                          if (responseUserInformation
-                                              is UserInformation) {
-                                            mainBloc.informationUser =
-                                                responseUserInformation;
-                                            mainBloc.refreshMainBloc();
-
-                                            context.loaderOverlay.hide();
-
-                                            if (response.status == "success") {
-                                              return await GlobalSnackBar
-                                                  .showInfoSnackBarIcon(
-                                                context,
-                                                response.message,
-                                              );
-                                            }
-
-                                            return await GlobalSnackBar
-                                                .showErrorSnackBarIcon(
-                                              context,
-                                              response.message,
-                                            );
-                                          }
-                                        }
-
-                                        context.loaderOverlay.hide();
-                                        await GlobalSnackBar
-                                            .showWarningSnackBar(
-                                          context,
-                                          "Ups, vuelvalo a intentar más tarde",
-                                        );
-
-                                        return;
+                                        Navigator.of(context).pop();
                                       }
                                     }
                                   },
@@ -1664,7 +1507,7 @@ class DialogHelper {
                                           final mainBloc =
                                               context.read<MainBloc>();
                                           final shippingPrice = await mainBloc
-                                              .onSaveShippingAddress(
+                                              .onSubmitShippingAddress(
                                             slug: productBloc.product!.slug!,
                                             quantity:
                                                 productBloc.quantity.value,

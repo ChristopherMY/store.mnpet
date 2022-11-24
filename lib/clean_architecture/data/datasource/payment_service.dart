@@ -1,21 +1,21 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/payment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/payment_repository.dart';
-import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/http.dart';
+import '../../helper/http_response.dart';
 
 class PaymentService implements PaymentRepositoryInterface {
   final String _urlMercadoPago = "api.mercadopago.com";
   final _mercadoPagoCredentials = Environment.mercadoPagoCredentials;
-  final _url = Environment.API_DAO;
+  final String _url = Environment.API_DAO;
+  final Http _dio = Http(logsEnabled: true);
 
   // List<MercadoPagoDocumentType>
 
   @override
-  Future<dynamic> createCardToken({
+  Future<HttpResponse> createCardToken({
     required String cvv,
     required String expirationYear,
     required int expirationMonth,
@@ -24,38 +24,40 @@ class PaymentService implements PaymentRepositoryInterface {
     required String identificationId,
     required String cardHolderName,
   }) async {
-    try {
-      final url = Uri.https(_urlMercadoPago, "/v1/card_tokens");
+    final url = "$_urlMercadoPago/v1/card_tokens";
 
-      final body = {
-        "security_code": cvv,
-        "expiration_year": expirationYear,
-        "expiration_month": expirationMonth,
-        "card_number": cardNumber,
-        "cardholder": {
-          'identification': {
-            'number': identificationNumber,
-            'type': identificationId
-          },
-          'name': cardHolderName
-        }
-      };
-      Map<String, String> headers = {
-        "Content-type": "application/json",
-        "Custom-Origin": "app",
-        HttpHeaders.authorizationHeader:
-            "Bearer ${_mercadoPagoCredentials.accessToken}"
-      };
+    final body = {
+      "security_code": cvv,
+      "expiration_year": expirationYear,
+      "expiration_month": expirationMonth,
+      "card_number": cardNumber,
+      "cardholder": {
+        'identification': {
+          'number': identificationNumber,
+          'type': identificationId
+        },
+        'name': cardHolderName
+      }
+    };
 
-      return await http.post(url, body: json.encode(body), headers: headers);
-    } catch (e) {
-      return e.toString();
-    }
+    Map<String, String> headers = {
+      "Content-type": "application/json",
+      "Custom-Origin": "app",
+      HttpHeaders.authorizationHeader:
+          "Bearer ${_mercadoPagoCredentials.accessToken}"
+    };
+
+    return await _dio.request(
+      url,
+      method: "POST",
+      data: body,
+      headers: headers,
+    );
   }
 
   // http.Response
   @override
-  Future<dynamic> createPayment({
+  Future<HttpResponse> createPayment({
     required String cardToken,
     required int installments,
     required String paymentMethodId,
@@ -76,83 +78,62 @@ class PaymentService implements PaymentRepositoryInterface {
     // required String lastNameCustomer,
     // required double transactionAmount,
   }) async {
-    try {
-      final url = Uri.parse('$_url/api/v1/checkout/process-payment/app');
+    final url = '$_url/api/v1/checkout/process-payment/app';
 
-      final body = Payment(
-        token: cardToken,
-        installments: installments,
-        paymentMethodId: paymentMethodId,
-        issuerId: issuerId,
+    final body = Payment(
+      token: cardToken,
+      installments: installments,
+      paymentMethodId: paymentMethodId,
+      issuerId: issuerId,
+      // paymentTypeId: paymentTypeId,
+      // userId: userId,
+      // addressId: addressId,
+      // shippingCost: shippingCost,
+      // subTotal: subTotal,
+      // transactionAmount: transactionAmount,
+      // identification: identification,
+      companyName: companyName,
 
-        //paymentTypeId: paymentTypeId,
-        // userId: userId,
-        // addressId: addressId,
-        // shippingCost: shippingCost,
-        // subTotal: subTotal,
-        // transactionAmount: transactionAmount,
-        // identification: identification,
-        companyName: companyName,// Optional
-        additionalInfoMessage: additionalInfoMessage, // Optional
-      );
+      additionalInfoMessage: additionalInfoMessage,
 
-      String bodyParams = paymentToMap(body);
+      /// Optional
+    );
 
-      return await http.post(url, headers: headers, body: bodyParams);
-
-      /*
-            responsePayment = responsePaymentFromMap(res.body);
-            print("Status: ${res.statusCode}");
-            print(res.body);
-
-            if (res.statusCode == 401) {
-              print("PROBLEMAS AL REALIZAR EL PAGO ERROR CODE: ${res.statusCode}");
-            }
-      */
-
-    } catch (e) {
-      return e.toString();
-    }
+    return await _dio.request(url, headers: headers, data: body.toMap());
   }
 
   // List<MercadoPagoDocumentType>
   @override
-  Future<dynamic> getIdentificationTypes() async {
-    try {
-      final url = Uri.https(
-        _urlMercadoPago,
-        "/v1/identification_types",
-        {
-          'access_token': _mercadoPagoCredentials.accessToken,
-        },
-      );
+  Future<HttpResponse> getIdentificationTypes() async {
+    final url = "$_urlMercadoPago/v1/identification_types";
 
-      return await http.get(url, headers: headers);
-    } catch (e) {
-      return e.toString();
-    }
+    return await _dio.request(
+      url,
+      method: "GET",
+      headers: {
+        "Content-type": "application/json",
+        "access_token": _mercadoPagoCredentials.accessToken,
+      },
+    );
   }
 
   // MercadoPagoPaymentMethodInstallments
   @override
-  Future<dynamic> getInstallments({
+  Future<HttpResponse> getInstallments({
     required String bin,
     required double amount,
   }) async {
-    try {
-      final url = Uri.https(
-        _urlMercadoPago,
-        "/v1/payment_methods/installments",
-        {
-          'access_token': _mercadoPagoCredentials.accessToken,
-          'bin': bin,
-          'amount': amount.toString(),
-        },
-      );
+    final url = "$_urlMercadoPago/v1/payment_methods/installments";
 
-      return await http.get(url, headers: headers);
-    } catch (e) {
-      return e.toString();
-    }
+    return await _dio.request(
+      url,
+      method: "GET",
+      headers: {
+        "Content-type": "application/json",
+        "access_token": _mercadoPagoCredentials.accessToken,
+        'bin': bin,
+        'amount': amount.toString(),
+      },
+    );
   }
 }

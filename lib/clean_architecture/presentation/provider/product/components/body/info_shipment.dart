@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
@@ -23,29 +22,11 @@ class InfoShipment extends StatelessWidget {
           onSaveShippingAddress: (_) async {
             final mainBloc = context.read<MainBloc>();
 
-            final shippingPrice = await mainBloc.onSaveShippingAddress(
+            mainBloc.onSubmitShippingAddress(
+              _,
               slug: productBloc.product!.slug!,
               quantity: productBloc.quantity.value,
             );
-
-
-            if (shippingPrice is double) {
-              productBloc.shippingPrice.value = shippingPrice;
-              productBloc.refreshUbigeo(slug: productBloc.product!.slug!);
-
-
-              const snackBar = SnackBar(
-                content: Text('Dirección guardada correctamente'),
-                backgroundColor: kBlackColor,
-              );
-
-              ScaffoldMessenger.of(_).removeCurrentSnackBar();
-              ScaffoldMessenger.of(_).showSnackBar(snackBar);
-
-              Navigator.pop(_);
-              return;
-            }
-
           },
         );
       },

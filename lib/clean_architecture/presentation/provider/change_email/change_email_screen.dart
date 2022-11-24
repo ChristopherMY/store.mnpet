@@ -1,13 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
@@ -42,7 +38,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
       changeEmailBloc.formKey.currentState!.save();
       context.loaderOverlay.show();
 
-      final response =
+      final responseApi =
           await changeEmailBloc.userRepositoryInterface.changeUserMail(
         headers: mainBloc.headers,
         bindings: {
@@ -52,44 +48,31 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
         },
       );
 
-      if (response is Text) {
-        if (kDebugMode) {
-          print(response.toString());
-        }
-
+      if (responseApi.data == null) {
         context.loaderOverlay.hide();
-        return;
-      }
-
-      if (response is! http.Response) {
-        context.loaderOverlay.hide();
-        return;
-      }
-
-      if (response.statusCode == 200 || response.statusCode == 400) {
-        final decode = ResponseApi.fromMap(jsonDecode(response.body));
-
-        if (decode.status == "error") {
-          GlobalSnackBar.showWarningSnackBar(context, decode.message);
-          context.loaderOverlay.hide();
+        final statusCode = responseApi.error!.statusCode;
+        if (statusCode == 400) {
+          final response = ResponseApi.fromMap(responseApi.error!.data);
+          GlobalSnackBar.showWarningSnackBar(context, response.message);
           return;
         }
 
-        final responseInformation = await mainBloc.getUserInformation();
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+        );
 
-        if (responseInformation is UserInformation) {
-          mainBloc.informationUser = responseInformation;
-        }
-
-        mainBloc.refreshMainBloc();
-        context.loaderOverlay.hide();
-        GlobalSnackBar.showInfoSnackBarIcon(context, decode.message);
         return;
       }
 
+      mainBloc.handleLoadUserInformation(context);
+
+      final response = ResponseApi.fromMap(responseApi.data);
+      GlobalSnackBar.showInfoSnackBarIcon(context, response.message);
+
+      Navigator.of(context).pop();
       context.loaderOverlay.hide();
-      GlobalSnackBar.showWarningSnackBar(
-          context, "Ups tuvimos problemas, vuelva a intentarlo más tarde");
+      return;
     }
   }
 

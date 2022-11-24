@@ -8,7 +8,7 @@ abstract class AuthRepositoryInterface {
   });
 
   // https.Response
-  Future<dynamic> createUser({required Map<String, dynamic> data});
+  Future<HttpResponse> createUser({required Map<String, dynamic> data});
 
   // https.Response
   Future<HttpResponse> requestPasswordChange({

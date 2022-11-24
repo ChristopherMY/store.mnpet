@@ -1,13 +1,15 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/keyboard.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 class SignUpBloc extends ChangeNotifier {
   final AuthRepositoryInterface authRepositoryInterface;
@@ -177,23 +179,58 @@ class SignUpBloc extends ChangeNotifier {
     return value;
   }
 
-  Future<dynamic> registerUser({required Map<String, dynamic> user}) async {
-    final response = await authRepositoryInterface.createUser(data: user);
-
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-
-      return false;
+  void registerUser(
+    BuildContext context, {
+    required Map<String, dynamic> user,
+  }) async {
+    if (!termsConditionsConfirmed.value) {
+      addError(error: kTermsNullError);
     }
 
-    if (response is! http.Response) return false;
+    if (formKey.currentState!.validate()) {
+      context.loaderOverlay.show();
+      formKey.currentState!.save();
+      KeyboardUtil.hideKeyboard(context);
 
-    final decode = json.decode(response.body);
+      final mainBloc = context.read<MainBloc>();
 
-    if (response.statusCode == 200) {
-      final credentials = CredentialsAuth.fromMap(decode);
+      if (errors.value.isNotEmpty) {
+        context.loaderOverlay.hide();
+        return GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Vuelva a revisar la información ingresada",
+        );
+      }
+
+      Map<String, dynamic> modelUser = {
+        "name": nameController.text,
+        "lastname": lastnameController.text,
+        "password": passwordController.text,
+        "email": emailController.text,
+        "document": {"value": numDocController.text, "type": "DNI"},
+        "terms_conditions_confirmed": termsConditionsConfirmed.value
+      };
+
+      final responseApi = await authRepositoryInterface.createUser(data: user);
+
+      if (responseApi.data == null) {
+        context.loaderOverlay.hide();
+        final statusCode = responseApi.error!.statusCode;
+        if (statusCode == 400) {
+          final response = ResponseApi.fromMap(responseApi.error!.data);
+          GlobalSnackBar.showWarningSnackBar(context, response.message);
+          return;
+        }
+
+        GlobalSnackBar.showWarningSnackBar(
+          context,
+          "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+        );
+
+        return;
+      }
+
+      final credentials = CredentialsAuth.fromMap(responseApi.data);
 
       await hiveRepositoryInterface.save(
         containerName: "authentication",
@@ -201,14 +238,30 @@ class SignUpBloc extends ChangeNotifier {
         value: credentials.toMap(),
       );
 
-      return credentials;
-    }
 
-    if (response.statusCode == 402 || response.statusCode == 404) {
-      return ResponseApi.fromMap(decode);
-    }
+      final responseSession = await mainBloc.loadSessionPromise();
+      context.loaderOverlay.hide();
 
-    return false;
+      if (responseSession) {
+        mainBloc.handleLoadUserInformation(context);
+
+        /// Procedemos a cambiar los items a carrito [produccion]
+        mainBloc.moveShoppingCart(context);
+        await mainBloc.handleGetShoppingCart(context);
+
+        /// Count step to back
+        int count = 0;
+        Navigator.of(context).popUntil((route) => count++ >= mainBloc.countNavigateIterationScreen);
+
+        return;
+      }
+
+      context.loaderOverlay.hide();
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Tenemos un problema, por favor inténtelo más tarde.",
+      );
+    }
   }
 
   void refreshBloc() {

@@ -11,7 +11,6 @@ import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.da
 import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
@@ -21,7 +20,6 @@ import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/cart/cart_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/checkout_info/checkout_info_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
@@ -33,11 +31,13 @@ class CartScreen extends StatefulWidget {
 
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => CartBloc(
-        cartRepositoryInterface: context.read<CartRepositoryInterface>(),
-        hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
-        productRepositoryInterface: context.read<ProductRepositoryInterface>(),
-      ),
+      create: (context) =>
+          CartBloc(
+            cartRepositoryInterface: context.read<CartRepositoryInterface>(),
+            hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
+            productRepositoryInterface: context.read<
+                ProductRepositoryInterface>(),
+          ),
       child: const CartScreen._(),
     );
   }
@@ -69,36 +69,11 @@ class _CartScreenState extends State<CartScreen> {
               notificationPredicate: (notification) => true,
               triggerMode: RefreshIndicatorTriggerMode.onEdge,
               onRefresh: () async {
-                dynamic response;
-
                 if (mainBloc.sessionAccount.value == Session.active) {
-                  response = await mainBloc.getShoppingCart(
-                    districtId: mainBloc.residence.districtId!,
-                    headers: mainBloc.headers,
-                  );
-                } else {
-                  response = await mainBloc.getShoppingCartTemp(
-                    districtId: mainBloc.residence.districtId!,
-                  );
-
-                  if (response is Cart) {
-                    final shoppingCartId = await mainBloc.handleGetShoppingCartId();
-                    if (shoppingCartId.toString().isEmpty ||
-                        shoppingCartId != response.id) {
-                      await mainBloc.hiveRepositoryInterface.save(
-                        containerName: "shopping_temporal",
-                        key: "cartId",
-                        value: response.id,
-                      );
-                    }
-                  }
-
+                  await mainBloc.handleGetShoppingCart(context);
+                  return;
                 }
-
-                if (response is Cart) {
-                  mainBloc.informationCart.value = response;
-                  mainBloc.cartLength.value = response.products!.length;
-                }
+                await mainBloc.getShoppingCartTemp(context: context);
               },
               child: CustomScrollView(
                 slivers: [
@@ -169,7 +144,7 @@ class _CartScreenState extends State<CartScreen> {
                                   itemBuilder:
                                       (BuildContext context, int index) {
                                     final product =
-                                        shoppingCart.products![index];
+                                    shoppingCart.products![index];
 
                                     if (!product.isFree!) {
                                       return CardItem(product: product);
@@ -232,7 +207,7 @@ class _CartScreenState extends State<CartScreen> {
                                 text: "Ir a pagar",
                                 press: () {
                                   if (mainBloc.credentials
-                                      is! CredentialsAuth) {
+                                  is! CredentialsAuth) {
                                     mainBloc.countNavigateIterationScreen = 3;
                                     mainBloc.handleAuthAccess(context);
 
@@ -266,7 +241,10 @@ class _CartScreenState extends State<CartScreen> {
                         children: <Widget>[
                           Text(
                             "Te va a encantar",
-                            style: Theme.of(context).textTheme.subtitle2,
+                            style: Theme
+                                .of(context)
+                                .textTheme
+                                .subtitle2,
                             textAlign: TextAlign.start,
                           ),
                           const SizedBox(height: 5)
@@ -329,14 +307,23 @@ class InfoCartDetail extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            Text("Resumen", style: Theme.of(context).textTheme.bodyText2),
+            Text("Resumen", style: Theme
+                .of(context)
+                .textTheme
+                .bodyText2),
             const SizedBox(height: 5.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text("Subtotal", style: Theme.of(context).textTheme.bodyText2),
+                Text("Subtotal", style: Theme
+                    .of(context)
+                    .textTheme
+                    .bodyText2),
                 Text("S/ ${cart.subTotal}",
-                    style: Theme.of(context).textTheme.bodyText2)
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodyText2)
               ],
             ),
             const SizedBox(height: 5.0),
@@ -344,10 +331,16 @@ class InfoCartDetail extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text("Costo de envío",
-                    style: Theme.of(context).textTheme.bodyText2),
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodyText2),
                 Text(
                   "S/ ${cart.shipment}",
-                  style: Theme.of(context).textTheme.bodyText2,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyText2,
                 ),
               ],
             ),
@@ -357,10 +350,16 @@ class InfoCartDetail extends StatelessWidget {
               children: <Widget>[
                 Text(
                   "Total",
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyText1,
                 ),
                 Text("S/ ${cart.total}",
-                    style: Theme.of(context).textTheme.bodyText2)
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodyText2)
               ],
             ),
           ],
@@ -380,7 +379,7 @@ class CardItem extends StatelessWidget {
     const url = Environment.API_DAO;
     return Container(
       constraints:
-          BoxConstraints(minHeight: getProportionateScreenHeight(135.0)),
+      BoxConstraints(minHeight: getProportionateScreenHeight(135.0)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10.0),
@@ -423,21 +422,26 @@ class CardItem extends StatelessWidget {
                                 product.name!,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 3,
-                                style: Theme.of(context).textTheme.bodyText1,
+                                style: Theme
+                                    .of(context)
+                                    .textTheme
+                                    .bodyText1,
                               ),
                               const SizedBox(height: 10.0),
-                              product.hasVariations!
-                                  ? Column(
-                                      children: product.variation!.attributes!
-                                          .map((attribute) {
-                                            return Text(
-                                              "${attribute.name}: ${attribute.value!.label}",
-                                            );
-                                          })
-                                          .toList()
-                                          .cast(),
-                                    )
-                                  : const SizedBox(),
+                              if (product.hasVariations!)
+                                Column(
+                                  children: product.variation!.attributes!
+                                      .map(
+                                        (attribute) {
+                                      return Text(
+                                        "${attribute.name}: ${attribute.value!
+                                            .label}",
+                                      );
+                                    },
+                                  )
+                                      .toList()
+                                      .cast(),
+                                ),
                             ],
                           ),
                         ),
@@ -448,31 +452,14 @@ class CardItem extends StatelessWidget {
                           ),
                           onTap: () async {
                             final mainBloc = context.read<MainBloc>();
-                            context.loaderOverlay.show();
-
-                            final response =
-                                await mainBloc.deleteItemShoppingCart(
+                            mainBloc.deleteItemShoppingCart(
                               variationId:
-                                  product.general! == "variable_product"
-                                      ? product.variation!.id!
-                                      : "",
+                              product.general! == "variable_product"
+                                  ? product.variation!.id!
+                                  : "",
                               productId: product.id!,
+                              context: context,
                             );
-
-                            if (response is ResponseApi) {
-                              await mainBloc.handleShoppingCart();
-                              context.loaderOverlay.hide();
-                              await GlobalSnackBar.showInfoSnackBarIcon(
-                                context,
-                                response.message,
-                              );
-                            } else {
-                              context.loaderOverlay.hide();
-                              GlobalSnackBar.showErrorSnackBarIcon(
-                                context,
-                                "Tuvimos problemas, vuelva a intentarlo más tarde.",
-                              );
-                            }
                           },
                         )
                       ],
@@ -483,8 +470,12 @@ class CardItem extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 0.0),
                           child: Text(
-                            "S/ ${double.parse(product.price!.sale!) * product.quantity!}",
-                            style: Theme.of(context).textTheme.bodyText1,
+                            "S/ ${double.parse(product.price!.sale!) *
+                                product.quantity!}",
+                            style: Theme
+                                .of(context)
+                                .textTheme
+                                .bodyText1,
                           ),
                         ),
                         Row(
@@ -496,27 +487,15 @@ class CardItem extends StatelessWidget {
                                 final mainBloc = context.read<MainBloc>();
 
                                 if (product.quantity! > 1) {
-                                  context.loaderOverlay.show();
-                                  final response =
-                                      await mainBloc.changeQuantity(
+                                  mainBloc.changeQuantity(
                                     productId: product.id!,
                                     quantity: product.quantity! - 1,
                                     variationId:
-                                        product.general! == "variable_product"
-                                            ? product.variation!.id!
-                                            : "",
+                                    product.general! == "variable_product"
+                                        ? product.variation!.id!
+                                        : "",
+                                    context: context,
                                   );
-
-                                  if (response is ResponseApi) {
-                                    await mainBloc.handleShoppingCart();
-
-                                    context.loaderOverlay.hide();
-
-                                    GlobalSnackBar.showInfoSnackBarIcon(
-                                      context,
-                                      response.message,
-                                    );
-                                  }
                                 }
                               },
                             ),
@@ -525,36 +504,27 @@ class CardItem extends StatelessWidget {
                               child: Text(
                                 product.quantity.toString(),
                                 textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyText2,
+                                style: Theme
+                                    .of(context)
+                                    .textTheme
+                                    .bodyText2,
                               ),
                             ),
                             GestureDetector(
                               child: const Icon(Icons.add_circle_outline),
                               onTap: () async {
-                                context.loaderOverlay.show();
                                 final mainBloc = context.read<MainBloc>();
 
                                 if (product.quantity! > 0) {
-                                  final response =
-                                      await mainBloc.changeQuantity(
+                                  mainBloc.changeQuantity(
                                     productId: product.id!,
                                     quantity: product.quantity! + 1,
                                     variationId:
-                                        product.general! == "variable_product"
-                                            ? product.variation!.id!
-                                            : "",
+                                    product.general! == "variable_product"
+                                        ? product.variation!.id!
+                                        : "",
+                                    context: context,
                                   );
-
-                                  if (response is ResponseApi) {
-                                    await mainBloc.handleShoppingCart();
-
-                                    context.loaderOverlay.hide();
-
-                                    GlobalSnackBar.showInfoSnackBarIcon(
-                                      context,
-                                      response.message,
-                                    );
-                                  }
                                 }
                               },
                             ),
@@ -611,15 +581,17 @@ class CardItemFree extends StatelessWidget {
                       imageUrl: "$url/$imageUrl",
                       imageBuilder: (context, imageProvider) =>
                           Image(image: imageProvider),
-                      placeholder: (context, url) => Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.rectangle,
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Image.asset(
-                        "assets/no-image.png",
-                        fit: BoxFit.contain,
-                      ),
+                      placeholder: (context, url) =>
+                          Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.rectangle,
+                            ),
+                          ),
+                      errorWidget: (context, url, error) =>
+                          Image.asset(
+                            "assets/no-image.png",
+                            fit: BoxFit.contain,
+                          ),
                     ),
                   ),
                   Expanded(
@@ -667,9 +639,13 @@ class CardItemFree extends StatelessWidget {
               child: Text(
                 "Obtienes un producto de regalo",
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                      color: Colors.white,
-                    ),
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .bodyText2!
+                    .copyWith(
+                  color: Colors.white,
+                ),
               ),
             ),
           ],

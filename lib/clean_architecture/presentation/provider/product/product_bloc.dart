@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +17,7 @@ import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_re
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/photoview_wrapper.dart';
@@ -101,79 +100,77 @@ class ProductBloc extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> loadProductDetails({required String slug}) async {
-    final response =
+  Future<void> handleLoadProductDetails(
+    BuildContext context, {
+    required String slug,
+  }) async {
+    final responseApi =
         await productRepositoryInterface.getProductSlug(slug: slug);
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
       }
+
+      GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+      return;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        product = productFromMap(response.body);
+    product = Product.fromMap(responseApi.data);
 
-        if (product!.general != "simple_product") {
-          handleInitVariation(product: product!);
-          handleLoadVariableComponents(product: product!);
-          handleBuildVariationAttributesContent(product: product!);
-        } else {
-          handleLoadSimpleComponents(product: product!);
-        }
-
-        handleInitPagination();
-
-        handleBuildHeaderContent(product: product!);
-      }
+    if (product!.general != "simple_product") {
+      handleInitVariation(product: product!);
+      handleLoadVariableComponents(product: product!);
+      handleBuildVariationAttributesContent(product: product!);
+    } else {
+      handleLoadSimpleComponents(product: product!);
     }
+
+    handleInitPagination();
+    handleBuildHeaderContent(product: product!);
   }
 
   Future<void> fetchRelatedProductsPagination({
     required List<Brand> categories,
     required int pageKey,
   }) async {
-    final response =
+    final responseApi =
         await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
       finalRange: _finalRange,
       initialRange: _initialRange,
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-
-      pagingController.error = response;
+    if (responseApi.data == null) {
+      pagingController.error = "";
+      return;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final products = jsonDecode(response.body) as List;
+    final products = (responseApi.data as List);
 
-        if (products.isNotEmpty) {
-          List<Product> newItems =
-              products.map((e) => Product.fromMap(e)).toList().cast();
+    if (products.isNotEmpty) {
+      List<Product> newItems =
+          products.map((e) => Product.fromMap(e)).toList().cast();
 
-          _initialRange += 20;
-          _finalRange += 20;
+      _initialRange += 20;
+      _finalRange += 20;
 
-          final isLastPage = newItems.length < _pageSize;
-          if (isLastPage) {
-            pagingController.appendLastPage(newItems);
-          } else {
-            final nextPageKey = pageKey + newItems.length;
-            pagingController.appendPage(newItems, nextPageKey);
-          }
-
-          return;
-        }
-
-        pagingController.error = "No cargo";
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        pagingController.appendLastPage(newItems);
+      } else {
+        final nextPageKey = pageKey + newItems.length;
+        pagingController.appendPage(newItems, nextPageKey);
       }
+
+      return;
     }
+
+    pagingController.error = "";
   }
 
   void handleInitVariation({required Product product}) {
@@ -332,32 +329,23 @@ class ProductBloc extends ChangeNotifier {
     quantity.value++;
   }
 
-  void onIncrementQuantity() async {
+  void onIncrementQuantity(BuildContext context) async {
     increment();
 
-    final response = await productRepositoryInterface.getShipmentPriceCost(
+    final responseApi = await productRepositoryInterface.getShipmentPriceCost(
       slug: product!.slug!,
       districtId: informationLocal.value.districtId!,
       quantity: quantity.value,
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-
+    if (responseApi.data == null) {
       shippingPrice.value = 0.00;
-      return;
+
+      GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        shippingPrice.value = double.parse(response.body.replaceAll('"', ""));
-        return;
-      }
-
-      shippingPrice.value = 0.00;
-    }
+    final price = responseApi.data;
+    shippingPrice.value = double.parse(price.replaceAll('"', ""));
   }
 
   void decrement() {
@@ -366,31 +354,30 @@ class ProductBloc extends ChangeNotifier {
     }
   }
 
-  void onDecrementQuantity() async {
+  void onDecrementQuantity(BuildContext context) async {
     decrement();
 
-    final response = await productRepositoryInterface.getShipmentPriceCost(
+    final responseApi = await productRepositoryInterface.getShipmentPriceCost(
       slug: product!.slug!,
       districtId: informationLocal.value.districtId!,
       quantity: quantity.value,
     );
 
-    if (response is String) {
+    if (responseApi.data == null) {
       shippingPrice.value = 0.00;
-      return;
+
+      GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        shippingPrice.value = double.parse(response.body.replaceAll('"', ""));
-        return;
-      }
+    final price = responseApi.data;
 
-      shippingPrice.value = 0.00;
-    }
+    shippingPrice.value = double.parse(price.replaceAll('"', ""));
   }
 
-  Future<void> refreshUbigeo({required String slug}) async {
+  Future<void> refreshUbigeo(
+    BuildContext context, {
+    required String slug,
+  }) async {
     informationLocal.value = UserInformationLocal.fromMap(
       await hiveRepositoryInterface.read(
               containerName: "shipment", key: "residence") ??
@@ -403,34 +390,22 @@ class ProductBloc extends ChangeNotifier {
           },
     );
 
-    productRepositoryInterface
-        .getShipmentPriceCost(
+    final responseApi = await productRepositoryInterface.getShipmentPriceCost(
       slug: slug,
       districtId: informationLocal.value.districtId!,
       quantity: quantity.value,
-    )
-        .then(
-      (response) {
-        if (response is String) {
-          if (kDebugMode) {
-            print("Problem on decrement quantity of product");
-          }
-
-          shippingPrice.value = 0.00;
-          return;
-        }
-
-        if (response is http.Response) {
-          if (response.statusCode == 200) {
-            shippingPrice.value =
-                double.parse(response.body.replaceAll('"', ""));
-            return;
-          }
-
-          shippingPrice.value = 0.00;
-        }
-      },
     );
+
+    if (responseApi.data == null) {
+      shippingPrice.value = 0.00;
+
+      GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+    }
+
+    final price = responseApi.data;
+
+    shippingPrice.value = double.parse(price.replaceAll('"', ""));
+    return;
   }
 
   void notify() {
@@ -530,7 +505,7 @@ class ProductBloc extends ChangeNotifier {
         return;
       }
 
-      await mainBloc.handleShoppingCart();
+      mainBloc.handleShoppingCart(context);
       stateOnlyCustomIndicatorText.value = ButtonState.idle;
       return;
     }
@@ -548,7 +523,8 @@ class ProductBloc extends ChangeNotifier {
       "cart_id": shoppingCartId,
     };
 
-    final responseApi = await cartRepositoryInterface.onSaveShoppingCartTemp(cart: buildCart);
+    final responseApi =
+        await cartRepositoryInterface.onSaveShoppingCartTemp(cart: buildCart);
 
     stateOnlyCustomIndicatorText.value = ButtonState.idle;
 
@@ -589,14 +565,15 @@ class ProductBloc extends ChangeNotifier {
     return;
   }
 
-  void initProductState({
+  void initProductState(
+    BuildContext context, {
     required Product product,
   }) async {
     await Future.wait(
       [
-        loadVimeoVideoConfig(galleryVideo: product.galleryVideo!),
-        loadProductDetails(slug: product.slug!),
-        refreshUbigeo(slug: product.slug!),
+        loadVimeoVideoConfig(context, galleryVideo: product.galleryVideo!),
+        handleLoadProductDetails(context, slug: product.slug!),
+        refreshUbigeo(context, slug: product.slug!),
       ],
     );
 
@@ -604,7 +581,8 @@ class ProductBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadVimeoVideoConfig({
+  Future<void> loadVimeoVideoConfig(
+    BuildContext context, {
     required List<GalleryVideo> galleryVideo,
   }) async {
     List<Widget> copyGalleryVideo = List.from(headerContent);
@@ -639,30 +617,24 @@ class ProductBloc extends ChangeNotifier {
                 }
               }
 
-              final response = await productRepositoryInterface
+              final responseApi = await productRepositoryInterface
                   .vimeoVideoConfigFromUrl(vimeoVideoId: vimeoVideoId);
 
-              if (response is String) {
-                if (kDebugMode) {
-                  print(response);
-                }
+              if (responseApi.data == null) {
+                GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+                return;
               }
 
-              if (response is http.Response) {
-                if (response.statusCode == 200) {
-                  final decodeResponse = jsonDecode(response.body);
-                  final vimeoVideo = VimeoVideoConfig.fromMap(decodeResponse);
-                  vimeoMp4Video =
-                      vimeoVideo.request?.files?.progressive![0].url ?? '';
+              final vimeoVideo = VimeoVideoConfig.fromMap(responseApi.data);
+              vimeoMp4Video =
+                  vimeoVideo.request?.files?.progressive![0].url ?? '';
 
-                  copyGalleryVideo.add(
-                    VimeoVideoPlayer(
-                      url: vimeoMp4Video,
-                      defaultImage: videoInformation.thumb!,
-                    ),
-                  );
-                }
-              }
+              copyGalleryVideo.add(
+                VimeoVideoPlayer(
+                  url: vimeoMp4Video,
+                  defaultImage: videoInformation.thumb!,
+                ),
+              );
             }
           }
         },

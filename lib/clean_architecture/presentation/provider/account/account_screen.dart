@@ -16,7 +16,6 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/ord
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/privacy/privacy_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/settings/settings_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/sign_up/sign_up_screen.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/copy_right.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
@@ -62,17 +61,7 @@ class _AccountScreenState extends State<AccountScreen> {
           triggerMode: RefreshIndicatorTriggerMode.onEdge,
           onRefresh: () async {
             if (mainBloc.informationUser is UserInformation) {
-              final response = await mainBloc.getUserInformation();
-              if (response is UserInformation) {
-                mainBloc.informationUser = response;
-                mainBloc.refreshMainBloc();
-
-                if (!mounted) return;
-                await GlobalSnackBar.showInfoSnackBarIcon(
-                  context,
-                  "Información actualizada.",
-                );
-              }
+              mainBloc.handleLoadUserInformation(context);
             }
           },
           child: Stack(
@@ -92,26 +81,23 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                       expandedHeight: getProportionateScreenHeight(56.0),
                       actions: [
-                        account == Account.active
-                            ? Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            SettingsScreen.init(context),
-                                      ),
-                                    );
-                                  },
-                                  child: const Icon(
-                                    Icons.settings,
-                                    color: Colors.black,
+                        if (account == Account.active)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => SettingsScreen.init(context),
                                   ),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
+                                );
+                              },
+                              child: const Icon(
+                                Icons.settings,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                     SliverToBoxAdapter(
@@ -130,8 +116,8 @@ class _AccountScreenState extends State<AccountScreen> {
                           child: Text(
                             "Mi perfil",
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -324,9 +310,9 @@ class HeaderInformation extends StatelessWidget {
                   child: accountActive
                       ? ExtendedImage.network(
                           mainBloc.informationUser.image!.src!,
-                          fit: BoxFit.fill,
+                          fit: BoxFit.cover,
                           cache: true,
-                          timeLimit: const Duration(seconds: 10),
+                          timeLimit: const Duration(seconds: 30),
                           enableMemoryCache: true,
                           enableLoadState: false,
                         )

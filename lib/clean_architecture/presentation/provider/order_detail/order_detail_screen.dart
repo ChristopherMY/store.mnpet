@@ -8,10 +8,8 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/order_detail
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order/order_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/order_detail/order_detail_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
 const url = Environment.API_DAO;
 
@@ -41,12 +39,7 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   void init() async {
     final orderDetailBloc = context.read<OrderDetailBloc>();
-    final result = await orderDetailBloc.getOrderDetailById(widget.paymentId);
-
-    if (result is od.OrderDetail) {
-      orderDetailBloc.orderDetail = result;
-      orderDetailBloc.refreshBloc();
-    }
+    await orderDetailBloc.getOrderDetailById(widget.paymentId, context);
   }
 
   @override
@@ -344,7 +337,8 @@ class _OrderDetailCard extends StatelessWidget {
                     shape: BoxShape.rectangle,
                   ),
                 ),
-                errorWidget: (context, url, error) => Image.asset("assets/no-image.png", fit: BoxFit.cover),
+                errorWidget: (context, url, error) =>
+                    Image.asset("assets/no-image.png", fit: BoxFit.cover),
               ),
             ),
           ),

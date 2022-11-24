@@ -1,11 +1,15 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+
+import '../../../helper/http_response.dart';
 
 class PhoneBloc extends ChangeNotifier {
   LocalRepositoryInterface localRepositoryInterface;
@@ -90,92 +94,115 @@ class PhoneBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> onChangeDefaultPhone({
+  Future<dynamic> onChangeDefaultPhone(
+    BuildContext context, {
     required String phoneId,
     required Map<String, String> headers,
   }) async {
-    final response = await userRepositoryInterface.changeMainPhone(
+    final mainBloc = context.read<MainBloc>();
+    context.loaderOverlay.show();
+    final responseApi = await userRepositoryInterface.changeMainPhone(
       phoneId: phoneId,
       headers: headers,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        return responseApiFromMap(response.body);
+    if (responseApi.data == null) {
+      context.loaderOverlay.hide();
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
       }
 
-      return false;
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
+      GlobalSnackBar.showWarningSnackBar(
+          context, "Ups tuvimos un problema, vuelva a intentarlo más tarde.");
+      return;
     }
 
-    return false;
+    mainBloc.handleLoadUserInformation(context);
+    context.loaderOverlay.hide();
+
+    final response = ResponseApi.fromMap(responseApi.data);
+    GlobalSnackBar.showWarningSnackBar(context, response.message);
+    return;
   }
 
-  Future<dynamic> onDeletePhone({
+  void onDeletePhone(
+    BuildContext context, {
     required String phoneId,
     required Map<String, String> headers,
   }) async {
-    final response = await userRepositoryInterface.deleteUserPhone(
+    context.loaderOverlay.show();
+    final mainBloc = context.read<MainBloc>();
+    final responseApi = await userRepositoryInterface.deleteUserPhone(
       phoneId: phoneId,
       headers: headers,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        return responseApiFromMap(response.body);
+    if (responseApi.data == null) {
+      context.loaderOverlay.hide();
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
       }
 
-      return false;
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
+      GlobalSnackBar.showWarningSnackBar(
+          context, "Ups tuvimos un problema, vuelva a intentarlo más tarde.");
+      return;
     }
 
-    return false;
+    mainBloc.handleLoadUserInformation(context);
+    context.loaderOverlay.hide();
+
+    final response = ResponseApi.fromMap(responseApi.data);
+    GlobalSnackBar.showWarningSnackBar(context, response.message);
+    return;
   }
 
-  Future<dynamic> onSave({required Map<String, String> headers}) async {
+  void onSave(
+    BuildContext context, {
+    required Map<String, String> headers,
+  }) async {
+    final mainBloc = context.read<MainBloc>();
+    final HttpResponse responseApi;
+
+    context.loaderOverlay.show();
     if (isUpdate) {
-      final response = await userRepositoryInterface.updateUserPhone(
+      responseApi = await userRepositoryInterface.updateUserPhone(
         phone: phone,
         headers: headers,
       );
-
-      if (response is http.Response) {
-        if (response.statusCode == 200) {
-          return responseApiFromMap(response.body);
-        }
-
-        return false;
-      } else if (response is String) {
-        if (kDebugMode) {
-          print(response);
-        }
-      }
     } else {
-      final response = await userRepositoryInterface.createPhone(
+      responseApi = await userRepositoryInterface.createPhone(
         phone: phone,
         headers: headers,
       );
-
-      if (response is http.Response) {
-        if (response.statusCode == 200) {
-          return responseApiFromMap(response.body);
-        }
-
-        return false;
-      } else if (response is String) {
-        if (kDebugMode) {
-          print(response);
-        }
-      }
     }
 
-    return false;
-  }
+    if (responseApi.data == null) {
+      context.loaderOverlay.hide();
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
+      }
 
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups tuvimos un problema, vuelva a intentarlo más tarde.",
+      );
+      return;
+    }
+
+    mainBloc.handleLoadUserInformation(context);
+    context.loaderOverlay.hide();
+
+    final response = ResponseApi.fromMap(responseApi.data);
+    GlobalSnackBar.showWarningSnackBar(context, response.message);
+    return;
+  }
 }

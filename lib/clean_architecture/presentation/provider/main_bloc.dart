@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/district.dart';
@@ -21,6 +20,10 @@ import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_re
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/login/login_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
+
+import '../../helper/http_response.dart';
 
 class MainBloc extends ChangeNotifier {
   LocalRepositoryInterface localRepositoryInterface;
@@ -40,8 +43,9 @@ class MainBloc extends ChangeNotifier {
   ValueNotifier<Session> sessionAccount = ValueNotifier(Session.inactive);
   ValueNotifier<Account> account = ValueNotifier(Account.inactive);
   ValueNotifier<Home> home = ValueNotifier(Home.inactive);
-  ValueNotifier<ShoppingCart> shoppingCart =
-      ValueNotifier(ShoppingCart.inactive);
+
+  // ValueNotifier<ShoppingCart> shoppingCart =
+  //     ValueNotifier(ShoppingCart.inactive);
 
   ValueNotifier<int> indexSelected = ValueNotifier(0);
 
@@ -63,7 +67,7 @@ class MainBloc extends ChangeNotifier {
   String provinceId = "";
 
   ValueNotifier<String> districtName = ValueNotifier("Seleccione un distrito");
-  String districtId = "";
+  String districtId = "61856a14587c82ef50c1b44b";
 
   String ubigeo = "";
 
@@ -94,12 +98,12 @@ class MainBloc extends ChangeNotifier {
       if (indexSelected.value == 1) {
         if (credentials is! CredentialsAuth) {
           if (informationCart.value is! Cart) {
-            handleGetShoppingCartNotAccount();
+            await getShoppingCartTemp(context: context);
             return;
           }
         } else {
           if (informationCart.value is! Cart) {
-            handleGetShoppingCart();
+            handleGetShoppingCart(context);
             return;
           }
         }
@@ -108,27 +112,16 @@ class MainBloc extends ChangeNotifier {
       if (indexSelected.value == 2) {
         if (credentials is! CredentialsAuth) {
           handleAuthAccess(context);
-
-          return;
-        } else {
-          if (informationUser is! UserInformation) {
-            loadingScreenAccount = true;
-            notifyListeners();
-
-            getUserInformation().then(
-              (loadInformation) {
-                if (loadInformation is UserInformation) {
-                  informationUser = loadInformation;
-                }
-
-                account.value = Account.active;
-                loadingScreenAccount = false;
-              },
-            );
-          }
-
           return;
         }
+
+        if (informationUser is! UserInformation) {
+          loadingScreenAccount = true;
+
+          handleLoadUserInformation(context);
+        }
+
+        return;
       }
     }
   }
@@ -141,12 +134,14 @@ class MainBloc extends ChangeNotifier {
     );
   }
 
-  void initRegion() async {
-    final response = await localRepositoryInterface.getRegions();
+  void initRegion(BuildContext context) async {
+    final responseApi = await localRepositoryInterface.getRegions();
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
+    if (responseApi.data == null) {
+      print("No cargo las regiones");
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == -1) {
+        GlobalSnackBar.showWarningSnackBar(context, kNoInternet);
       }
 
       regions = [];
@@ -154,26 +149,17 @@ class MainBloc extends ChangeNotifier {
       return;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-        regions.addAll(
-          data.map((element) => Region.fromMap(element)).toList().cast(),
-        );
+    regions.addAll(
+      (responseApi.data as List).map((x) => Region.fromMap(x)).toList(),
+    );
 
-        extraRegions.addAll(
-          data.map((element) => Region.fromMap(element)).toList().cast(),
-        );
-
-        return;
-      }
-
-      regions = [];
-      extraRegions = [];
-    }
+    extraRegions.addAll(
+      (responseApi.data as List).map((x) => Region.fromMap(x)).toList(),
+    );
   }
 
-  void onChangeRegion({
+  void onChangeRegion(
+    BuildContext context, {
     required int index,
     required StateSetter stateAlertRegion,
   }) async {
@@ -192,34 +178,40 @@ class MainBloc extends ChangeNotifier {
 
     departmentId = regions[index].regionId.toString();
 
-    final response = await localRepositoryInterface.getProvinces(
+    final responseApi = await localRepositoryInterface.getProvinces(
       departmentId: departmentId,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-
-        provinces.addAll(
-          data.map((element) => Province.fromMap(element)).toList().cast(),
-        );
-      } else {
-        provinces = [];
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
       provinces = [];
+
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
+      }
+
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "No pudimos cargar la información, vuelva a intentarlo más tarde.",
+      );
+      return;
     }
+
+    provinces.addAll(
+      (responseApi.data as List)
+          .map((element) => Province.fromMap(element))
+          .toList(),
+    );
 
     departmentName.value = regions[index].name.toString();
     provinceName.value = "Seleccione";
     districtName.value = "Seleccione";
   }
 
-  void onChangeProvince({
+  void onChangeProvince(
+    BuildContext context, {
     required int index,
     required StateSetter stateAlertProvince,
   }) async {
@@ -235,27 +227,24 @@ class MainBloc extends ChangeNotifier {
     stateAlertProvince(() => provinces[index].checked = true);
 
     provinceId = provinces[index].provinceId.toString();
-    final response =
+    final responseApi =
         await localRepositoryInterface.getDistricts(provinceId: provinceId);
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == -1) {
+        GlobalSnackBar.showWarningSnackBar(context, kNoInternet);
       }
 
       districts = [];
+      return;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-        districts.addAll(
-          data.map((element) => District.fromMap(element)).toList().cast(),
-        );
-      } else {
-        districts = [];
-      }
-    }
+    districts.addAll(
+      (responseApi.data as List)
+          .map((element) => District.fromMap(element))
+          .toList(),
+    );
 
     provinceName.value = provinces[index].name.toString();
     districtName.value = "Seleccione";
@@ -273,7 +262,7 @@ class MainBloc extends ChangeNotifier {
       }
     }
 
-    districtId = districts[index].id.toString();
+    districtId = districts[index].id!;
     districts[index].checked = true;
 
     stateAlertDistrict(() {
@@ -297,10 +286,13 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> onSaveShippingAddress({
+  void onSubmitShippingAddress(
+    BuildContext context, {
     required String slug,
     required int quantity,
   }) async {
+    final productBloc = context.read<ProductBloc>();
+
     departmentName.value == "Seleccione un departamento" ||
             departmentName.value == "Seleccione"
         ? addError(
@@ -340,44 +332,36 @@ class MainBloc extends ChangeNotifier {
         ubigeo: ubigeo,
       );
 
-      print(userInformationLocal.toMap());
-      print("!********************!");
-
       await hiveRepositoryInterface.save(
         containerName: "shipment",
         key: "residence",
         value: userInformationLocal.toMap(),
       );
 
-      final response = await productRepositoryInterface.getShipmentPriceCost(
+      final responseApi = await productRepositoryInterface.getShipmentPriceCost(
         slug: slug,
         districtId: districtId,
         quantity: quantity,
       );
 
-      Logger logger = Logger();
-      logger.i(response);
-
-      if (response is String) {
-        if (kDebugMode) {
-          print(response);
-        }
-
-        return null;
+      if (responseApi.data == null) {
+        GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+        return;
       }
 
-      if (response is! http.Response) {
-        return null;
-      }
+      final shippingPrice = double.parse(responseApi.data.replaceAll('"', ""));
 
-      if (response.statusCode != 200) {
-        return null;
-      }
+      productBloc.shippingPrice.value = shippingPrice;
+      productBloc.refreshUbigeo(context, slug: productBloc.product!.slug!);
 
-      return double.parse(response.body.replaceAll('"', ""));
+      GlobalSnackBar.showInfoSnackBarIcon(
+        context,
+        'Dirección guardada correctamente',
+      );
+
+      Navigator.of(context).pop();
+      return;
     }
-
-    return null;
   }
 
   Future<bool> loadSessionPromise() async {
@@ -469,31 +453,40 @@ class MainBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> getUserInformation() async {
-    final response = await userRepositoryInterface.getInformationUser(
+  void handleLoadUserInformation(BuildContext context) async {
+    final responseApi = await userRepositoryInterface.getInformationUser(
       headers: headers,
     );
 
-    //TODO: Todo esta esta para optimizar
-
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
       }
 
-      return false;
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups tenemos problemas, vuelva a intentarlo más tarde.",
+      );
+
+      return;
     }
 
-    if (response is! http.Response) {
-      return false;
-    }
+    final response = UserInformation.fromMap(responseApi.data);
+    informationUser = response;
 
-    if (response.statusCode != 200) {
-      return false;
-    }
+    account.value = Account.active;
+    sessionAccount.value = Session.active;
+    loadingScreenAccount = false;
 
-    final decodeResponse = json.decode(response.body);
-    return UserInformation.fromMap(decodeResponse);
+    GlobalSnackBar.showInfoSnackBarIcon(
+      context,
+      "Información actualizada.",
+    );
+
+    refreshMainBloc();
   }
 
   void refreshMainBloc() {
@@ -520,22 +513,8 @@ class MainBloc extends ChangeNotifier {
     );
   }
 
-  Future<dynamic> getShoppingCart({
-    required String districtId,
-    required Map<String, String> headers,
-  }) async {
-    final responseApi = await cartRepositoryInterface.getShoppingCart(
-      districtId: districtId,
-      headers: headers,
-    );
-
-    if (responseApi.data == null) return;
-
-    return Cart.fromMap(responseApi.data);
-  }
-
   Future<dynamic> getShoppingCartTemp({
-    required String districtId,
+    required BuildContext context,
   }) async {
     final shoppingCartId = await handleGetShoppingCartId();
 
@@ -546,57 +525,73 @@ class MainBloc extends ChangeNotifier {
     };
 
     final responseApi = await cartRepositoryInterface.getShoppingCartTemp(
+      districtId: residence.districtId!,
+      headers: headers,
+    );
+
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+
+      if (statusCode == -1) {
+        GlobalSnackBar.showErrorSnackBarIcon(
+          context,
+          "Compruebe su conexion a internet",
+        );
+        return;
+      }
+
+      GlobalSnackBar.showErrorSnackBarIcon(
+        context,
+        "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+      );
+      return;
+    }
+
+    final cartInfo = Cart.fromMap(responseApi.data);
+
+    if (shoppingCartId.toString().isEmpty) {
+      await hiveRepositoryInterface.save(
+        containerName: "shopping_temporal",
+        key: "cartId",
+        value: cartInfo.id,
+      );
+    }
+
+    cartLength.value = cartInfo.products!.length;
+    informationCart.value = cartInfo;
+  }
+
+  Future<void> handleGetShoppingCart(BuildContext context) async {
+    final responseApi = await cartRepositoryInterface.getShoppingCart(
       districtId: districtId,
       headers: headers,
     );
 
-    if (responseApi.data == null) return;
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
 
-    return Cart.fromMap(responseApi.data);
+      if (statusCode == -1) {
+        GlobalSnackBar.showErrorSnackBarIcon(
+          context,
+          "Compruebe su conexion a internet",
+        );
+        return;
+      }
+
+      GlobalSnackBar.showErrorSnackBarIcon(
+        context,
+        "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+      );
+      return;
+    }
+
+    final cartInfo = Cart.fromMap(responseApi.data);
+
+    informationCart.value = cartInfo;
+    cartLength.value = cartInfo.products!.length;
   }
 
-  void handleGetShoppingCartNotAccount() async {
-    final shoppingCartId = await handleGetShoppingCartId();
-
-    getShoppingCartTemp(
-      districtId: residence.districtId!,
-    ).then(
-      (cart) async {
-        if (cart is Cart) {
-          if (shoppingCartId.toString().isEmpty) {
-            await hiveRepositoryInterface.save(
-              containerName: "shopping_temporal",
-              key: "cartId",
-              value: cart.id,
-            );
-          }
-
-          cartLength.value = cart.products!.length;
-          informationCart.value = cart;
-        }
-
-        shoppingCart.value = ShoppingCart.active;
-      },
-    );
-  }
-
-  Future<void> handleGetShoppingCart() async {
-    await getShoppingCart(
-      districtId: residence.districtId!,
-      headers: headers,
-    ).then(
-      (cart) {
-        if (cart is Cart) {
-          informationCart.value = cart;
-          cartLength.value = cart.products!.length;
-        }
-
-        shoppingCart.value = ShoppingCart.active;
-      },
-    );
-  }
-
-  Future<dynamic> changeShoppingCart() async {
+  void moveShoppingCart(BuildContext context) async {
     final shoppingCartId = await handleGetShoppingCartId();
 
     final responseApi = await cartRepositoryInterface.moveShoppingCart(
@@ -604,9 +599,20 @@ class MainBloc extends ChangeNotifier {
       headers: headers,
     );
 
-    if (responseApi.data == null) return null;
+    if (responseApi.data == null) {
+      // GlobalSnackBar.showInfoSnackBarIcon(
+      //   context,
+      //   'Ups tenemos problemas, vuelva a intentarlo más tarde.',
+      // );
+      return;
+    }
 
-    return ResponseApi.fromMap(responseApi.data);
+    // final response = ResponseApi.fromMap(responseApi.data);
+    //
+    // GlobalSnackBar.showInfoSnackBarIcon(
+    //   context,
+    //   response.message,
+    // );
   }
 
   Future<void> handleRemoveShoppingCart() async {
@@ -616,85 +622,76 @@ class MainBloc extends ChangeNotifier {
     );
   }
 
-  Future<dynamic> deleteItemShoppingCart({
+  void deleteItemShoppingCart({
     required String variationId,
     required String productId,
+    required BuildContext context,
   }) async {
-    dynamic response;
+    final HttpResponse responseApi;
+    context.loaderOverlay.show();
     if (sessionAccount.value == Session.active) {
-      response = await cartRepositoryInterface.deleteProductCart(
+      responseApi = await cartRepositoryInterface.deleteProductCart(
         productId: productId,
         variationId: variationId,
         headers: headers,
       );
     } else {
-      response = await cartRepositoryInterface.deleteProductCartTemp(
+      responseApi = await cartRepositoryInterface.deleteProductCartTemp(
         cartId: informationCart.value.id!,
         variationId: variationId,
         productId: productId,
       );
     }
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
+    context.loaderOverlay.hide();
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode >= 400) {
+        if (statusCode == 400) {
+          final response = ResponseApi.fromMap(responseApi.error!.data);
+          GlobalSnackBar.showErrorSnackBarIcon(
+            context,
+            response.message,
+          );
+        }
 
-      return false;
-    }
-
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        return responseApiFromMap(response.body);
-      }
-    }
-  }
-
-  Future<void> handleShoppingCart() async {
-    if (sessionAccount.value == Session.active) {
-      final cart = await getShoppingCart(
-        districtId: residence.districtId!,
-        headers: headers,
-      );
-
-      if (cart is Cart) {
-        informationCart.value = cart;
-        cartLength.value = cart.products!.length;
         return;
       }
 
+      GlobalSnackBar.showErrorSnackBarIcon(
+        context,
+        "Tuvimos problemas, vuelva a intentarlo más tarde.",
+      );
       return;
     }
 
-    final shoppingCartId = await handleGetShoppingCartId();
-
-    final cart = await getShoppingCartTemp(
-      districtId: residence.districtId!,
+    final response = ResponseApi.fromMap(responseApi.data);
+    handleShoppingCart(context);
+    GlobalSnackBar.showInfoSnackBarIcon(
+      context,
+      response.message,
     );
-
-    if (cart is Cart) {
-      print(cart.toMap());
-      if (shoppingCartId.toString().isEmpty) {
-        await hiveRepositoryInterface.save(
-          containerName: "shopping_temporal",
-          key: "cartId",
-          value: cart.id,
-        );
-      }
-
-      cartLength.value = cart.products!.length;
-      informationCart.value = cart;
-    }
   }
 
-  Future<dynamic> changeQuantity({
+  void handleShoppingCart(BuildContext context) async {
+    if (sessionAccount.value == Session.active) {
+      await handleGetShoppingCart(context);
+      return;
+    }
+
+    await getShoppingCartTemp(context: context);
+  }
+
+  void changeQuantity({
     required String productId,
     required int quantity,
     required String variationId,
+    required BuildContext context,
   }) async {
-    dynamic response;
+    final HttpResponse responseApi;
+    context.loaderOverlay.show();
     if (sessionAccount.value == Session.active) {
-      response = await cartRepositoryInterface.updateProductCart(
+      responseApi = await cartRepositoryInterface.updateProductCart(
         productId: productId,
         variationId: variationId,
         quantity: quantity,
@@ -703,7 +700,7 @@ class MainBloc extends ChangeNotifier {
     } else {
       final shoppingCartId = await handleGetShoppingCartId();
 
-      response = await cartRepositoryInterface.updateProductCartTemp(
+      responseApi = await cartRepositoryInterface.updateProductCartTemp(
         cartId: shoppingCartId,
         productId: productId,
         variationId: variationId,
@@ -711,13 +708,34 @@ class MainBloc extends ChangeNotifier {
       );
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        return responseApiFromMap(response.body);
+    context.loaderOverlay.hide();
+    if (responseApi.data == null) {
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode >= 400) {
+        if (statusCode == 400) {
+          final response = ResponseApi.fromMap(responseApi.error!.data);
+          GlobalSnackBar.showErrorSnackBarIcon(
+            context,
+            response.message,
+          );
+        }
+
+        return;
       }
+
+      GlobalSnackBar.showErrorSnackBarIcon(
+        context,
+        "Tuvimos problemas, vuelva a intentarlo más tarde.",
+      );
+      return;
     }
 
-    return false;
+    final response = ResponseApi.fromMap(responseApi.data);
+    handleShoppingCart(context);
+    GlobalSnackBar.showInfoSnackBarIcon(
+      context,
+      response.message,
+    );
   }
 
   Future<String> handleGetShoppingCartId() async {

@@ -85,7 +85,7 @@ class _CommentsState extends State<Comments> {
       snap: true,
       leading: SizedBox(),
       toolbarHeight: 62,
-      backgroundColor: kSecondaryBackgroundColor,
+      backgroundColor: kBackGroundColor,
       leadingWidth: 0,
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.none,

@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_repository.dart';
@@ -13,7 +12,6 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/mai
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/phone/phone_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_helper.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 import '../../widget/button_crud.dart';
 
@@ -219,52 +217,12 @@ class AddressesDetail extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 5.0),
                                       GestureDetector(
-                                        onTap: () async {
-                                          context.loaderOverlay.show();
-                                          final response = await shipmentBloc
-                                              .onDeleteAddress(
+                                        onTap: () {
+                                          shipmentBloc.onDeleteAddress(
+                                            context,
                                             addressId: address.id!,
                                             headers: mainBloc.headers,
                                           );
-
-                                          if (response is ResponseApi) {
-                                            shipmentBloc.address = Address(
-                                              ubigeo: Ubigeo(),
-                                              lotNumber: 1,
-                                              dptoInt: 1,
-                                              addressDefault: false,
-                                            );
-
-                                            final responseUserInformation =
-                                                await mainBloc
-                                                    .getUserInformation();
-
-                                            if (responseUserInformation
-                                                is UserInformation) {
-                                              mainBloc.informationUser =
-                                                  responseUserInformation;
-
-                                              mainBloc.refreshMainBloc();
-                                              context.loaderOverlay.hide();
-
-                                              await GlobalSnackBar
-                                                  .showInfoSnackBarIcon(
-                                                context,
-                                                response.message,
-                                              );
-
-                                              return;
-                                            }
-                                          }
-
-                                          context.loaderOverlay.hide();
-                                          await GlobalSnackBar
-                                              .showWarningSnackBar(
-                                            context,
-                                            "Ups, vuelvalo a intentar más tarde",
-                                          );
-
-                                          return;
                                         },
                                         child: const CircleAvatar(
                                           radius: 15.0,

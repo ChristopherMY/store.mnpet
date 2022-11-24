@@ -1,12 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:store_mundo_negocio/clean_architecture/domain/model/keyword.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 class SearchKeywordBloc extends ChangeNotifier {
   LocalRepositoryInterface localRepositoryInterface;
@@ -21,19 +20,19 @@ class SearchKeywordBloc extends ChangeNotifier {
   ValueNotifier<List<Keyword>> searchResults = ValueNotifier(<Keyword>[]);
   ValueNotifier<List<Text>> textSearchResult = ValueNotifier(<Text>[]);
 
-  void handleInitKeywords() async {
+  void handleInitKeywords(BuildContext context) async {
     if (keywords is! List<Keyword>) {
-      final response = await localRepositoryInterface.getKeywords();
-      if (response is http.Response) {
-        if (response.statusCode == 200) {
-          final decode = jsonDecode(response.body);
-          keywords =
-              decode.map((element) => Keyword.fromMap(element)).toList().cast();
-          return;
+      final responseApi = await localRepositoryInterface.getKeywords();
+
+      if (responseApi.data == null) {
+        keywords = <Keyword>[];
+        final statusCode = responseApi.error!.statusCode;
+        if (statusCode == -1) {
+          GlobalSnackBar.showWarningSnackBar(context, kNoInternet);
         }
       }
 
-      keywords = <Keyword>[];
+      keywords = (responseApi.data as List).map((x) => Keyword.fromMap(x)).toList();
     }
   }
 

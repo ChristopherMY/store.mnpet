@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/tab_payment_page.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
@@ -55,7 +54,7 @@ class CheckoutInfoScreen extends StatefulWidget {
           paymentRepositoryInterface:
               context.read<PaymentRepositoryInterface>(),
           hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
-        )..getIdentificationTypes(),
+        )..getIdentificationTypes(context),
         builder: (_, __) => const CheckoutInfoScreen._(),
       ),
     );
@@ -69,13 +68,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
   void handleUserInformation() async {
     final mainBloc = context.read<MainBloc>();
     if (mainBloc.informationUser is! UserInformation) {
-      final loadInformation = await mainBloc.getUserInformation();
-      if (loadInformation is UserInformation) {
-        mainBloc.informationUser = loadInformation;
-      }
-
-      mainBloc.account.value = Account.active;
-      mainBloc.refreshMainBloc();
+      mainBloc.handleLoadUserInformation(context);
     }
   }
 
@@ -547,13 +540,20 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                               MercadoPagoPayment infoPayment =
                                   MercadoPagoPayment.fromJsonMap(decode);
 
-                              print(infoPayment.status);
-                              print(infoPayment.statusDetail);
-
                               context.loaderOverlay.hide();
 
+                              if (infoPayment.status == "rejected") {
+                                final errorDescription = statusDetailName(
+                                    statusDetail: infoPayment.status!);
+                                GlobalSnackBar.showErrorSnackBarIcon(
+                                  context,
+                                  errorDescription!,
+                                );
+                                return;
+                              }
+
                               if (infoPayment.statusDetail == "accredited") {
-                                await mainBloc.handleGetShoppingCart();
+                                await mainBloc.handleGetShoppingCart(context);
 
                                 await Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
@@ -564,9 +564,9 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                 );
                               }
                             }
-                          } else {
-                            print('invalid!');
                           }
+
+                          /// END IF VALIDATION FORM
                         }
                         break;
                       default:
@@ -785,57 +785,12 @@ class _OrderCheckoutShippingState extends State<_OrderCheckoutShipping> {
                                             ),
                                             const SizedBox(width: 5.0),
                                             GestureDetector(
-                                              onTap: () async {
-                                                context.loaderOverlay.show();
-                                                final response =
-                                                    await shipmentBloc
-                                                        .onDeleteAddress(
+                                              onTap: () {
+                                                shipmentBloc.onDeleteAddress(
+                                                  context,
                                                   addressId: address.id!,
                                                   headers: mainBloc.headers,
                                                 );
-
-                                                if (response is ResponseApi) {
-                                                  shipmentBloc.address =
-                                                      Address(
-                                                    ubigeo: Ubigeo(),
-                                                    lotNumber: 1,
-                                                    dptoInt: 1,
-                                                    addressDefault: false,
-                                                  );
-
-                                                  final responseUserInformation =
-                                                      await mainBloc
-                                                          .getUserInformation();
-
-                                                  if (responseUserInformation
-                                                      is UserInformation) {
-                                                    mainBloc.informationUser =
-                                                        responseUserInformation;
-
-                                                    mainBloc.refreshMainBloc();
-                                                    context.loaderOverlay
-                                                        .hide();
-
-                                                    if (!mounted) return;
-                                                    await GlobalSnackBar
-                                                        .showInfoSnackBarIcon(
-                                                      context,
-                                                      response.message,
-                                                    );
-
-                                                    return;
-                                                  }
-                                                }
-
-                                                context.loaderOverlay.hide();
-                                                if (!mounted) return;
-                                                await GlobalSnackBar
-                                                    .showWarningSnackBar(
-                                                  context,
-                                                  "Ups, vuelvalo a intentar más tarde",
-                                                );
-
-                                                return;
                                               },
                                               child: const CircleAvatar(
                                                 radius: 15.0,
@@ -1040,53 +995,12 @@ class _OrderCheckoutShippingPhoneState
                                         ),
                                         const SizedBox(width: 5.0),
                                         GestureDetector(
-                                          onTap: () async {
-                                            context.loaderOverlay.show();
-                                            final response =
-                                                await phoneBloc.onDeletePhone(
+                                          onTap: () {
+                                            phoneBloc.onDeletePhone(
+                                              context,
                                               phoneId: phone.id!,
                                               headers: mainBloc.headers,
                                             );
-
-                                            if (response is ResponseApi) {
-                                              phoneBloc.phone = Phone(
-                                                phoneDefault: false,
-                                                type: "phone",
-                                                areaCode: "51",
-                                              );
-
-                                              final responseUserInformation =
-                                                  await mainBloc
-                                                      .getUserInformation();
-
-                                              if (responseUserInformation
-                                                  is UserInformation) {
-                                                mainBloc.informationUser =
-                                                    responseUserInformation;
-                                                mainBloc.refreshMainBloc();
-
-                                                context.loaderOverlay.hide();
-
-                                                if (!mounted) return;
-                                                await GlobalSnackBar
-                                                    .showInfoSnackBarIcon(
-                                                  context,
-                                                  response.message,
-                                                );
-
-                                                return;
-                                              }
-                                            }
-
-                                            context.loaderOverlay.hide();
-                                            if (!mounted) return;
-                                            await GlobalSnackBar
-                                                .showWarningSnackBar(
-                                              context,
-                                              "Ups, vuelvalo a intentar más tarde",
-                                            );
-
-                                            return;
                                           },
                                           child: const CircleAvatar(
                                             radius: 15.0,

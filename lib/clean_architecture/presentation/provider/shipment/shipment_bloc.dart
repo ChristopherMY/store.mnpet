@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/district.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/region.dart';
@@ -10,8 +9,11 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/local_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
 
 import '../../../domain/repository/user_repository.dart';
+import '../../../helper/http_response.dart';
 
 class ShipmentBloc extends ChangeNotifier {
   LocalRepositoryInterface localRepositoryInterface;
@@ -138,7 +140,8 @@ class ShipmentBloc extends ChangeNotifier {
     }
   }
 
-  void onChangeRegion({
+  void onChangeRegion(
+    BuildContext context, {
     required int index,
     required StateSetter stateAlertRegion,
     required List<Region> regions,
@@ -158,27 +161,29 @@ class ShipmentBloc extends ChangeNotifier {
 
     address.ubigeo!.departmentId = regions[index].id.toString();
 
-    final response = await localRepositoryInterface.getProvinces(
+    final responseApi = await localRepositoryInterface.getProvinces(
       departmentId: regions[index].regionId!,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-
-        provinces.addAll(
-          data.map((element) => Province.fromMap(element)).toList().cast(),
-        );
-      } else {
-        provinces = [];
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-
+    if (responseApi.data == null) {
       provinces = [];
+      final statusCode = responseApi.error!.statusCode;
+
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
+      }
+
+      GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+      return;
     }
+
+    final data = responseApi.data;
+
+    provinces.addAll(
+      data.map((element) => Province.fromMap(element)).toList().cast(),
+    );
 
     address.ubigeo!.department = regions[index].name.toString();
     address.ubigeo!.province = "Seleccione";
@@ -187,7 +192,8 @@ class ShipmentBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onChangeProvince({
+  void onChangeProvince(
+    BuildContext context, {
     required int index,
     required StateSetter stateAlertProvince,
   }) async {
@@ -204,25 +210,28 @@ class ShipmentBloc extends ChangeNotifier {
 
     address.ubigeo!.provinceId = provinces[index].id.toString();
 
-    final response = await localRepositoryInterface.getDistricts(
+    final responseApi = await localRepositoryInterface.getDistricts(
       provinceId: provinces[index].provinceId!,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-        districts.addAll(
-            data.map((element) => District.fromMap(element)).toList().cast());
-      } else {
-        districts = [];
-      }
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
+    if (responseApi.data == null) {
+      districts = [];
+      final statusCode = responseApi.error!.statusCode;
+
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
       }
 
-      districts = [];
+      GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+      return;
     }
+
+    final data = responseApi.data;
+
+    districts.addAll(
+        data.map((element) => District.fromMap(element)).toList().cast());
 
     address.ubigeo!.province = provinces[index].name.toString();
     address.ubigeo!.district = "Seleccione";
@@ -267,92 +276,120 @@ class ShipmentBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> onSave({required Map<String, String> headers}) async {
+  void onSave(
+    BuildContext context, {
+    required Map<String, String> headers,
+  }) async {
+    final mainBloc = context.read<MainBloc>();
+    context.loaderOverlay.show();
+    final HttpResponse responseApi;
+
     if (isUpdate) {
-      final response = await userRepositoryInterface.updateUserAddress(
+      responseApi = await userRepositoryInterface.updateUserAddress(
         address: address,
         headers: headers,
       );
-
-      if (response is http.Response) {
-        if (response.statusCode == 200) {
-          return responseApiFromMap(response.body);
-        }
-
-        return false;
-      } else if (response is String) {
-        if (kDebugMode) {
-          print(response);
-        }
-      }
     } else {
-      final response = await userRepositoryInterface.createAddress(
+      responseApi = await userRepositoryInterface.createAddress(
         address: address,
         headers: headers,
       );
-
-      if (response is http.Response) {
-        if (response.statusCode == 200) {
-          return responseApiFromMap(response.body);
-        }
-
-        return false;
-      } else if (response is String) {
-        if (kDebugMode) {
-          print(response);
-        }
-      }
     }
 
-    return false;
+    if (responseApi.data == null) {
+      context.loaderOverlay.hide();
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
+      }
+
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+      );
+      return;
+    }
+
+    mainBloc.handleLoadUserInformation(context);
+    context.loaderOverlay.hide();
+
+    final response = ResponseApi.fromMap(responseApi.data);
+    GlobalSnackBar.showWarningSnackBar(context, response.message);
+    return;
   }
 
-  Future<dynamic> onChangeDefaultAddress({
+  void onChangeDefaultAddress(
+    BuildContext context, {
     required String addressId,
     required Map<String, String> headers,
   }) async {
-    final response = await userRepositoryInterface.changeMainAddress(
+    final mainBloc = context.read<MainBloc>();
+    context.loaderOverlay.show();
+    final responseApi = await userRepositoryInterface.changeMainAddress(
       addressId: addressId,
       headers: headers,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        return responseApiFromMap(response.body);
+    if (responseApi.data == null) {
+      context.loaderOverlay.hide();
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
       }
 
-      return false;
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+      );
+      return;
     }
 
-    return false;
+    mainBloc.handleLoadUserInformation(context);
+    context.loaderOverlay.hide();
+
+    final response = ResponseApi.fromMap(responseApi.data);
+    GlobalSnackBar.showWarningSnackBar(context, response.message);
+    return;
   }
 
-  Future<dynamic> onDeleteAddress({
+  void onDeleteAddress(
+    BuildContext context, {
     required String addressId,
     required Map<String, String> headers,
   }) async {
-    final response = await userRepositoryInterface.deleteUserAddress(
+    final mainBloc = context.read<MainBloc>();
+    context.loaderOverlay.show();
+    final responseApi = await userRepositoryInterface.deleteUserAddress(
       addressId: addressId,
       headers: headers,
     );
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        return responseApiFromMap(response.body);
+    if (responseApi.data == null) {
+      context.loaderOverlay.hide();
+      final statusCode = responseApi.error!.statusCode;
+      if (statusCode == 400) {
+        final response = ResponseApi.fromMap(responseApi.error!.data);
+        GlobalSnackBar.showWarningSnackBar(context, response.message);
+        return;
       }
 
-      return false;
-    } else if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
+      GlobalSnackBar.showWarningSnackBar(
+        context,
+        "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+      );
+      return;
     }
 
-    return false;
+    mainBloc.handleLoadUserInformation(context);
+    context.loaderOverlay.hide();
+
+    final response = ResponseApi.fromMap(responseApi.data);
+    GlobalSnackBar.showWarningSnackBar(context, response.message);
+    return;
   }
 
   void onChangeAddressDefault(bool? value) {

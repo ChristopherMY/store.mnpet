@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
@@ -45,45 +42,39 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         changePasswordBloc.formKey.currentState!.save();
         context.loaderOverlay.show();
 
-        final response = await changePasswordBloc.userRepositoryInterface.changeUserPassword(
+        final responseApi =
+            await changePasswordBloc.userRepositoryInterface.changeUserPassword(
           headers: mainBloc.headers,
           bindings: {
             "password": changePasswordBloc.newPasswordController.text,
-            "password_confirmation": changePasswordBloc.confirmPasswordController.text,
-            "current_password": changePasswordBloc.currentPasswordController.text,
+            "password_confirmation":
+                changePasswordBloc.confirmPasswordController.text,
+            "current_password":
+                changePasswordBloc.currentPasswordController.text,
           },
         );
 
         context.loaderOverlay.hide();
 
-        if (response is Text) {
-          if (kDebugMode) {
-            print(response.toString());
-          }
-
-          return;
-        }
-
-        if (response is! http.Response) {
-          return;
-        }
-
-        if (response.statusCode == 200 || response.statusCode == 400) {
-          final decode = ResponseApi.fromMap(jsonDecode(response.body));
-
-          if (decode.status == "error") {
-            GlobalSnackBar.showWarningSnackBar(context, decode.message);
+        if (responseApi.data == null) {
+          context.loaderOverlay.hide();
+          final statusCode = responseApi.error!.statusCode;
+          if (statusCode == 400) {
+            final response = ResponseApi.fromMap(responseApi.error!.data);
+            GlobalSnackBar.showWarningSnackBar(context, response.message);
             return;
           }
 
-          GlobalSnackBar.showInfoSnackBarIcon(context, decode.message);
+          GlobalSnackBar.showWarningSnackBar(
+            context,
+            "Ups tuvimos problemas, vuelva a intentarlo más tarde",
+          );
+
           return;
         }
 
-        GlobalSnackBar.showWarningSnackBar(
-          context,
-          "Ups tuvimos problemas, vuelva a intentarlo más tarde",
-        );
+        final response = ResponseApi.fromMap(responseApi.data);
+        GlobalSnackBar.showInfoSnackBarIcon(context, response.message);
       }
     }
   }

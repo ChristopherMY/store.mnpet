@@ -1,5 +1,5 @@
 
-
+import '../../helper/http_response.dart';
 abstract class LocalRepositoryInterface{
   const LocalRepositoryInterface();
 
@@ -10,14 +10,14 @@ abstract class LocalRepositoryInterface{
   Future<void> clearAllData();
 
   // List<Region>
-  Future<dynamic> getRegions();
+  Future<HttpResponse> getRegions();
 
   // List<Province>
-  Future<dynamic> getProvinces({required String departmentId});
+  Future<HttpResponse> getProvinces({required String departmentId});
 
   // List<District>
-  Future<dynamic> getDistricts({required String provinceId});
+  Future<HttpResponse> getDistricts({required String provinceId});
 
   // List<Keyword>
-  Future<dynamic> getKeywords();
+  Future<HttpResponse> getKeywords();
 }

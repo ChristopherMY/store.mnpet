@@ -3,8 +3,6 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/keyboard.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
@@ -246,105 +244,8 @@ class _SignUpFormState extends State<SignUpForm> {
           DefaultButton(
             text: "Continuar",
             press: () async {
-              if (!signUpBloc.termsConditionsConfirmed.value) {
-                signUpBloc.addError(error: kTermsNullError);
-              }
 
-              if (signUpBloc.formKey.currentState!.validate()) {
-                context.loaderOverlay.show();
-                signUpBloc.formKey.currentState!.save();
-                KeyboardUtil.hideKeyboard(context);
 
-                if (signUpBloc.errors.value.isNotEmpty) {
-                  context.loaderOverlay.hide();
-                  return GlobalSnackBar.showWarningSnackBar(
-                    context,
-                    "Vuelva a revisar la información ingresada",
-                  );
-                }
-
-                Map<String, dynamic> modelUser = {
-                  "name": signUpBloc.nameController.text,
-                  "lastname": signUpBloc.lastnameController.text,
-                  "password": signUpBloc.passwordController.text,
-                  "email": signUpBloc.emailController.text,
-                  "document": {
-                    "value": signUpBloc.numDocController.text,
-                    "type": "DNI"
-                  },
-                  "terms_conditions_confirmed":
-                      signUpBloc.termsConditionsConfirmed.value
-                };
-
-                final response = await signUpBloc.registerUser(user: modelUser);
-                if (!mounted) return;
-
-                if (response is bool) {
-                  context.loaderOverlay.hide();
-
-                  return GlobalSnackBar.showErrorSnackBarIcon(
-                    context,
-                    "Tuvimos problemas, vuelva a intentarlo",
-                  );
-                }
-
-                if (response is ResponseApi) {
-                  if (response.status == "error") {
-                    GlobalSnackBar.showErrorSnackBarIcon(
-                      context,
-                      response.message,
-                    );
-                  }
-
-                  context.loaderOverlay.hide();
-                  return;
-                }
-
-                if (response is! CredentialsAuth) {
-                  context.loaderOverlay.hide();
-                  return GlobalSnackBar.showErrorSnackBarIcon(
-                    context,
-                    "Tuvimos problemas, vuelva a intentarlo",
-                  );
-                }
-
-                final responseSession = await mainBloc.loadSessionPromise();
-                if (responseSession) {
-                  final userInformation = await mainBloc.getUserInformation();
-                  if (!mounted) return;
-
-                  if (userInformation is! UserInformation) {
-                    context.loaderOverlay.hide();
-
-                    return GlobalSnackBar.showErrorSnackBarIcon(
-                      context,
-                      "Tuvimos problemas, vuelva a intentarlo",
-                    );
-                  }
-
-                  /// Procedemos a cambiar
-                  await mainBloc.changeShoppingCart();
-                  await mainBloc.handleGetShoppingCart();
-
-                  mainBloc.informationUser = userInformation;
-                  mainBloc.sessionAccount.value = Session.active;
-                  mainBloc.account.value = Account.active;
-
-                  /// Count step to back
-                  int count = 0;
-                  Navigator.of(context).popUntil((route) =>
-                      count++ >= mainBloc.countNavigateIterationScreen);
-
-                  context.loaderOverlay.hide();
-                  return;
-                }
-
-                context.loaderOverlay.hide();
-                GlobalSnackBar.showWarningSnackBar(
-                  context,
-                  "Tenemos un problema, por favor inténtelo más tarde.",
-                );
-              }
             },
           ),
           const SizedBox(height: 20.0)

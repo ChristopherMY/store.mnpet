@@ -1,83 +1,83 @@
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
-
+import '../../helper/http_response.dart';
 abstract class UserRepositoryInterface {
   const UserRepositoryInterface();
 
   // Address
-  Future<dynamic> getAddressMain();
+  Future<HttpResponse> getAddressMain();
 
   // http.response
-  Future<dynamic> updateUserAddress({
+  Future<HttpResponse> updateUserAddress({
     required Address address,
     required Map<String, String> headers,
   });
 
-  Future<dynamic> updateUserInformation({
+  Future<HttpResponse> updateUserInformation({
     required Map<String, dynamic> binding,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> createAddress({
+  Future<HttpResponse> createAddress({
     required Address address,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> changeMainAddress({
+  Future<HttpResponse> changeMainAddress({
     required String addressId,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> deleteUserAddress({
+  Future<HttpResponse> deleteUserAddress({
     required String addressId,
     required Map<String, String> headers,
   });
 
-  Future<dynamic> createPhone({
+  Future<HttpResponse> createPhone({
     required Phone phone,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> updateUserPhone({
+  Future<HttpResponse> updateUserPhone({
     required Phone phone,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> changeMainPhone({
+  Future<HttpResponse> changeMainPhone({
     required String phoneId,
     required Map<String, String> headers,
   });
 
   // http.response
-  Future<dynamic> deleteUserPhone({
+  Future<HttpResponse> deleteUserPhone({
     required String phoneId,
     required Map<String, String> headers,
   });
 
   // User
-  Future<dynamic> getInformationUser({required Map<String, String> headers});
+  Future<HttpResponse> getInformationUser({required Map<String, String> headers});
 
   // http.response
-  Future<dynamic> pushUserNotificationToken();
+  // Future<HttpResponse> pushUserNotificationToken();
 
   // List<Order>
-  Future<dynamic> getOrdersById({
+  Future<HttpResponse> getOrdersById({
     required Map<String, String> headers,
   });
 
   // List<Order>
-  Future<dynamic> getOrderDetailById({required int paymentId});
+  Future<HttpResponse> getOrderDetailById({required int paymentId});
 
-  Future<dynamic> changeUserMail({
+  Future<HttpResponse> changeUserMail({
     required Map<String, String> headers,
     required Map<String, dynamic> bindings
   });
 
-  Future<dynamic> changeUserPassword({
+  Future<HttpResponse> changeUserPassword({
     required Map<String, String> headers,
     required Map<String, dynamic> bindings
   });

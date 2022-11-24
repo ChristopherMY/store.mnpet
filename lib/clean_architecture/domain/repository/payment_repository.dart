@@ -1,12 +1,12 @@
-import 'package:store_mundo_negocio/clean_architecture/domain/model/payment.dart';
+import '../../helper/http_response.dart';
 
 abstract class PaymentRepositoryInterface {
 
   // List<MercadoPagoDocumentType>
-  Future<dynamic> getIdentificationTypes();
+  Future<HttpResponse> getIdentificationTypes();
 
   // http.Response
-  Future<dynamic> createCardToken({
+  Future<HttpResponse> createCardToken({
     required String cvv,
     required String expirationYear,
     required int expirationMonth,
@@ -17,13 +17,13 @@ abstract class PaymentRepositoryInterface {
   });
 
   // MercadoPagoPaymentMethodInstallments
-  Future<dynamic> getInstallments({
+  Future<HttpResponse> getInstallments({
     required String bin,
     required double amount,
   });
 
   // http.Response
-  Future<dynamic> createPayment({
+  Future<HttpResponse> createPayment({
     required String cardToken,
     required int installments,
     required String paymentMethodId,

@@ -4,10 +4,8 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_auth.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/auth_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/keyboard.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/global_snackbar.dart';
@@ -147,24 +145,11 @@ class SignInBloc extends ChangeNotifier {
       final hasSession = await mainBloc.loadSessionPromise();
 
       if (hasSession) {
-        final responseUserInformation = await mainBloc.getUserInformation();
+        mainBloc.handleLoadUserInformation(context);
 
-        if (responseUserInformation is! UserInformation) {
-          GlobalSnackBar.showErrorSnackBarIcon(
-            context,
-            "Tuvimos problemas, vuelva a intentarlo",
-          );
-
-          return;
-        }
-
-        await mainBloc.changeShoppingCart();
-        await mainBloc.handleGetShoppingCart();
-
-        mainBloc.informationUser = responseUserInformation;
-        mainBloc.sessionAccount.value = Session.active;
-        mainBloc.account.value = Account.active;
-        mainBloc.refreshMainBloc();
+        /// Procedemos a cambiar los items a carrito [produccion]
+        mainBloc.moveShoppingCart(context);
+        await mainBloc.handleGetShoppingCart(context);
 
         context.loaderOverlay.hide();
 
@@ -178,7 +163,6 @@ class SignInBloc extends ChangeNotifier {
         context,
         "Tenemos un problema, por favor inténtelo más tarde.",
       );
-
     }
   }
 

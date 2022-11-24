@@ -68,8 +68,7 @@ class CartBloc extends ChangeNotifier {
     required List<Brand> categories,
     required int pageKey,
   }) async {
-    final response =
-        await productRepositoryInterface.getRelatedProductsPagination(
+    final responseApi = await productRepositoryInterface.getRelatedProductsPagination(
       categories: categories,
       finalRange: _finalRange,
       initialRange: _initialRange,

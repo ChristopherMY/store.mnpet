@@ -106,8 +106,7 @@ class _MainScreenState extends State<MainScreen>
             // showSelectedLabels: false,
             // showUnselectedLabels: false,
             currentIndex: value,
-            onTap: (index) =>
-                mainBloc.onChangeIndexSelected(index: index, context: context),
+            onTap: (index) => mainBloc.onChangeIndexSelected(index: index, context: context),
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),
