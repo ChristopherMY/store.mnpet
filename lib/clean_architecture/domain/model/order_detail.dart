@@ -634,8 +634,8 @@ class Regular {
       );
 
   factory Regular.fromMap(Map<String, dynamic> json) => Regular(
-    min: json["min"] == null ? null : json["min"],
-    max: json["max"] == null ? null : json["max"],
+    min: json["min"] == null ? null : json["min"].toDouble(),
+    max: json["max"] == null ? null : json["max"].toDouble(),
   );
 
   Map<String, dynamic> toMap() => {

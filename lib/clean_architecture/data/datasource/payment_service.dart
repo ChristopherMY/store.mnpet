@@ -24,7 +24,7 @@ class PaymentService implements PaymentRepositoryInterface {
     required String identificationId,
     required String cardHolderName,
   }) async {
-    final url = "$_urlMercadoPago/v1/card_tokens";
+    final url = "https://$_urlMercadoPago/v1/card_tokens";
 
     final body = {
       "security_code": cvv,
@@ -99,20 +99,19 @@ class PaymentService implements PaymentRepositoryInterface {
       /// Optional
     );
 
-    return await _dio.request(url, headers: headers, data: body.toMap());
+    return await _dio.request(url, method: "POST", headers: headers, data: body.toMap());
   }
 
   // List<MercadoPagoDocumentType>
   @override
   Future<HttpResponse> getIdentificationTypes() async {
-    final url = "$_urlMercadoPago/v1/identification_types";
+    final url = "https://$_urlMercadoPago/v1/identification_types?access_token=${_mercadoPagoCredentials.accessToken}";
 
     return await _dio.request(
       url,
       method: "GET",
       headers: {
         "Content-type": "application/json",
-        "access_token": _mercadoPagoCredentials.accessToken,
       },
     );
   }
@@ -123,16 +122,15 @@ class PaymentService implements PaymentRepositoryInterface {
     required String bin,
     required double amount,
   }) async {
-    final url = "$_urlMercadoPago/v1/payment_methods/installments";
-
+    final url = "https://$_urlMercadoPago/v1/payment_methods/installments?access_token=${_mercadoPagoCredentials.accessToken}&bin=$bin&amount=$amount";
     return await _dio.request(
       url,
       method: "GET",
       headers: {
         "Content-type": "application/json",
-        "access_token": _mercadoPagoCredentials.accessToken,
-        'bin': bin,
-        'amount': amount.toString(),
+        // "access_token": _mercadoPagoCredentials.accessToken,
+        // 'bin': bin,
+        // 'amount': amount.toString(),
       },
     );
   }

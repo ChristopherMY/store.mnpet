@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/home_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
@@ -20,6 +21,7 @@ class MainScreen extends StatefulWidget {
     return ChangeNotifierProvider(
       create: (context) => HomeBloc(
         homeRepositoryInterface: context.read<HomeRepositoryInterface>(),
+        hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
       )..handleInitComponents(),
       builder: (_, __) => const MainScreen._(),
     );

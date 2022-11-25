@@ -2,16 +2,14 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/mercado_pago_payment_method_installments.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/tab_payment_page.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
@@ -42,6 +40,7 @@ import '../../../domain/usecase/page.dart';
 import '../../util/glassmorphism_config.dart';
 import '../../widget/credit_card_form.dart';
 import '../../widget/credit_card_widget.dart';
+import '../../../helper/http_response.dart';
 
 class CheckoutInfoScreen extends StatefulWidget {
   const CheckoutInfoScreen._({Key? key}) : super(key: key);
@@ -454,42 +453,34 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
 
                             if (mainBloc.informationCart.value is Cart) {
                               context.loaderOverlay.show();
-                              final response =
-                                  await checkoutInfoBloc.handlePayment(
+                              final responseApi = await checkoutInfoBloc.handlePayment(
                                 cartInformation: mainBloc.informationCart.value,
                                 userInformation: mainBloc.informationUser,
                                 context: context,
                               );
 
-                              if (response is! http.Response) {
-                                context.loaderOverlay.hide();
-                                GlobalSnackBar.showWarningSnackBar(
-                                  context,
-                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-                                );
-
-                                return;
-                              }
-
-                              if (response is String) {
-                                context.loaderOverlay.hide();
-
-                                GlobalSnackBar.showWarningSnackBar(
-                                  context,
-                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-                                );
-
-                                return;
-                              }
-
-                              final decode = json.decode(response.body);
-
                               if (!mounted) return;
-                              if (response.statusCode != 201) {
-                                if (response.statusCode == 400) {
-                                  if (decode['error']['status'] == 400) {
-                                    final errorText = checkoutInfoBloc
-                                        .badRequestProcess(decode);
+
+                              if (responseApi is! HttpResponse) {
+                                context.loaderOverlay.hide();
+                                GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+                                return;
+                              }
+
+                              if(responseApi.data == null){
+                                final statusCode = responseApi.error!.statusCode;
+                                final data = responseApi.error!.data;
+
+                                context.loaderOverlay.hide();
+                                if(statusCode == 402){
+                                  final response = ResponseApi.fromMap(responseApi.error!.data);
+                                  GlobalSnackBar.showWarningSnackBar(context, response.message);
+                                  return;
+                                }
+
+                                if(statusCode == 400){
+                                  if (data['error']['status'] == 400) {
+                                    final errorText = checkoutInfoBloc.badRequestProcess(data);
 
                                     context.loaderOverlay.hide();
                                     GlobalSnackBar.showErrorSnackBarIcon(
@@ -499,28 +490,29 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
 
                                     return;
                                   }
+
+                                  GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+                                  return;
                                 }
 
-                                if (checkoutInfoBloc.installmentsDetail
-                                    is! MercadoPagoPaymentMethodInstallments) {
+                                if (checkoutInfoBloc.installmentsDetail is! MercadoPagoPaymentMethodInstallments) {
                                   context.loaderOverlay.hide();
                                   GlobalSnackBar.showWarningSnackBar(
                                     context,
-                                    "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                                    kOtherProblem,
                                   );
 
                                   return;
                                 }
 
-                                if (response.statusCode != 401) {
+                                if (statusCode != 400) {
                                   final errorText =
-                                      checkoutInfoBloc.badTokenProcess(
-                                    status: decode['status'],
+                                  checkoutInfoBloc.badTokenProcess(
+                                    status: data['status'],
                                     installments:
-                                        checkoutInfoBloc.installmentsDetail,
+                                    checkoutInfoBloc.installmentsDetail,
                                   );
 
-                                  context.loaderOverlay.hide();
                                   GlobalSnackBar.showErrorSnackBarIcon(
                                     context,
                                     errorText,
@@ -529,22 +521,15 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                   return;
                                 }
 
-                                GlobalSnackBar.showWarningSnackBar(
-                                  context,
-                                  "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
-                                );
-
+                                GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
                                 return;
                               }
 
-                              MercadoPagoPayment infoPayment =
-                                  MercadoPagoPayment.fromJsonMap(decode);
-
+                              MercadoPagoPayment infoPayment = MercadoPagoPayment.fromJsonMap(responseApi.data);
                               context.loaderOverlay.hide();
-
                               if (infoPayment.status == "rejected") {
                                 final errorDescription = statusDetailName(
-                                    statusDetail: infoPayment.status!);
+                                    statusDetail: infoPayment.statusDetail!);
                                 GlobalSnackBar.showErrorSnackBarIcon(
                                   context,
                                   errorDescription!,
@@ -563,6 +548,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                                   ),
                                 );
                               }
+
                             }
                           }
 
@@ -572,7 +558,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
                       default:
                         GlobalSnackBar.showWarningSnackBar(
                           context,
-                          "Ups. Tuvimos un problema, vuelva a intentarlo más tarde",
+                          kOtherProblem,
                         );
                     }
                   }

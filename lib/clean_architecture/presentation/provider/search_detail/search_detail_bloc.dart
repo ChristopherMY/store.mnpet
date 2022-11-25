@@ -1,8 +1,4 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/binding_search.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/filter_product_detail.dart';
@@ -11,6 +7,7 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/search_produ
 import 'package:store_mundo_negocio/clean_architecture/domain/model/sort_option.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/product_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class SearchDetailBloc extends ChangeNotifier {
   ProductRepositoryInterface productRepositoryInterface;
@@ -20,7 +17,7 @@ class SearchDetailBloc extends ChangeNotifier {
   static const _pageSize = 16;
 
   final PagingController<int, Product> pagingController =
-      PagingController(firstPageKey: 0);
+  PagingController(firstPageKey: 0);
   ValueNotifier<LoadStatus> loadStatus = ValueNotifier(LoadStatus.loading);
 
   static const _limit = 16;
@@ -28,8 +25,7 @@ class SearchDetailBloc extends ChangeNotifier {
   ValueNotifier<List<Brand>> category = ValueNotifier(<Brand>[]);
   ValueNotifier<List<Brand>> productTypes = ValueNotifier(<Brand>[]);
   ValueNotifier<List<Brand>> brands = ValueNotifier(<Brand>[]);
-  ValueNotifier<List<ProductAttribute>> attributes =
-      ValueNotifier(<ProductAttribute>[]);
+  ValueNotifier<List<ProductAttribute>> attributes = ValueNotifier(<ProductAttribute>[]);
 
   late ProductAttribute attributeSelected;
   int indexProductAttribute = 0;
@@ -61,7 +57,8 @@ class SearchDetailBloc extends ChangeNotifier {
   late double rangeMin = 0.0;
   late double rangeMax = 500.0;
 
-  ValueNotifier<RangeValues> currentRangeValues = ValueNotifier(const RangeValues(0, 100));
+  ValueNotifier<RangeValues> currentRangeValues =
+  ValueNotifier(const RangeValues(0, 100));
 
   ValueNotifier<List<SortOption>> sort = ValueNotifier(
     <SortOption>[
@@ -116,30 +113,24 @@ class SearchDetailBloc extends ChangeNotifier {
   Future<void> searchProductDetails(int page) async {
     bindingSearch.page = page;
 
-    final response = await productRepositoryInterface.getSearchProductDetails(
+    final responseApi =
+    await productRepositoryInterface.getSearchProductDetails(
       bindings: bindingSearch.toMap(),
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-
-      pagingController.error = response;
+    if (responseApi.data == null) {
+      pagingController.error = kNoLoadMoreItems;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decode = jsonDecode(response.body);
-        SearchProductDetails details = SearchProductDetails.fromMap(decode);
-        final isLastPage = details.docs!.length < _pageSize;
-        if (isLastPage) {
-          pagingController.appendLastPage(details.docs!);
-        } else {
-          final nextPageKey = page + 1;
-          pagingController.appendPage(details.docs!, nextPageKey);
-        }
-      }
+    SearchProductDetails details =
+    SearchProductDetails.fromMap(responseApi.data);
+    final isLastPage = details.docs!.length < _pageSize;
+
+    if (isLastPage) {
+      pagingController.appendLastPage(details.docs!);
+    } else {
+      final nextPageKey = page + 1;
+      pagingController.appendPage(details.docs!, nextPageKey);
     }
   }
 
@@ -150,39 +141,31 @@ class SearchDetailBloc extends ChangeNotifier {
 
     loadStatus.value = LoadStatus.loading;
 
-    final response = await productRepositoryInterface.getFiltersProductDetails(
+    final responseApi =
+    await productRepositoryInterface.getFiltersProductDetails(
       bindings: bindingSearchFilter.toMap(),
     );
 
-    if (response is String) {
-      if (kDebugMode) {
-        print(response);
-      }
-
+    if (responseApi.data == null) {
       loadStatus.value = LoadStatus.error;
-      pagingController.error = response;
+      pagingController.error = kNoLoadMoreItems;
       return;
     }
 
-    if (response is http.Response) {
-      if (response.statusCode == 200) {
-        final decode = jsonDecode(response.body);
-        final filterResponse = FilterProductDetail.fromMap(decode);
+    final filterResponse = FilterProductDetail.fromMap(responseApi.data);
 
-        rangeMin = filterResponse.priceRange!.priceRangeDefault!.min!;
-        rangeMax = filterResponse.priceRange!.priceRangeDefault!.max!;
+    rangeMin = filterResponse.priceRange!.priceRangeDefault!.min!;
+    rangeMax = filterResponse.priceRange!.priceRangeDefault!.max!;
 
-        category.value = List.from(filterResponse.categories!);
-        productTypes.value = List.from(filterResponse.productTypes!);
-        brands.value = List.from(filterResponse.brands!);
-        attributes.value = List.from(filterResponse.attributes!);
+    category.value = List.from(filterResponse.categories!);
+    productTypes.value = List.from(filterResponse.productTypes!);
+    brands.value = List.from(filterResponse.brands!);
+    attributes.value = List.from(filterResponse.attributes!);
 
-        currentRangeValues.value = RangeValues(rangeMin, rangeMax);
-      }
+    currentRangeValues.value = RangeValues(rangeMin, rangeMax);
 
-      reloadLoadFilters = false;
-      loadStatus.value = LoadStatus.normal;
-    }
+    reloadLoadFilters = false;
+    loadStatus.value = LoadStatus.normal;
   }
 
   void handleChangeCategories(int index) {
@@ -234,7 +217,7 @@ class SearchDetailBloc extends ChangeNotifier {
       bindingSearch.attributesTerm = attributes.value
           .map(
             (e) => e.termsSelected!.map((e) => e.slug!).toList(),
-          )
+      )
           .toList()
           .cast()
           .first;

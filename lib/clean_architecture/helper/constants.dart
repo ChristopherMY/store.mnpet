@@ -51,6 +51,8 @@ String parseDouble(String value) {
 
 const defaultDuration = Duration(milliseconds: 250);
 
+
+const String kNoLoadMoreItems = "Seguiremos trabajando para conseguir los productos que buscas.";
 const String kOtherProblem = "Ups tuvimos problemas, vuelva a intentarlo más tarde.";
 const String kNoInternet = "Revise su conexión a internet";
 

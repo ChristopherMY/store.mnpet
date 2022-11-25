@@ -92,7 +92,7 @@ class InfoAttributes extends StatelessWidget {
                 width: 27,
                 child: RawMaterialButton(
                   onPressed: () async {
-                    productBloc.onDecrementQuantity();
+                    productBloc.onDecrementQuantity(context);
                   },
                   elevation: 2.0,
                   fillColor: Colors.white,
@@ -127,7 +127,7 @@ class InfoAttributes extends StatelessWidget {
                 width: 27,
                 child: RawMaterialButton(
                   onPressed: () async {
-                    productBloc.onIncrementQuantity();
+                    productBloc.onIncrementQuantity(context);
                   },
                   elevation: 2.0,
                   fillColor: Colors.white,

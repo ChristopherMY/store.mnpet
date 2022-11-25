@@ -26,14 +26,16 @@ class OrderBloc extends ChangeNotifier {
     final credentialsAuth = await mainBloc.loadCredentialsAuth();
 
     headers[HttpHeaders.authorizationHeader] =
-    "Bearer ${credentialsAuth.token}";
+        "Bearer ${credentialsAuth.token}";
 
-    final responseApi = await userRepositoryInterface.getOrdersById(
-        headers: headers);
+    final responseApi =
+        await userRepositoryInterface.getOrdersById(headers: headers);
 
     if (responseApi.data == null) {
       GlobalSnackBar.showWarningSnackBar(
-        context, "Ups tuvimos un problema, vuelva a intentarlo más tarde",);
+        context,
+        "Ups tuvimos un problema, vuelva a intentarlo más tarde",
+      );
       return;
     }
 
@@ -54,4 +56,5 @@ class OrderBloc extends ChangeNotifier {
   void refreshBloc() {
     notifyListeners();
   }
+
 }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 
 import '../../product_bloc.dart';
 
@@ -18,7 +17,6 @@ class CustomProgressButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productBloc = context.watch<ProductBloc>();
-    final mainBloc = context.read<MainBloc>();
 
     return ValueListenableBuilder(
       valueListenable: productBloc.stateOnlyCustomIndicatorText,

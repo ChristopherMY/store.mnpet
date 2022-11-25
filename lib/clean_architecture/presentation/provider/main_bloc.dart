@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/cart.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/check_cart_temporal.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/district.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/province.dart';
@@ -76,7 +76,6 @@ class MainBloc extends ChangeNotifier {
 
   dynamic informationUser;
   ValueNotifier<dynamic> informationCart = ValueNotifier(dynamic);
-  dynamic residence;
   dynamic credentials;
 
   Map<String, String> headers = {
@@ -96,17 +95,8 @@ class MainBloc extends ChangeNotifier {
       }
 
       if (indexSelected.value == 1) {
-        if (credentials is! CredentialsAuth) {
-          if (informationCart.value is! Cart) {
-            await getShoppingCartTemp(context: context);
-            return;
-          }
-        } else {
-          if (informationCart.value is! Cart) {
-            handleGetShoppingCart(context);
-            return;
-          }
-        }
+        //   handleShoppingCart(context);
+        return;
       }
 
       if (indexSelected.value == 2) {
@@ -119,9 +109,8 @@ class MainBloc extends ChangeNotifier {
           loadingScreenAccount = true;
 
           handleLoadUserInformation(context);
+          return;
         }
-
-        return;
       }
     }
   }
@@ -493,23 +482,35 @@ class MainBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  void handleLoadShipmentResidence() async {
-    residence = await Future.microtask(
-      () async {
-        return UserInformationLocal.fromMap(
-          await hiveRepositoryInterface.read(
-                containerName: "shipment",
-                key: "residence",
-              ) ??
-              {
-                "department": "Lima",
-                "province": "Lima",
-                "district": "Miraflores",
-                "districtId": "61856a14587c82ef50c1b44b",
-                "ubigeo": "Lima - Lima - Miraflores",
-              },
-        );
-      },
+  // void handleLoadShipmentResidence() async {
+  //   residence = UserInformationLocal.fromMap(
+  //     await hiveRepositoryInterface.read(
+  //           containerName: "shipment",
+  //           key: "residence",
+  //         ) ??
+  //         {
+  //           "department": "Lima",
+  //           "province": "Lima",
+  //           "district": "Miraflores",
+  //           "districtId": "61856a14587c82ef50c1b44b",
+  //           "ubigeo": "Lima - Lima - Miraflores",
+  //         },
+  //   );
+  // }
+
+  Future<UserInformationLocal> loadStoreShipmentResidence() async {
+    return UserInformationLocal.fromMap(
+      await hiveRepositoryInterface.read(
+        containerName: "shipment",
+        key: "residence",
+      ) ??
+          {
+            "department": "Lima",
+            "province": "Lima",
+            "district": "Miraflores",
+            "districtId": "61856a14587c82ef50c1b44b",
+            "ubigeo": "Lima - Lima - Miraflores",
+          },
     );
   }
 
@@ -524,8 +525,10 @@ class MainBloc extends ChangeNotifier {
       'Custom-Cart': shoppingCartId
     };
 
+    final shipmentResidence = await loadStoreShipmentResidence();
+
     final responseApi = await cartRepositoryInterface.getShoppingCartTemp(
-      districtId: residence.districtId!,
+      districtId: shipmentResidence.districtId!,
       headers: headers,
     );
 
@@ -549,7 +552,12 @@ class MainBloc extends ChangeNotifier {
 
     final cartInfo = Cart.fromMap(responseApi.data);
 
-    if (shoppingCartId.toString().isEmpty) {
+    if (shoppingCartId != cartInfo.id) {
+      await hiveRepositoryInterface.remove(
+        containerName: "shopping_temporal",
+        key: "cartId",
+      );
+
       await hiveRepositoryInterface.save(
         containerName: "shopping_temporal",
         key: "cartId",
@@ -744,5 +752,31 @@ class MainBloc extends ChangeNotifier {
           key: "cartId",
         ) ??
         "";
+  }
+
+  void verifyExistsCartTemporal() async {
+    final String cartId = await handleGetShoppingCartId();
+
+    final responseApi =
+        await localRepositoryInterface.verifyExistsCartTemporal(cartId: cartId);
+    if (responseApi.data == null) return;
+
+    final response = CheckCartTemporal.fromMap(responseApi.data);
+
+    if (response.cartId != cartId) {
+      await hiveRepositoryInterface.remove(
+        containerName: "shopping_temporal",
+        key: "cartId",
+      );
+
+      await hiveRepositoryInterface.save(
+        containerName: "shopping_temporal",
+        key: "cartId",
+        value: response.cartId,
+      );
+      return;
+    }
+
+    return;
   }
 }

@@ -146,7 +146,7 @@ class ProductBloc extends ChangeNotifier {
     );
 
     if (responseApi.data == null) {
-      pagingController.error = "";
+      pagingController.error = kNoLoadMoreItems;
       return;
     }
 
@@ -170,7 +170,7 @@ class ProductBloc extends ChangeNotifier {
       return;
     }
 
-    pagingController.error = "";
+    pagingController.error = kNoLoadMoreItems;
   }
 
   void handleInitVariation({required Product product}) {
@@ -434,11 +434,6 @@ class ProductBloc extends ChangeNotifier {
   }
 
   Future<void> onChangedPhotoPage(int index, bool isAppBar) async {
-    print("**************");
-    print("indexPhotoViewer: $indexPhotoViewer");
-    print("Index: $index");
-    print("**************");
-
     await swiperController.move(index);
     if (isAppBar) {
       indexPhotoViewer = index;
@@ -550,18 +545,7 @@ class ProductBloc extends ChangeNotifier {
       return;
     }
 
-    // final cartMap = Cart.fromMap(responseApi.data);
-    // logger.w(cartMap);
-    //
-    // if (cartMap.id != shoppingCartId || shoppingCartId.isEmpty) {
-    //   print("REGISTRO ID: ${cartMap.id}");
-    //   await hiveRepositoryInterface.save(
-    //     containerName: "shopping_temporal",
-    //     key: "cartId",
-    //     value: cartMap.id,
-    //   );
-    // }
-
+    mainBloc.handleShoppingCart(context);
     return;
   }
 
@@ -655,9 +639,6 @@ class ProductBloc extends ChangeNotifier {
   }) {
     if (product!.galleryVideo!.isNotEmpty) {
       final variavle = product!.galleryVideo!.length - 1;
-
-      print(variavle);
-      print(indexPhotoViewer);
 
       if (variavle <= indexPhotoViewer) {
         Navigator.of(context).push(

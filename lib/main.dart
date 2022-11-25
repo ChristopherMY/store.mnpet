@@ -78,8 +78,8 @@ class MyApp extends StatelessWidget {
                       context.read<CartRepositoryInterface>(),
                 )
                   ..handleLoadSession()
-                  ..initRegion(context)
-                  ..handleLoadShipmentResidence(),
+                  ..verifyExistsCartTemporal()
+                  ..initRegion(context),
             builder: (context, child) {
               return Consumer<MainBloc>(
                 builder: (context, provider, child) {
@@ -139,8 +139,8 @@ class MyApp extends StatelessWidget {
                               color: Colors.blueAccent,
                             ),
                             headline5: const TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 12,
                             ),
                           )
                           .apply(

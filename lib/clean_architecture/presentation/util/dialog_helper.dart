@@ -1486,10 +1486,10 @@ class DialogHelper {
                                 ) {
                                   return BuildAttributesSections(
                                     onIncrementQuantity: () {
-                                      productBloc.onIncrementQuantity();
+                                      productBloc.onIncrementQuantity(context);
                                     },
                                     onDecrementQuantity: () {
-                                      productBloc.onDecrementQuantity();
+                                      productBloc.onDecrementQuantity(context);
                                     },
                                     onChangeVariation:
                                         (attrKey, attrId, termKey, termId) {
@@ -1506,31 +1506,12 @@ class DialogHelper {
                                         onSaveShippingAddress: (_) async {
                                           final mainBloc =
                                               context.read<MainBloc>();
-                                          final shippingPrice = await mainBloc
-                                              .onSubmitShippingAddress(
+                                          mainBloc.onSubmitShippingAddress(
+                                            context,
                                             slug: productBloc.product!.slug!,
                                             quantity:
                                                 productBloc.quantity.value,
                                           );
-
-                                          if (shippingPrice is double) {
-                                            productBloc.shippingPrice.value =
-                                                shippingPrice;
-
-                                            const snackBar = SnackBar(
-                                              content: Text(
-                                                  'Dirección guardada correctamente'),
-                                              backgroundColor:
-                                                  kPrimaryBackgroundColor,
-                                            );
-
-                                            ScaffoldMessenger.of(_)
-                                                .removeCurrentSnackBar();
-                                            ScaffoldMessenger.of(_)
-                                                .showSnackBar(snackBar);
-
-                                            Navigator.of(_).pop();
-                                          }
                                         },
                                       );
                                     },

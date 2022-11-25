@@ -65,4 +65,17 @@ class LocalService implements LocalRepositoryInterface {
       headers: headers,
     );
   }
+
+  @override
+  Future<HttpResponse> verifyExistsCartTemporal({
+    required String cartId,
+  }) async {
+    return await _dio.request(
+      "$_url/api/v1/cart/temporal/check",
+      method: "POST",
+      data: {
+        "cart_id": cartId,
+      },
+    );
+  }
 }

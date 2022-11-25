@@ -1,5 +1,6 @@
 
 import '../../helper/http_response.dart';
+
 abstract class LocalRepositoryInterface{
   const LocalRepositoryInterface();
 
@@ -20,4 +21,6 @@ abstract class LocalRepositoryInterface{
 
   // List<Keyword>
   Future<HttpResponse> getKeywords();
+
+  Future<HttpResponse> verifyExistsCartTemporal({required String cartId});
 }

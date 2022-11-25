@@ -47,7 +47,7 @@ class ProductScreen extends StatefulWidget {
           hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
         )
           ..isLoadingPage = true
-          ..initProductState(product: product);
+          ..initProductState(product: product, context);
       },
       builder: (context, child) => const ProductScreen._(),
     );
@@ -87,7 +87,8 @@ class _ProductScreenState extends State<ProductScreen> {
                               _buildComments(context: _scaffoldKey.currentContext),
                             */
             _lineBreakSliver(),
-            if (product.galleryDescription!.isNotEmpty) const BuildDescription(),
+            if (product.galleryDescription!.isNotEmpty)
+              const BuildDescription(),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(15.0),

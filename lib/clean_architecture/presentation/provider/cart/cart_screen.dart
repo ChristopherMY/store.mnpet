@@ -38,7 +38,7 @@ class CartScreen extends StatefulWidget {
             productRepositoryInterface: context.read<
                 ProductRepositoryInterface>(),
           ),
-      child: const CartScreen._(),
+      builder: (__, ___) => const CartScreen._(),
     );
   }
 
@@ -50,7 +50,7 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     final cartBloc = context.read<CartBloc>();
-    cartBloc.initPage();
+    cartBloc.initPage(context);
 
     super.initState();
   }

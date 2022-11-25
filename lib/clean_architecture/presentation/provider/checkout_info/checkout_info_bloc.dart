@@ -67,6 +67,7 @@ class CheckOutInfoBloc extends ChangeNotifier {
         context,
         "Fecha de expiración vacía",
       );
+
       return;
     }
 
@@ -329,8 +330,7 @@ class CheckOutInfoBloc extends ChangeNotifier {
       return;
     }
 
-    final result =
-        MercadoPagoPaymentMethodInstallments.fromJsonList(responseApi.data);
+    final result = MercadoPagoPaymentMethodInstallments.fromJsonList(responseApi.data);
     installmentsDetail = result.installmentList!.first;
   }
 

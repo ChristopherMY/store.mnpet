@@ -1,15 +1,22 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/home_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 
 class HomeBloc extends ChangeNotifier {
   final HomeRepositoryInterface homeRepositoryInterface;
+  final HiveRepositoryInterface hiveRepositoryInterface;
 
-  HomeBloc({required this.homeRepositoryInterface});
+  HomeBloc({
+    required this.homeRepositoryInterface,
+    required this.hiveRepositoryInterface,
+  });
 
   ValueNotifier<List<MasterCategory>> categoriesList =
       ValueNotifier(<MasterCategory>[]);
@@ -44,8 +51,7 @@ class HomeBloc extends ChangeNotifier {
     );
 
     if (response.isEmpty) {
-      pagingController.error =
-          "Nos encontramos en mantenimiento, intentelo más tarde";
+      pagingController.error = kNoLoadMoreItems;
       return;
     }
 
@@ -87,6 +93,13 @@ class HomeBloc extends ChangeNotifier {
       },
     );
   }
+
+  // void verifyExistsCartTemporal(BuildContext context) {
+  //   hiveRepositoryInterface.read(
+  //     containerName: containerName,
+  //     key: key,
+  //   );
+  // }
 
   void refresh() {
     notifyListeners();
