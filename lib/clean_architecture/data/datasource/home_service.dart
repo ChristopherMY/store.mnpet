@@ -7,7 +7,7 @@ import 'package:store_mundo_negocio/clean_architecture/helper/http.dart';
 
 class HomeService implements HomeRepositoryInterface {
   final String _url = Environment.API_DAO;
-  final Http _dio = Http(logsEnabled: true);
+  final Http _dio = Http(logsEnabled: false);
   final Logger _logger = Logger();
 
   @override

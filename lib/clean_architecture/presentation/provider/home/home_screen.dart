@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -15,7 +16,6 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/widget/heade
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
-import 'package:store_mundo_negocio/main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -33,8 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
       homeBloc.fetchPage(pageKey);
     });
 
-    print("Esta cargando home bloc");
-
     super.initState();
   }
 
@@ -45,7 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Stack(
       children: <Widget>[
         RefreshIndicator(
-          notificationPredicate: (ScrollNotification scrollNotification) => true,
+          notificationPredicate: (ScrollNotification scrollNotification) =>
+              true,
           triggerMode: RefreshIndicatorTriggerMode.onEdge,
           onRefresh: () async {
             homeBloc.reloadPagination = true;
@@ -87,7 +86,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: GestureDetector(
                       onTap: () {
                         final mainBloc = context.read<MainBloc>();
-                        mainBloc.onChangeIndexSelected(index: 1, context: context);
+                        mainBloc.onChangeIndexSelected(
+                            index: 1, context: context);
                       },
                       child: const Icon(
                         Icons.shopping_basket_outlined,
@@ -109,6 +109,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
+              ),
+              const SliverToBoxAdapter(
+                child: BannersSection(),
               ),
               const SliverToBoxAdapter(
                 child: SizedBox(height: 10.0),
@@ -193,6 +196,66 @@ class _HomeScreenState extends State<HomeScreen> {
               )
                   : SizedBox(),*/
       ],
+    );
+  }
+}
+
+class BannersSection extends StatefulWidget {
+  const BannersSection({Key? key}) : super(key: key);
+
+  @override
+  State<BannersSection> createState() => _BannersSectionState();
+}
+
+class _BannersSectionState extends State<BannersSection> {
+  final _pageController = PageController(
+    viewportFraction: 0.8,
+    initialPage: 1,
+  );
+  double _currentPage = 0.0;
+
+  void _listener() {
+    setState(() {
+      _currentPage = _pageController.page!;
+    });
+  }
+
+  @override
+  void initState() {
+    _pageController.addListener(_listener);
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _pageController.removeListener(_listener);
+    _pageController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+      child: CarouselSlider.builder(
+        options: CarouselOptions(
+          height: 150,
+          viewportFraction: 0.70,
+          initialPage: 0,
+          aspectRatio: 1.0,
+          enableInfiniteScroll: true,
+          autoPlay: true,
+          enlargeCenterPage: true,
+        ),
+        itemCount: 1,
+        itemBuilder: (context, index, realIndex) {
+          return Image.network(
+              "https://via.placeholder.com/668x360?text=Visit+Blogging.com+Now%20C/O%20https://placeholder.com/",
+              fit: BoxFit.fitWidth);
+        },
+      ),
     );
   }
 }

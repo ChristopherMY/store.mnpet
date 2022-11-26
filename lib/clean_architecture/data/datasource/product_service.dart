@@ -1,9 +1,4 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
-import 'package:logger/logger.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/comment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/http.dart';
@@ -14,7 +9,7 @@ import '../../helper/http_response.dart';
 
 class ProductService implements ProductRepositoryInterface {
   final _url = Environment.API_DAO;
-  final Http _dio = Http(logsEnabled: true);
+  final Http _dio = Http(logsEnabled: false);
 
   // void
   @override

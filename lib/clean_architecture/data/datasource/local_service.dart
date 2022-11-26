@@ -7,7 +7,7 @@ import '../../helper/http_response.dart';
 
 class LocalService implements LocalRepositoryInterface {
   final String _url = Environment.API_DAO;
-  final Http _dio = Http(logsEnabled: true);
+  final Http _dio = Http(logsEnabled: false);
 
   @override
   Future<void> clearAllData() {

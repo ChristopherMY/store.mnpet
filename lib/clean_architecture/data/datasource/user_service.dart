@@ -8,7 +8,7 @@ import '../../helper/http_response.dart';
 
 class UserService implements UserRepositoryInterface {
   final String _url = Environment.API_DAO;
-  final Http _dio = Http(logsEnabled: true);
+  final Http _dio = Http(logsEnabled: false);
 
   // http.response
   @override

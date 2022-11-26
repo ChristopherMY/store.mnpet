@@ -10,7 +10,7 @@ class PaymentService implements PaymentRepositoryInterface {
   final String _urlMercadoPago = "api.mercadopago.com";
   final _mercadoPagoCredentials = Environment.mercadoPagoCredentials;
   final String _url = Environment.API_DAO;
-  final Http _dio = Http(logsEnabled: true);
+  final Http _dio = Http(logsEnabled: false);
 
   // List<MercadoPagoDocumentType>
 
