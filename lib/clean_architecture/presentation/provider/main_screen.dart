@@ -33,6 +33,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen>
     with AfterLayoutMixin<MainScreen> {
+
+
   Future<void> loadingScreen(BuildContext context) async {
     Navigator.of(context).push(
       PageRouteBuilder(
@@ -65,6 +67,14 @@ class _MainScreenState extends State<MainScreen>
     );
   }
 
+  void onChangeNavigator(int index) {
+    final mainBloc = context.read<MainBloc>();
+    mainBloc.onChangeIndexSelected(
+      index: index,
+      context: context,
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initStat
@@ -81,10 +91,10 @@ class _MainScreenState extends State<MainScreen>
     SizeConfig().init(context);
     return Scaffold(
       backgroundColor: kBackGroundColor,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: Stack(
+        // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
+          Positioned.fill(
             child: ValueListenableBuilder(
               valueListenable: mainBloc.indexSelected,
               builder: (context, int value, child) {
@@ -98,33 +108,110 @@ class _MainScreenState extends State<MainScreen>
                 );
               },
             ),
-          )
+          ),
+          // ValueListenableBuilder(
+          //   valueListenable: notifierBottomBarVisible,
+          //   child: Container(
+          //     color: Colors.white,
+          //     child: Row(
+          //       children: [
+          //         Expanded(
+          //           child: GestureDetector(
+          //             onTap: () {
+          //               mainBloc.onChangeIndexSelected(
+          //                 index: 0,
+          //                 context: context,
+          //               );
+          //             },
+          //             child: const Icon(Icons.home),
+          //           ),
+          //         ),
+          //         Expanded(
+          //           child: Container(
+          //             color: Colors.red,
+          //             height: kBottomNavigationBarHeight,
+          //             child: GestureDetector(
+          //               onTap: () {
+          //                 mainBloc.onChangeIndexSelected(
+          //                   index: 1,
+          //                   context: context,
+          //                 );
+          //               },
+          //               child: const Icon(Icons.shopping_basket_outlined),
+          //             ),
+          //           ),
+          //         ),
+          //         /*
+          //
+          //
+          //          */
+          //
+          //         // Expanded(
+          //         //   child: SizedBox(
+          //         //     height: kBottomNavigationBarHeight,
+          //         //     child: Material(
+          //         //       color: Colors.white,
+          //         //       child: IconButton(
+          //         //         onPressed: () {
+          //         //           mainBloc.onChangeIndexSelected(
+          //         //             index: 2,
+          //         //             context: context,
+          //         //           );
+          //         //         },
+          //         //         highlightColor: kPrimaryColor,
+          //         //         icon: const Icon(Icons.person_outline),
+          //         //       ),
+          //         //     ),
+          //         //   ),
+          //         // ),
+          //       ],
+          //     ),
+          //   ),
+          //   builder: (context, bool value, child) {
+          //     return AnimatedPositioned(
+          //       duration: kThemeAnimationDuration,
+          //       left: 0,
+          //       right: 0,
+          //       bottom: value ? 0.0 : -kToolbarHeight,
+          //       height: kToolbarHeight,
+          //       child: child!,
+          //     );
+          //   },
+          // ),
+
+          /// NavigationBottomBar
+
+          ValueListenableBuilder(
+            valueListenable: mainBloc.indexSelected,
+            builder: (context, int value, child) {
+              return AnimatedPositioned(
+                duration: kThemeAnimationDuration,
+                bottom: mainBloc.bottomBarVisible ? 0.0 : -kToolbarHeight,
+                height: kToolbarHeight,
+                width: SizeConfig.screenWidth,
+                child: BottomNavigationBar(
+                  currentIndex: value,
+                  onTap: onChangeNavigator,
+                  selectedItemColor: kPrimaryColor,
+                  items: const <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home_outlined),
+                      label: "Home",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.shopping_basket_outlined),
+                      label: "Carrito",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.person_outline),
+                      label: "Mi cuenta",
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
-      ),
-      bottomNavigationBar: ValueListenableBuilder(
-        valueListenable: mainBloc.indexSelected,
-        builder: (context, int value, child) {
-          return BottomNavigationBar(
-            // showSelectedLabels: false,
-            // showUnselectedLabels: false,
-            currentIndex: value,
-            onTap: (index) => mainBloc.onChangeIndexSelected(index: index, context: context),
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                label: "Home",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_basket_outlined),
-                label: "Carrito",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                label: "Mi cuenta",
-              ),
-            ],
-          );
-        },
       ),
     );
   }

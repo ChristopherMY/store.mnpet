@@ -51,6 +51,8 @@ class MainBloc extends ChangeNotifier {
 
   ValueNotifier<int> cartLength = ValueNotifier(0);
 
+  bool bottomBarVisible = true;
+
   List<Region> extraRegions = List.of(<Region>[]);
   List<Region> regions = List.of(<Region>[]);
   List<Province> provinces = <Province>[];

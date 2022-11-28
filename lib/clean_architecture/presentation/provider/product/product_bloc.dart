@@ -207,10 +207,9 @@ class ProductBloc extends ChangeNotifier {
           (image) => Hero(
             tag: image.id!,
             child: CachedNetworkImage(
-              fit: BoxFit.fitHeight,
+              fit: BoxFit.fill,
               imageUrl: "$cloudFront/${image.src}",
-              imageBuilder: (context, imageProvider) =>
-                  Image(image: imageProvider),
+              imageBuilder: (context, imageProvider) => Image(image: imageProvider),
               placeholder: (context, url) => const SizedBox.shrink(),
               errorWidget: (context, url, error) =>
                   Image.asset("assets/no-image.png"),
@@ -553,9 +552,11 @@ class ProductBloc extends ChangeNotifier {
     BuildContext context, {
     required Product product,
   }) async {
+    loadVimeoVideoConfig(context, galleryVideo: product.galleryVideo!);
+
+
     await Future.wait(
       [
-        loadVimeoVideoConfig(context, galleryVideo: product.galleryVideo!),
         handleLoadProductDetails(context, slug: product.slug!),
         refreshUbigeo(context, slug: product.slug!),
       ],

@@ -2,10 +2,12 @@ import 'dart:math';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/star_rating.dart';
 
@@ -47,19 +49,32 @@ class _TrendingItemMainState extends State<TrendingItemMain>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => ProductScreen.init(context, widget.product),
+      onTap: () async {
+        final mainBloc = context.read<MainBloc>();
+
+        mainBloc.bottomBarVisible = false;
+        mainBloc.refreshMainBloc();
+
+        await Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ProductScreen.init(context, widget.product),
+              );
+            },
           ),
         );
+
+        mainBloc.bottomBarVisible = true;
+        mainBloc.refreshMainBloc();
       },
       child: Card(
         color: Colors.white,
         borderOnForeground: false,
         elevation: 0.1,
         clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kSizeBorderRounded)),
         child: Column(
           children: <Widget>[
             ClipRRect(

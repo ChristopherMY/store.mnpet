@@ -19,6 +19,8 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
+import '../../widget/shake_transition.dart';
+
 class SearchDetailScreen extends StatefulWidget {
   const SearchDetailScreen._({
     Key? key,
@@ -26,16 +28,19 @@ class SearchDetailScreen extends StatefulWidget {
     this.search,
     this.keyword,
     this.category,
+    this.showBanner = false,
   }) : super(key: key);
 
   final String? search;
   final Keyword? keyword;
   final TypeFilter typeFilter;
   final MasterCategory? category;
+  final bool showBanner;
 
   static Widget init({
     required BuildContext context,
     required TypeFilter typeFilter,
+    bool showBanner = false,
     String? search,
     Keyword? keywords,
     MasterCategory? category,
@@ -54,6 +59,7 @@ class SearchDetailScreen extends StatefulWidget {
         keyword: keywords,
         search: search,
         category: category,
+        showBanner: showBanner,
       ),
     );
   }
@@ -196,14 +202,34 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   ),
                 ),
               ),
+
+              if (widget.showBanner)
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 10.0,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: ShakeTransition(
+                      duration: const Duration(seconds: 1),
+                      offset: 50,
+                      child: Hero(
+                        tag: "assets/banners/corousel-2.jpg",
+                        child: Image.asset("assets/banners/corousel-2.jpg"),
+                      ),
+                    ),
+                  ),
+                ),
+
               SliverPadding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8.0,
                   vertical: 10.0,
                 ),
                 sliver: SliverAnimatedSwitcher(
-                  duration: kThemeAnimationDuration,
+                  duration: const Duration(milliseconds: 350),
                   child: PagedSliverMasonryGrid(
+                    key: UniqueKey(),
                     crossAxisCount: searchDetailBloc.isGridList ? 2 : 1,
                     pagingController: searchDetailBloc.pagingController,
                     mainAxisSpacing: 3,

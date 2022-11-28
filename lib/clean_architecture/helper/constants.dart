@@ -17,7 +17,7 @@ const kBlackColor = Color(0xFF000000);
 const kAnimationDuration = Duration(milliseconds: 200);
 
 const kFontSizeTitleAppBar = 16.0;
-
+const kSizeBorderRounded = 8.0;
 final headingStyle = TextStyle(
   fontSize: getProportionateScreenWidth(22),
   fontWeight: FontWeight.bold,

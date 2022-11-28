@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/model/banners.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
@@ -20,6 +21,7 @@ class HomeBloc extends ChangeNotifier {
 
   ValueNotifier<List<MasterCategory>> categoriesList =
       ValueNotifier(<MasterCategory>[]);
+  ValueNotifier<List<Banners>> bannersList = ValueNotifier(<Banners>[]);
 
   static int _initialRange = 0;
   static int _finalRange = 20;
@@ -50,24 +52,24 @@ class HomeBloc extends ChangeNotifier {
       finalRange: _finalRange,
     );
 
-    if (response.isEmpty) {
+    if (response.data == null) {
       pagingController.error = kNoLoadMoreItems;
       return;
     }
 
-    if (response.isNotEmpty) {
+    final data =
+        (response.data as List).map((x) => Product.fromMap(x)).toList();
+
+    if (data.isNotEmpty) {
       _initialRange += 20;
       _finalRange += 20;
 
-      // List<Product> newItems =
-      //     values.map((product) => Product.fromMap(product)).toList().cast();
-
-      final isLastPage = response.length < _pageSize;
+      final isLastPage = data.length < _pageSize;
       if (isLastPage) {
-        pagingController.appendLastPage(response);
+        pagingController.appendLastPage(data);
       } else {
-        final nextPageKey = pageKey + response.length;
-        pagingController.appendPage(response, nextPageKey);
+        final nextPageKey = pageKey + data.length;
+        pagingController.appendPage(data, nextPageKey);
       }
     }
 
@@ -75,17 +77,30 @@ class HomeBloc extends ChangeNotifier {
   }
 
   Future<void> handleInitComponents() async {
-    final collection =
-        await Future.wait([homeRepositoryInterface.getCategoriesHome()]);
+    final collection = await Future.wait([
+      homeRepositoryInterface.getCategoriesHome(),
+      homeRepositoryInterface.getBannersHome(),
+    ]);
 
     collection.forEachIndexed(
       (index, response) {
         switch (index) {
           case 0:
             {
-              if (response.isNotEmpty) {
-                categoriesList.value = response;
-              }
+              if (response.data == null) return;
+
+              categoriesList.value = (response.data as List)
+                  .map((x) => MasterCategory.fromMap(x))
+                  .toList();
+            }
+            break;
+          case 1:
+            {
+              if (response.data == null) return;
+
+              bannersList.value = (response.data as List)
+                  .map((x) => Banners.fromMap(x))
+                  .toList();
             }
             break;
           default:

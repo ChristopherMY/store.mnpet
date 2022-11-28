@@ -1,15 +1,15 @@
-import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+
+import '../../helper/http_response.dart';
 
 abstract class HomeRepositoryInterface {
   HomeRepositoryInterface();
 
-  Future<List<Product>> getPaginationProduct({
+  Future<HttpResponse> getPaginationProduct({
     required int initialRange,
     required int finalRange,
   });
 
-  Future<List<MasterCategory>> getCategoriesHome();
+  Future<HttpResponse> getCategoriesHome();
 
-
+  Future<HttpResponse> getBannersHome();
 }
