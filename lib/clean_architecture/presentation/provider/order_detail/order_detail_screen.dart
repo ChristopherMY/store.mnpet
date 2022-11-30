@@ -53,7 +53,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     final orderDetailBloc = context.watch<OrderDetailBloc>();
 
     if (orderDetailBloc.orderDetail is! od.OrderDetail) {
-      return const LoadingBagFullScreen();
+      return const LoadingBag();
     }
 
     final orderDetail = orderDetailBloc.orderDetail;

@@ -10,12 +10,15 @@ const _url = Environment.CLOUD_FRONT;
 
 class TrendingItemMainGrid extends StatelessWidget {
   const TrendingItemMainGrid({
+    Key? key,
     required this.product,
     required this.gradientColors,
-  });
+    this.showHero = false,
+  }) : super(key: key);
 
   final Product product;
   final List<Color> gradientColors;
+  final bool showHero;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,7 @@ class TrendingItemMainGrid extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ProductScreen.init(context, product),
+            builder: (context) => ProductScreen.init(context, product, showHero),
           ),
         );
       },
@@ -53,8 +56,6 @@ class TrendingItemMainGrid extends StatelessWidget {
                     ),
                     compressionRatio: 0.75,
                     maxBytes: 50,
-                    width: null,
-                    height: null,
                   ),
                 ),
               ),

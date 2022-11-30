@@ -49,7 +49,7 @@ class _OrderScreenState extends State<OrderScreen> {
     final orderBloc = context.watch<OrderBloc>();
 
     if (orderBloc.orders is! List<Order>) {
-      return const LoadingBagFullScreen();
+      return const LoadingBag();
     }
 
     return SafeArea(

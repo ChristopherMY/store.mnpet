@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -17,6 +18,7 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/util/dialog_
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product_grid.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/marquesinas_effect.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
 import '../../widget/shake_transition.dart';
@@ -27,23 +29,26 @@ class SearchDetailScreen extends StatefulWidget {
     required this.typeFilter,
     this.search,
     this.keyword,
-    this.category,
+    this.categories,
     this.showBanner = false,
+    this.imageUrl = "",
   }) : super(key: key);
 
   final String? search;
   final Keyword? keyword;
   final TypeFilter typeFilter;
-  final MasterCategory? category;
-  final bool showBanner;
+  final List<MasterCategory>? categories;
+  final bool? showBanner;
+  final String? imageUrl;
 
   static Widget init({
     required BuildContext context,
     required TypeFilter typeFilter,
-    bool showBanner = false,
+    bool? showBanner = false,
     String? search,
     Keyword? keywords,
-    MasterCategory? category,
+    List<MasterCategory>? categories,
+    String? imageUrl,
   }) {
     return ChangeNotifierProvider<SearchDetailBloc>(
       create: (context) => SearchDetailBloc(
@@ -52,14 +57,17 @@ class SearchDetailScreen extends StatefulWidget {
         ..bindingSearch.keywords =
             typeFilter == TypeFilter.keyword ? [keywords!.slug!] : []
         ..bindingSearch.search = typeFilter == TypeFilter.search ? search! : ""
-        ..bindingSearch.categories =
-            typeFilter == TypeFilter.category ? [category!.slug!] : [],
+        ..bindingSearch.categories = (typeFilter == TypeFilter.category
+                ? categories!.map((e) => e.slug).toList()
+                : [])
+            .cast<String>(),
       builder: (_, __) => SearchDetailScreen._(
         typeFilter: typeFilter,
         keyword: keywords,
         search: search,
-        category: category,
+        categories: categories,
         showBanner: showBanner,
+        imageUrl: imageUrl,
       ),
     );
   }
@@ -69,8 +77,6 @@ class SearchDetailScreen extends StatefulWidget {
 }
 
 class _SearchDetailScreenState extends State<SearchDetailScreen> {
-  final GlobalKey<ScaffoldState> _key = GlobalKey();
-
   @override
   void initState() {
     final searchDetailsBloc = context.read<SearchDetailBloc>();
@@ -91,12 +97,9 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
     return SafeArea(
       child: LoaderOverlay(
         child: Scaffold(
-          key: _key,
           drawerEnableOpenDragGesture: false,
           backgroundColor: kBackGroundColor,
           body: CustomScrollView(
-            scrollDirection: Axis.vertical,
-            primary: true,
             slivers: [
               SliverAppBar(
                 centerTitle: true,
@@ -105,17 +108,20 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   statusBarColor: Colors.white,
                   statusBarIconBrightness: Brightness.dark,
                 ),
-                title: Text(
-                  widget.typeFilter == TypeFilter.search
-                      ? widget.search!
-                      : (widget.typeFilter == TypeFilter.category
-                          ? widget.category!.name!
-                          : widget.keyword!.name!),
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                title:
+                    // Text(
+                    //   widget.typeFilter == TypeFilter.search
+                    //       ? widget.search!
+                    //       : (widget.typeFilter == TypeFilter.category
+                    //           ? widget.categories!.map((e) => e.name).join(",")
+                    //           : widget.keyword!.name!),
+                    // ),
+                    MarquesinasEffect(
+                  titles: widget.typeFilter == TypeFilter.search
+                      ? [widget.search!]
+                      : widget.typeFilter == TypeFilter.category
+                          ? widget.categories!.map((e) => e.name!).toList()
+                          : [widget.keyword!.name!],
                 ),
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back_outlined),
@@ -127,11 +133,11 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   color: Colors.black, /*change your color here*/
                 ),
                 actions: <Widget>[
-                  GestureDetector(
-                    onTap: () {
+                  IconButton(
+                    onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: const Icon(Icons.search),
+                    icon: const Icon(Icons.search),
                   )
                 ],
                 floating: true,
@@ -146,7 +152,7 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10.0,
-                          vertical: 9.0,
+                          vertical: 10.0,
                         ),
                         child: SizedBox(
                           height: 32.0,
@@ -202,29 +208,28 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   ),
                 ),
               ),
-
-              if (widget.showBanner)
+              if (widget.showBanner!)
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 10.0,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: getProportionateScreenWidth(14.0),
+                    vertical: getProportionateScreenHeight(15.0),
                   ),
                   sliver: SliverToBoxAdapter(
                     child: ShakeTransition(
                       duration: const Duration(seconds: 1),
                       offset: 50,
                       child: Hero(
-                        tag: "assets/banners/corousel-2.jpg",
-                        child: Image.asset("assets/banners/corousel-2.jpg"),
+                        tag: widget.imageUrl!,
+                        child: CachedNetworkImage(
+                          imageUrl: widget.imageUrl!,
+                        ),
                       ),
                     ),
                   ),
                 ),
-
               SliverPadding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 10.0,
+                  horizontal: 10.0,
                 ),
                 sliver: SliverAnimatedSwitcher(
                   duration: const Duration(milliseconds: 350),
@@ -232,7 +237,8 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                     key: UniqueKey(),
                     crossAxisCount: searchDetailBloc.isGridList ? 2 : 1,
                     pagingController: searchDetailBloc.pagingController,
-                    mainAxisSpacing: 3,
+                    mainAxisSpacing: 5,
+                    crossAxisSpacing: 5,
                     builderDelegate: PagedChildBuilderDelegate<Product>(
                       itemBuilder: (context, item, index) {
                         if (searchDetailBloc.isGridList) {
@@ -262,37 +268,6 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   ),
                 ),
               ),
-              // SliverPadding(
-              //   padding: const EdgeInsets.all(15.0),
-              //   sliver: SliverToBoxAdapter(
-              //     child: Column(
-              //       children: [
-              //         const SizedBox(
-              //           height: 350,
-              //           child: LottieAnimation(
-              //             source: "assets/lottie/shake-a-empty-box.json",
-              //           ),
-              //         ),
-              //         const SizedBox(height: 20.0),
-              //         SizedBox(
-              //           width: getProportionateScreenWidth(280),
-              //           child: const Text(
-              //             "No hay productos que coincidan con tu búsqueda",
-              //             style: TextStyle(fontSize: 18.0),
-              //             textAlign: TextAlign.center,
-              //           ),
-              //         ),
-              //         const SizedBox(height: 15.0),
-              //         const Text("Intenta cambiando algunas opciones"),
-              //         const SizedBox(height: 10.0),
-              //         // const SubmitButton(
-              //         //   title: "Limpiar todos los filtros",
-              //         //   act: () => clearFilter(back: false),
-              //         // )
-              //       ],
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),
@@ -300,3 +275,5 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
     );
   }
 }
+
+

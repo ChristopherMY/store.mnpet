@@ -50,8 +50,7 @@ class MainBloc extends ChangeNotifier {
   ValueNotifier<int> indexSelected = ValueNotifier(0);
 
   ValueNotifier<int> cartLength = ValueNotifier(0);
-
-  bool bottomBarVisible = true;
+  ValueNotifier<bool> bottomBarVisible = ValueNotifier(true);
 
   List<Region> extraRegions = List.of(<Region>[]);
   List<Region> regions = List.of(<Region>[]);

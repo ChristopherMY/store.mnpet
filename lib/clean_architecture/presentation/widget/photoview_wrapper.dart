@@ -262,7 +262,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
         minScale: PhotoViewComputedScale.contained * (0.5 + position / 10),
         maxScale: PhotoViewComputedScale.covered * 4.1,
         heroAttributes: PhotoViewHeroAttributes(
-          tag: gallery[position].id!,
+          tag: "banner-${gallery[position].id!}",
           transitionOnUserGestures: true,
         ),
       );

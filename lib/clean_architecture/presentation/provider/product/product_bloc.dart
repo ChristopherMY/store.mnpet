@@ -1,13 +1,11 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
@@ -65,6 +63,8 @@ class ProductBloc extends ChangeNotifier {
   ValueNotifier<double> salePrice = ValueNotifier(0.0);
   ValueNotifier<double> regularPrice = ValueNotifier(0.0);
 
+  final ValueNotifier<bool> notifierNavigationBottomBarVisible =
+      ValueNotifier(false);
   ValueNotifier<bool> showSwiperPagination = ValueNotifier(false);
   ValueNotifier<ButtonState> stateOnlyCustomIndicatorText =
       ValueNotifier(ButtonState.idle);
@@ -75,7 +75,7 @@ class ProductBloc extends ChangeNotifier {
   List<Widget> attributesContent = <Widget>[];
 
   bool isExpanded = false;
-  bool isLoadingPage = true;
+  ValueNotifier<bool> isLoadingPage = ValueNotifier(true);
 
   final SwiperController swiperController = SwiperController();
 
@@ -131,7 +131,7 @@ class ProductBloc extends ChangeNotifier {
     }
 
     handleInitPagination();
-    handleBuildHeaderContent(product: product!);
+    //  handleBuildHeaderContent(product: product!);
   }
 
   Future<void> fetchRelatedProductsPagination({
@@ -198,30 +198,30 @@ class ProductBloc extends ChangeNotifier {
     regularPrice.value = double.parse(product.price!.regular!);
   }
 
-  void handleBuildHeaderContent({required Product product}) {
-    const cloudFront = Environment.API_DAO;
-
-    if (product.galleryHeader!.isNotEmpty) {
-      headerContent.addAll(
-        product.galleryHeader!.map(
-          (image) => Hero(
-            tag: image.id!,
-            child: CachedNetworkImage(
-              fit: BoxFit.fill,
-              imageUrl: "$cloudFront/${image.src}",
-              imageBuilder: (context, imageProvider) => Image(image: imageProvider),
-              placeholder: (context, url) => const SizedBox.shrink(),
-              errorWidget: (context, url, error) =>
-                  Image.asset("assets/no-image.png"),
-            ),
-          ),
-        ),
-      );
-    }
-
-    galleryHeaderList.add(product.mainImage!);
-    galleryHeaderList.addAll(product.galleryHeader!);
-  }
+  // void handleBuildHeaderContent({required Product product}) {
+  //   const cloudFront = Environment.API_DAO;
+  //
+  //   if (product.galleryHeader!.isNotEmpty) {
+  //     headerContent.addAll(
+  //       product.galleryHeader!.map(
+  //         (image) => Hero(
+  //           tag: image.id!,
+  //           child: CachedNetworkImage(
+  //             fit: BoxFit.fill,
+  //             imageUrl: "$cloudFront/${image.src}",
+  //             imageBuilder: (context, imageProvider) => Image(image: imageProvider),
+  //             placeholder: (context, url) => const SizedBox.shrink(),
+  //             errorWidget: (context, url, error) =>
+  //                 Image.asset("assets/no-image.png"),
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   }
+  //
+  //   galleryHeaderList.add(product.mainImage!);
+  //   galleryHeaderList.addAll(product.galleryHeader!);
+  // }
 
   void handleBuildVariationAttributesContent({required Product product}) {
     for (var attr in variation.value.attributes!) {
@@ -404,7 +404,6 @@ class ProductBloc extends ChangeNotifier {
     final price = responseApi.data;
 
     shippingPrice.value = double.parse(price.replaceAll('"', ""));
-    return;
   }
 
   void notify() {
@@ -439,7 +438,6 @@ class ProductBloc extends ChangeNotifier {
     }
 
     indexPhotoViewerDescription = index;
-    // notifyListeners();
   }
 
   void onSaveShoppingCart(BuildContext context) async {
@@ -553,8 +551,6 @@ class ProductBloc extends ChangeNotifier {
     required Product product,
   }) async {
     loadVimeoVideoConfig(context, galleryVideo: product.galleryVideo!);
-
-
     await Future.wait(
       [
         handleLoadProductDetails(context, slug: product.slug!),
@@ -562,8 +558,8 @@ class ProductBloc extends ChangeNotifier {
       ],
     );
 
-    isLoadingPage = false;
-    notifyListeners();
+    isLoadingPage.value = false;
+    notifierNavigationBottomBarVisible.value = true;
   }
 
   Future<void> loadVimeoVideoConfig(
@@ -637,12 +633,12 @@ class ProductBloc extends ChangeNotifier {
     required BuildContext context,
     required bool isAppBar,
     required ManagerTypePhotoViewer managerTypePhotoViewer,
-  }) {
+  }) async {
     if (product!.galleryVideo!.isNotEmpty) {
       final variavle = product!.galleryVideo!.length - 1;
 
       if (variavle <= indexPhotoViewer) {
-        Navigator.of(context).push(
+      await  Navigator.of(context).push(
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 600),
             reverseTransitionDuration: const Duration(milliseconds: 600),
@@ -677,7 +673,7 @@ class ProductBloc extends ChangeNotifier {
       return;
     }
 
-    Navigator.of(context).push(
+   await Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 600),
         reverseTransitionDuration: const Duration(milliseconds: 600),
@@ -707,5 +703,6 @@ class ProductBloc extends ChangeNotifier {
         },
       ),
     );
+
   }
 }

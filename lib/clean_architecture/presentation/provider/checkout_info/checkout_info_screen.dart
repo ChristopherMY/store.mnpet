@@ -569,7 +569,7 @@ class _CheckoutInfoScreenState extends State<CheckoutInfoScreen> {
         ),
       );
     } else {
-      return const LoadingBagFullScreen();
+      return const LoadingBag();
     }
   }
 

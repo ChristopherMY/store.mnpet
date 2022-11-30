@@ -4,27 +4,35 @@ import 'package:flutter/services.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 
-class LoadingBagFullScreen extends StatelessWidget {
-  const LoadingBagFullScreen({Key? key}) : super(key: key);
+class LoadingBag extends StatelessWidget {
+  const LoadingBag({Key? key, this.isFullScreen = true}) : super(key: key);
+
+  final bool isFullScreen;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kBackGroundColor,
-      appBar: AppBar(
+    if (isFullScreen) {
+      return Scaffold(
         backgroundColor: kBackGroundColor,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarColor: kBackGroundColor,
-          statusBarIconBrightness: Brightness.dark,
+        appBar: AppBar(
+          backgroundColor: kBackGroundColor,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: kBackGroundColor,
+            statusBarIconBrightness: Brightness.dark,
+          ),
+          toolbarHeight: 0,
+          elevation: 0,
         ),
-        toolbarHeight: 0,
-        elevation: 0,
-      ),
-      body: const Align(
-        alignment: Alignment.center,
-        child: LottieAnimation(source: "assets/lottie/shopping-bag.json"),
-      ),
+        body: const Align(
+          alignment: Alignment.center,
+          child: LottieAnimation(source: "assets/lottie/shopping-bag.json"),
+        ),
+      );
+    }
+
+    return const Align(
+      alignment: Alignment.center,
+      child: LottieAnimation(source: "assets/lottie/shopping-bag.json"),
     );
-    ;
   }
 }

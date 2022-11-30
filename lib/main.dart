@@ -22,13 +22,23 @@ import 'package:store_mundo_negocio/clean_architecture/domain/repository/user_re
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_screen.dart';
 
+extension Unique<E, Id> on List<E> {
+  List<E> unique([Id Function(E element)? id, bool inplace = true]) {
+    final ids = Set();
+    var list = inplace ? this : List<E>.from(this);
+    list.retainWhere((x) => ids.add(id != null ? id(x) : x as Id));
+    return list;
+  }
+}
+
+
 void main() async {
   await Hive.initFlutter();
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp],
   );
-  runApp(const MyApp());
+  runApp(constMyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -44,7 +54,7 @@ class MyApp extends StatelessWidget {
         Provider<CartRepositoryInterface>(
           create: (context) => CartService(),
         ),
-        Provider<ProductRepositoryInterface>(
+        cProvider<ProductRepositoryInterface>(
           create: (context) => ProductService(),
         ),
         Provider<LocalRepositoryInterface>(
@@ -148,7 +158,7 @@ class MyApp extends StatelessWidget {
                             fontFamily: 'Roboto',
                           ),
                     ),
-                    home: MainScreen.init(context),
+                    home: const MainScreen(),
                   );
                 },
               );

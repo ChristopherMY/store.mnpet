@@ -1,12 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 
 const cloudFront = Environment.API_DAO;
@@ -60,20 +58,19 @@ class Categories extends StatelessWidget {
                     children: categories.map(
                       (MasterCategory element) {
                         return GestureDetector(
-                          onTap: ()  {
-                             Navigator.of(context).push(
+                          onTap: () {
+                            Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) {
                                   return SearchDetailScreen.init(
                                     context: context,
                                     typeFilter: TypeFilter.category,
-                                    category: element,
+                                    categories: [element],
                                     search: "",
                                   );
                                 },
                               ),
                             );
-
                           },
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
@@ -129,9 +126,6 @@ class Categories extends StatelessWidget {
   _buildImage({required String src}) {
     return CachedNetworkImage(
       imageUrl: src,
-      imageBuilder: (context, imageProvider) => Image(
-        image: imageProvider,
-      ),
       placeholder: (context, url) => Container(
         decoration: const BoxDecoration(
           shape: BoxShape.circle,

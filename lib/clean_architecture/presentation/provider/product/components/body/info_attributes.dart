@@ -20,7 +20,7 @@ class InfoAttributes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productBloc = context.watch<ProductBloc>();
-    if (productBloc.isLoadingPage) {
+    if (productBloc.isLoadingPage.value) {
       return const Placeholder();
     } else {
       final product = productBloc.product!;
@@ -161,7 +161,8 @@ class InfoAttributes extends StatelessWidget {
             list.add(
               GestureDetector(
                 onTap: () {
-                 DialogHelper.settingModalBottomSheetAttributes(context: context);
+                  DialogHelper.settingModalBottomSheetAttributes(
+                      context: context);
                 },
                 child: SizedBox(
                   width: 77.0,
@@ -334,7 +335,8 @@ class BuildAttributesSections extends StatelessWidget {
                 return MultiSliver(
                   children: <Widget>[
                     SliverPadding(
-                      padding: const EdgeInsets.only(top: 10, left: 15, right: 15),
+                      padding:
+                          const EdgeInsets.only(top: 10, left: 15, right: 15),
                       sliver: SliverToBoxAdapter(
                         child: SizedBox(
                           height: 30.0,
@@ -499,7 +501,8 @@ class BuildAttributesSections extends StatelessWidget {
             ),
           ),
           SliverPadding(
-            padding:const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
             sliver: SliverToBoxAdapter(
               child: InkWell(
                 onTap: onShowDialogShipping,

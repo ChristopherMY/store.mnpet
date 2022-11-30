@@ -9,9 +9,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 63.0,
+      height: kBottomNavigationBarHeight,
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
       decoration: BoxDecoration(
+        color: Colors.white,
         border: Border.all(width: 0.5, color: Colors.black12),
       ),
       child: Row(

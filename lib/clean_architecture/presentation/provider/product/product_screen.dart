@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
-import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/cart_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
@@ -29,15 +28,24 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/loading_bag_full_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/shake_transition.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/star_rating.dart';
+import 'package:store_mundo_negocio/main.dart';
 
 import '../../../domain/usecase/page.dart';
 
 class ProductScreen extends StatefulWidget {
-  const ProductScreen._({Key? key}) : super(key: key);
+  const ProductScreen._({
+    Key? key,
+    required this.product,
+    this.showHero = false,
+  }) : super(key: key);
 
-  static Widget init(BuildContext context, Product product) {
-    return ChangeNotifierProvider(
+  final Product product;
+  final bool showHero;
+
+  static Widget init(BuildContext context, Product product, bool showHero) {
+    return ChangeNotifierProvider<ProductBloc>(
       create: (context) {
         return ProductBloc(
           productRepositoryInterface:
@@ -45,11 +53,9 @@ class ProductScreen extends StatefulWidget {
           cartRepositoryInterface: context.read<CartRepositoryInterface>(),
           localRepositoryInterface: context.read<LocalRepositoryInterface>(),
           hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
-        )
-          ..isLoadingPage = true
-          ..initProductState(product: product, context);
+        );
       },
-      builder: (context, child) => const ProductScreen._(),
+      child: ProductScreen._(product: product, showHero: showHero),
     );
   }
 
@@ -60,106 +66,133 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   @override
   void initState() {
-    // final productBloc = context.read<ProductBloc>();
-    //  productBloc.init();
-
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final productBloc = context.read<ProductBloc>();
+      productBloc.initProductState(product: widget.product, context);
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final productBloc = context.watch<ProductBloc>();
-    if (productBloc.isLoadingPage) return const LoadingBagFullScreen();
-
-    final product = productBloc.product!;
-    return Scaffold(
-      backgroundColor: kBackGroundColor,
-      body: SafeArea(
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            const _BuildAppBar(),
-            _buildInfo(context: context, product: product),
-            /*
-                              _lineBreakSliver(),
-                              _buildRatings(context: _scaffoldKey.currentContext, product: product),
-                              _lineBreakSliver(),
-                              _buildComments(context: _scaffoldKey.currentContext),
-                            */
-            _lineBreakSliver(),
-            if (product.galleryDescription!.isNotEmpty)
-              const BuildDescription(),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "Seguro que te gusta",
-                      style: Theme.of(context).textTheme.subtitle2,
-                      textAlign: TextAlign.start,
+    // if (productBloc.isLoadingPage) return const LoadingBagFullScreen();
+    print("Build Product Screen!!");
+    return WillPopScope(
+      onWillPop: () async {
+        productBloc.notifierNavigationBottomBarVisible.value = false;
+        Navigator.of(context).pop();
+        return false;
+      },
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: widget.showHero
+                  ? Hero(
+                      tag: "background-${widget.product.id!}",
+                      child: Container(
+                        color: Colors.white,
+                      ),
+                    )
+                  : Container(
+                      color: Colors.white,
                     ),
-                    const SizedBox(height: 5)
-                  ],
-                ),
-              ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10.0,
-                vertical: 10.0,
-              ),
-              sliver: PagedSliverMasonryGrid(
-                crossAxisCount: 2,
-                pagingController: productBloc.pagingController,
-                builderDelegate: PagedChildBuilderDelegate<Product>(
-                  firstPageErrorIndicatorBuilder: (context) {
-                    return const LottieAnimation(
-                      source: "assets/lottie/lonely-404.json",
-                    );
-                  },
-                  itemBuilder: (context, item, index) {
-                    return TrendingItemMain(
-                      product: item,
-                      gradientColors: const [
-                        Color(0xFFF28767),
-                        Color(0xFFFFA726),
-                      ],
-                    );
-                  },
-                ),
-              ),
+            ValueListenableBuilder<bool>(
+              valueListenable: productBloc.isLoadingPage,
+              builder: (context, isLoadingPage, child) {
+                return Material(
+                  color: kBackGroundColor,
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      _BuildAppBar(
+                          product: widget.product, showHero: widget.showHero),
+                      if (!isLoadingPage) ...[
+                        _buildInfo(
+                          context: context,
+                          product: productBloc.product!,
+                        ),
+                        /*
+                        _lineBreakSliver(),
+                        _buildRatings(context: _scaffoldKey.currentContext, product: product),
+                        _lineBreakSliver(),
+                        _buildComments(context: _scaffoldKey.currentContext),
+                   */
+                        _lineBreakSliver(),
+                        if (productBloc.product!.galleryDescription!.isNotEmpty)
+                          const BuildDescription(),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Text(
+                              "Seguro que te gusta",
+                              style: Theme.of(context).textTheme.subtitle2,
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
+                        ),
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0,
+                            vertical: 10.0,
+                          ),
+                          sliver: PagedSliverMasonryGrid(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 5,
+                            mainAxisSpacing: 5,
+                            pagingController: productBloc.pagingController,
+                            builderDelegate: PagedChildBuilderDelegate<Product>(
+                              firstPageErrorIndicatorBuilder: (context) {
+                                return const LottieAnimation(
+                                  source: "assets/lottie/lonely-404.json",
+                                );
+                              },
+                              itemBuilder: (context, item, index) {
+                                return TrendingItemMain(
+                                  product: item,
+                                  gradientColors: const [
+                                    Color(0xFFF28767),
+                                    Color(0xFFFFA726),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ] else
+                        const SliverToBoxAdapter(
+                          child: Material(
+                            color: Colors.white,
+                            child: LoadingBag(isFullScreen: false),
+                          ),
+                        ),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: kBottomNavigationBarHeight),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-            /*
-                              SliverVisibility(
-                                visible: _show,
-                                sliver: SliverPersistentHeader(
-                                  delegate: DelegateTabHeader(
-                                    TabBar(
-                                      isScrollable: true,
-                                      controller: _tabController,
-                                      tabs: [
-                                        Tab(child: Text("Qué es")),
-                                        Tab(child: Text("Descripción")),
-                                        Tab(child: Text("Valoraciones")),
-                                        /*Tab(child: Text("Recomendados")),*/
-                                        Tab(child: Text("Recomendados"))
-                                      ],
-                                      labelColor: Colors.redAccent,
-                                      indicatorColor: Colors.red,
-                                      unselectedLabelColor: Colors.black,
-                                    ),
-                                  ),
-                                  floating: false,
-                                  pinned: true,
-                                ),
-                              ),
-                          */
+            ValueListenableBuilder<bool>(
+              valueListenable: productBloc.notifierNavigationBottomBarVisible,
+              child: const CustomBottomNavigationBar(),
+              builder: (context, value, child) {
+                return AnimatedPositioned(
+                  duration: const Duration(milliseconds: 400),
+                  left: 0,
+                  right: 0,
+                  bottom: value ? 0.0 : -kBottomNavigationBarHeight,
+                  height: kToolbarHeight,
+                  child: child!,
+                );
+              },
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavigationBar(),
     );
     // );
   }
@@ -184,19 +217,42 @@ class _ProductScreenState extends State<ProductScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             /* _containerPromo(context),*/
-            const BuildNoPromotion(),
-            const BuildInformation(),
+            const ShakeTransition(
+              duration: Duration(milliseconds: 300),
+              offset: 80,
+              child: BuildNoPromotion(),
+            ),
+            const ShakeTransition(
+              duration: Duration(milliseconds: 350),
+              offset: 80,
+              child: BuildInformation(),
+            ),
             _lineBreak1px(),
-            const InfoAttributes(),
+            const ShakeTransition(
+              duration: Duration(milliseconds: 400),
+              offset: 80,
+              child: InfoAttributes(),
+            ),
             _lineBreak1px(),
-            const BuildSpecifications(),
+            const ShakeTransition(
+              duration: Duration(milliseconds: 450),
+              offset: 80,
+              child: BuildSpecifications(),
+            ),
             _lineBreak10px(),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 7.0),
+            const ShakeTransition(
+              duration: Duration(milliseconds: 500),
+              offset: 80,
               child: InfoShipment(),
             ),
             _lineBreak10px(),
-            _buildWhatsapp(context: context, description: product.name!),
+            ShakeTransition(
+              duration: const Duration(milliseconds: 550),
+              offset: 80,
+              axis: Axis.vertical,
+              child:
+                  _buildWhatsapp(context: context, description: product.name!),
+            )
           ],
         ),
       ),
@@ -275,15 +331,55 @@ class _ProductScreenState extends State<ProductScreen> {
 }
 
 class _BuildAppBar extends StatelessWidget {
-  const _BuildAppBar({Key? key}) : super(key: key);
+  const _BuildAppBar({Key? key, required this.product, required this.showHero})
+      : super(key: key);
+
+  final Product product;
+  final bool showHero;
 
   @override
   Widget build(BuildContext context) {
     final productBloc = context.read<ProductBloc>();
     final mainBloc = context.read<MainBloc>();
+
+    List<Widget> headerWidget = [];
+    List<MainImage> headerImageList =
+        [product.mainImage!, ...product.galleryHeader!].unique((x) => x.id);
+
+    if (headerImageList.isNotEmpty) {
+      headerWidget.addAll(
+        headerImageList.map(
+          (image) {
+            return showHero
+                ? Hero(
+                    tag: image.id!,
+                    child: CachedNetworkImage(
+                      fit: BoxFit.fill,
+                      imageUrl: "$cloudFront/${image.src}",
+                      errorWidget: (context, url, error) =>
+                          Image.asset("assets/no-image.png"),
+                    ),
+                  )
+                : CachedNetworkImage(
+                    fit: BoxFit.fill,
+                    imageUrl: "$cloudFront/${image.src}",
+                    errorWidget: (context, url, error) =>
+                        Image.asset("assets/no-image.png"),
+                  );
+          },
+        ),
+      );
+    }
+    //
+    // if (product.galleryVideo!.isNotEmpty) {
+    //   // productBloc.loadVimeoVideoConfig(context,
+    //   //     galleryVideo: product.galleryVideo!);
+    // }
+
     return SliverAppBar(
       leading: GestureDetector(
         onTap: () {
+          productBloc.notifierNavigationBottomBarVisible.value = false;
           Navigator.of(context).pop();
         },
         child: const Padding(
@@ -317,8 +413,8 @@ class _BuildAppBar extends StatelessWidget {
           child: Swiper(
             layout: SwiperLayout.DEFAULT,
             controller: productBloc.swiperController,
-            itemCount: productBloc.headerContent.length,
-            itemBuilder: (_, index) => productBloc.headerContent[index],
+            itemCount: headerWidget.length,
+            itemBuilder: (_, index) => headerWidget[index],
             autoplay: false,
             duration: 3,
             onIndexChanged: productBloc.onChangedIndex,
@@ -482,63 +578,56 @@ class BuildDescription extends StatelessWidget {
               style: Theme.of(context).textTheme.subtitle2,
             ),
           ),
-          // widget.product.galleryDescription.length > 0
-          //     ? SizedBox(height: 8)
-          //     : SizedBox(),
-          productBloc.product!.largeDescription != ""
-              ? Padding(
-                  padding: const EdgeInsets.only(
-                    left: 15.0,
-                    right: 15.0,
-                    bottom: 5.0,
+          if (productBloc.product!.largeDescription != "")
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 15.0,
+                right: 15.0,
+                bottom: 5.0,
+              ),
+              child: Column(
+                children: [
+                  AnimatedCrossFade(
+                    firstChild: Text(
+                      productBloc.product!.largeDescription!,
+                      maxLines: 2,
+                      textAlign: TextAlign.justify,
+                      style: const TextStyle(fontSize: 14.0),
+                    ),
+                    secondChild: Text(
+                      productBloc.product!.largeDescription!,
+                      //textAlign: TextAlign.justify,
+                      style: const TextStyle(fontSize: 14.0),
+                    ),
+                    crossFadeState: productBloc.isExpanded
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
+                    duration: kThemeAnimationDuration,
                   ),
-                  child: Column(
-                    children: [
-                      AnimatedCrossFade(
-                        firstChild: Text(
-                          productBloc.product!.largeDescription!,
-                          maxLines: 2,
-                          textAlign: TextAlign.justify,
-                          style: const TextStyle(fontSize: 14.0),
-                        ),
-                        secondChild: Text(
-                          productBloc.product!.largeDescription!,
-                          //textAlign: TextAlign.justify,
-                          style: const TextStyle(fontSize: 14.0),
-                        ),
-                        crossFadeState: productBloc.isExpanded
-                            ? CrossFadeState.showSecond
-                            : CrossFadeState.showFirst,
-                        duration: kThemeAnimationDuration,
-                      ),
-                      const SizedBox(height: 8.0),
-                      Center(
-                        child:
-                            productBloc.product!.largeDescription!.length > 108
-                                ? GestureDetector(
-                                    //  onTap: () => _expand(),
-                                    child: Text(
-                                      productBloc.isExpanded
-                                          ? "Ver menos"
-                                          : "Ver más",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  )
-                                : const SizedBox(),
-                      ),
-                      const SizedBox(height: 15),
-                      const Divider(
-                        color: kBackGroundColor,
-                        thickness: 1,
-                        height: 1,
-                      ),
-                    ],
+                  const SizedBox(height: 8.0),
+                  Center(
+                    child: productBloc.product!.largeDescription!.length > 108
+                        ? GestureDetector(
+                            //  onTap: () => _expand(),
+                            child: Text(
+                              productBloc.isExpanded ? "Ver menos" : "Ver más",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          )
+                        : const SizedBox(),
                   ),
-                )
-              : const SizedBox(),
+                  const SizedBox(height: 15),
+                  const Divider(
+                    color: kBackGroundColor,
+                    thickness: 1,
+                    height: 1,
+                  ),
+                ],
+              ),
+            ),
           const BuildTechnicalBanners()
         ],
       ),
@@ -552,13 +641,45 @@ class BuildTechnicalBanners extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productBloc = context.read<ProductBloc>();
-    const cloudFront = Environment.API_DAO;
+    print('Reload BuildTechnicalBanners');
+    return ListView.builder(
+      itemCount: productBloc.product!.galleryDescription!.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        final gallery = productBloc.product!.galleryDescription![index];
+        return GestureDetector(
+          onTap: () {
+            productBloc.onChangedIndexDescription(index);
+            productBloc.onOpenGallery(
+              context: context,
+              isAppBar: false,
+              managerTypePhotoViewer: ManagerTypePhotoViewer.single,
+            );
+          },
+          child: Hero(
+            tag: "banner-${gallery.id!}",
+            child: AspectRatio(
+              aspectRatio: gallery.aspectRatio!,
+              child: CachedNetworkImage(
+                imageUrl: "$cloudFront/${gallery.src}",
+                errorWidget: (context, url, error) => Image.asset(
+                  "assets/no-image.png",
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
 
-    return Column(
+    /*
+    Column(
       children: List.generate(
         productBloc.product!.galleryDescription!.length,
         (index) {
-          final product = productBloc.product!.galleryDescription![index];
+          final gallery = productBloc.product!.galleryDescription![index];
           return GestureDetector(
             onTap: () {
               productBloc.onChangedIndexDescription(index);
@@ -569,23 +690,11 @@ class BuildTechnicalBanners extends StatelessWidget {
               );
             },
             child: Hero(
-              tag: product.id!,
+              tag: "banner-${gallery.id!}",
               child: AspectRatio(
-                aspectRatio: product.aspectRatio!,
+                aspectRatio: gallery.aspectRatio!,
                 child: CachedNetworkImage(
-                  imageUrl: "$cloudFront/${product.src}",
-                  imageBuilder: (context, imageProvider) => Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      image: DecorationImage(
-                        image: imageProvider,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  placeholder: (context, url) => Container(
-                    decoration: const BoxDecoration(shape: BoxShape.rectangle),
-                  ),
+                  imageUrl: "$cloudFront/${gallery.src}",
                   errorWidget: (context, url, error) => Image.asset(
                     "assets/no-image.png",
                     fit: BoxFit.cover,
@@ -597,6 +706,7 @@ class BuildTechnicalBanners extends StatelessWidget {
         },
       ),
     );
+     */
   }
 }
 

@@ -107,7 +107,7 @@ class Product {
             ? null
             : MainImage.fromMap(json["main_image"]),
         galleryHeader: json["gallery_header"] == null
-            ? null
+            ? []
             : List<MainImage>.from(
                 json["gallery_header"].map((x) => MainImage.fromMap(x))),
         shortDescription: json["short_description"] == null
@@ -135,7 +135,7 @@ class Product {
             : List<GalleryVideo>.from(
                 json["gallery_video"].map((x) => GalleryVideo.fromMap(x))),
         galleryDescription: json["gallery_description"] == null
-            ? null
+            ? []
             : List<MainImage>.from(
                 json["gallery_description"].map((x) => MainImage.fromMap(x))),
         price: json["price"] == null ? null : Price.fromMap(json["price"]),
@@ -180,7 +180,7 @@ class Product {
             ? null
             : List<dynamic>.from(variations!.map((x) => x.toMap())),
         "variation": variation == null ? null : variation!.toMap(),
-        "main_image": mainImage == null ? null : mainImage!.toMap(),
+        "main_image": mainImage == null ? [] : mainImage!.toMap(),
         "gallery_header": galleryHeader == null
             ? null
             : List<dynamic>.from(galleryHeader!.map((x) => x.toMap())),
@@ -399,20 +399,24 @@ class MainImage {
   final String? key;
   final int? order;
 
-  factory MainImage.fromMap(Map<String, dynamic> json) => MainImage(
-        id: json["_id"] == null ? null : json["_id"],
-        src: json["src"] == null ? null : json["src"],
-        dimensions: json["dimensions"] == null
-            ? null
-            : Dimensions.fromMap(json["dimensions"]),
-        aspectRatio: json["aspect_ratio"] == null
-            ? 1.38
-            : json["aspect_ratio"].toDouble(),
-        type: json["type"] == null ? null : json["type"],
-        format: json["format"] == null ? null : json["format"],
-        key: json["key"] == null ? null : json["key"],
-        order: json["order"] == null ? null : json["order"],
-      );
+  factory MainImage.fromMap(Map<String, dynamic> json) {
+    // Random random = Random();
+    // final number = random.nextInt(90) + 100;
+
+    return MainImage(
+      id: json["_id"] == null ? null : json["_id"],
+      src: json["src"] == null ? null : json["src"],
+      dimensions: json["dimensions"] == null
+          ? null
+          : Dimensions.fromMap(json["dimensions"]),
+      aspectRatio:
+          json["aspect_ratio"] == null ? 1.38 : json["aspect_ratio"].toDouble(),
+      type: json["type"] == null ? null : json["type"],
+      format: json["format"] == null ? null : json["format"],
+      key: json["key"] == null ? null : json["key"],
+      order: json["order"] == null ? null : json["order"],
+    );
+  }
 
   Map<String, dynamic> toMap() => {
         "_id": id == null ? null : id,

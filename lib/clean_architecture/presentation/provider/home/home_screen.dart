@@ -1,7 +1,9 @@
+import 'dart:async';
+
+import 'package:after_layout/after_layout.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +12,8 @@ import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.da
 import 'package:store_mundo_negocio/clean_architecture/domain/model/banners.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/category.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_repository.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/repository/home_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
@@ -17,6 +21,7 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/hom
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/splash/splash_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/categories_list.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/header.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product.dart';
@@ -24,26 +29,68 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lotti
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen._({Key? key}) : super(key: key);
+
+  static Widget init(BuildContext context) {
+    return ChangeNotifierProvider<HomeBloc>(
+      create: (context) => HomeBloc(
+        homeRepositoryInterface: context.read<HomeRepositoryInterface>(),
+        hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
+      )..handleInitComponents(),
+      builder: (context, child) => const HomeScreen._(),
+    );
+  }
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with AfterLayoutMixin<HomeScreen> {
+  Future<void> loadingScreen(BuildContext context) async {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: const Duration(milliseconds: 350),
+        transitionsBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          const begin = Offset(0.0, 1.0);
+          const end = Offset.zero;
+          const curve = Curves.decelerate;
+
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          return FadeTransition(
+            opacity: animation,
+            // position: animation.drive(tween),
+            child: child,
+          );
+        },
+        pageBuilder: (_, animation1, animation2) => SplashScreen.init(context),
+      ),
+    );
+  }
+
   @override
   void initState() {
     final homeBloc = context.read<HomeBloc>();
 
-    homeBloc.pagingController.addPageRequestListener((pageKey) {
-      homeBloc.fetchPage(pageKey);
-    });
-
+    homeBloc.init();
     super.initState();
   }
 
   @override
+  FutureOr<void> afterFirstLayout(BuildContext context) =>
+      loadingScreen(context);
+
+  @override
   Widget build(BuildContext context) {
+    print("RECARGO HOME SCREEN");
     final homeBloc = context.watch<HomeBloc>();
 
     return Stack(
@@ -54,9 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
           triggerMode: RefreshIndicatorTriggerMode.onEdge,
           onRefresh: () async {
             homeBloc.reloadPagination = true;
-            await Future.sync(
-              () => homeBloc.pagingController.refresh(),
-            );
+            homeBloc.pagingController.refresh();
           },
           child: CustomScrollView(
             slivers: <Widget>[
@@ -87,19 +132,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   onField: () {},
                 ),
                 actions: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0, left: 0.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        final mainBloc = context.read<MainBloc>();
-                        mainBloc.onChangeIndexSelected(
-                            index: 1, context: context);
-                      },
-                      child: const Icon(
-                        Icons.shopping_basket_outlined,
-                        color: Colors.black45,
-                        size: 25.0,
-                      ),
+                  IconButton(
+                    onPressed: () {
+                      final mainBloc = context.read<MainBloc>();
+                      mainBloc.onChangeIndexSelected(
+                        index: 1,
+                        context: context,
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.shopping_basket_outlined,
+                      color: Colors.black,
                     ),
                   ),
                 ],
@@ -119,34 +162,39 @@ class _HomeScreenState extends State<HomeScreen> {
               const SliverToBoxAdapter(
                 child: BannersSection(),
               ),
+              const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15.0,
+                padding: EdgeInsets.symmetric(
+                  horizontal: getProportionateScreenWidth(15.0),
+                  vertical: getProportionateScreenHeight(5.0),
                 ),
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     "Seguro te gusta",
                     style: Theme.of(context).textTheme.subtitle2,
-                    textAlign: TextAlign.start,
                   ),
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10.0,
+                padding: EdgeInsets.symmetric(
+                  horizontal: getProportionateScreenWidth(11.0),
                 ),
                 sliver: PagedSliverMasonryGrid(
                   crossAxisCount: 2,
+                  crossAxisSpacing: 5,
+                  mainAxisSpacing: 5,
                   pagingController: homeBloc.pagingController,
                   builderDelegate: PagedChildBuilderDelegate<Product>(
                     firstPageErrorIndicatorBuilder: (context) {
                       return const LottieAnimation(
-                          source: "assets/lottie/lonely-404.json");
+                        source: "assets/lottie/lonely-404.json",
+                      );
                     },
                     itemBuilder: (context, item, index) {
                       return TrendingItemMain(
                         product: item,
+                        showHero: true,
                         gradientColors: const [
                           Color(0xFFF28767),
                           Color(0xFFFFA726),
@@ -156,6 +204,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+              SliverToBoxAdapter(
+                  child: SizedBox(height: getProportionateScreenHeight(65.0))),
             ],
           ),
         ),
@@ -230,149 +280,164 @@ class _BannersSectionState extends State<BannersSection> {
     return ValueListenableBuilder<List<Banners>>(
       valueListenable: homeBloc.bannersList,
       builder: (context, banners, child) {
-        return Padding(
-          padding: EdgeInsets.all(getProportionateScreenWidth(15.0)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Text(
-              //   "Banners",
-              //   style: Theme.of(context).textTheme.subtitle2,
-              //   textAlign: TextAlign.start,
-              // ),
-              // SizedBox(height: getProportionateScreenHeight(15.0)),
-              AspectRatio(
-                aspectRatio: 2.55,
-                child: CarouselSlider.builder(
-                  carouselController: _controller,
-                  options: CarouselOptions(
-                    // height: getProportionateScreenHeight(140.0),
-                    viewportFraction: 1,
-                    initialPage: 0,
-                    aspectRatio: 1.0,
-                    enableInfiniteScroll: true,
-                    autoPlay: false,
-                    enlargeCenterPage: true,
-                    onPageChanged: (index, reason) {
-                      setState(() {
-                        _current = index;
-                      });
-                    },
-                  ),
-                  itemCount: banners[0].images!.length,
-                  itemBuilder: (_, index, realIndex) {
-                    final banner = banners[0].images![index];
-                    return Stack(
-                      children: [
-                        Positioned.fill(
-                          child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(kSizeBorderRounded),
-                            child: Hero(
-                              tag: banner.id!,
-                              child: Material(
-                                color: kBackGroundColor,
-                                child: Ink.image(
-                                  image: CachedNetworkImageProvider(
-                                      "$_url/${banner.src}"),
-                                  fit: BoxFit.fitWidth,
-                                  alignment: Alignment.bottomCenter,
-                                  child: InkWell(
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (__) {
-                                            return SearchDetailScreen.init(
-                                              context: context,
-                                              typeFilter: TypeFilter.category,
-                                              category: MasterCategory(
-                                                name: "pwwpwp",
-                                                slug: banners[0].category!.slug,
+        print("banners: ${banners.length}");
+        if (banners.isEmpty) return const SizedBox.shrink();
+
+        // double aspectRatio = banners
+        //     .map((e) =>
+        //         e.banners!.fold(
+        //             0,
+        //             (previousValue, element) =>
+        //                 element.image!.aspectRatio! +
+        //                 element.image!.aspectRatio!) /
+        //         e.banners!.length)
+        //     .first;
+
+        return Column(
+          children: banners.map((banner) {
+            double aspectRatio = banner.banners!
+                .reduce((value, element) =>
+                    value.image!.aspectRatio! > element.image!.aspectRatio!
+                        ? value
+                        : element)
+                .image!
+                .aspectRatio!;
+
+            return Padding(
+              padding: EdgeInsets.all(getProportionateScreenWidth(15.0)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  if (banner.visibility!.name!) ...[
+                    Text(
+                      banner.name!,
+                      style: Theme.of(context).textTheme.subtitle2,
+                    ),
+                    SizedBox(height: getProportionateScreenHeight(15.0)),
+                  ],
+                  if (banner.banners!.isNotEmpty) ...[
+                    AspectRatio(
+                      aspectRatio: aspectRatio,
+                      child: CarouselSlider.builder(
+                        carouselController: _controller,
+                        options: CarouselOptions(
+                          viewportFraction: 1,
+                          initialPage: 0,
+                          enableInfiniteScroll: true,
+                          autoPlay: false,
+                          enlargeCenterPage: true,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _current = index;
+                            });
+                          },
+                        ),
+                        itemCount: banner.banners!.length,
+                        itemBuilder: (_, index, realIndex) {
+                          final bannerDetail = banner.banners![index];
+                          return Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.circular(kSizeBorderRounded),
+                                  child: Hero(
+                                    tag: "$_url/${bannerDetail.image!.src!}",
+                                    child: Material(
+                                      color: kBackGroundColor,
+                                      child: Ink.image(
+                                        image: CachedNetworkImageProvider(
+                                          "$_url/${bannerDetail.image!.src!}",
+                                        ),
+                                        fit: BoxFit.fitWidth,
+                                        alignment: Alignment.bottomCenter,
+                                        child: InkWell(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (__) {
+                                                  return SearchDetailScreen
+                                                      .init(
+                                                    context: context,
+                                                    typeFilter:
+                                                        TypeFilter.category,
+                                                    categories:
+                                                        banner.isContainer!
+                                                            ? bannerDetail
+                                                                .categories!
+                                                            : banner.categories,
+                                                    search: "",
+                                                    showBanner: true,
+                                                    imageUrl:
+                                                        "$_url/${bannerDetail.image!.src!}",
+                                                  );
+                                                },
                                               ),
-                                              search: "",
-                                              showBanner: true,
                                             );
                                           },
+                                          splashColor:
+                                              kBackGroundColor.withOpacity(0.1),
+                                          child: banner.visibility!.description!
+                                              ? Align(
+                                                  alignment:
+                                                      Alignment.bottomCenter,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10.0),
+                                                    child: Text(
+                                                      banner.description!,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                    ),
+                                                  ),
+                                                )
+                                              : const SizedBox.shrink(),
+                                          //child: const SizedBox.shrink(),
                                         ),
-                                      );
-                                    },
-                                    splashColor:
-                                        kBackGroundColor.withOpacity(0.1),
-                                    // child: const Align(
-                                    //   alignment: Alignment.bottomCenter,
-                                    //   child: Padding(
-                                    //     padding: EdgeInsets.only(bottom: 8.0),
-                                    //     child: Text(
-                                    //       "Lorem Ipsum is simply dummy text Lorem Ipsum is simply dum=",
-                                    //       textAlign: TextAlign.center,
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    child: const SizedBox.shrink(),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
+                              // const Positioned(
+                              //   left: 10,
+                              //   right: 10,
+                              //   bottom: 10,
+                              //   child: Text(
+                              //     "Lorem Ipsum is simply dummy text ",
+                              //     textAlign: TextAlign.center,
+                              //   ),
+                              // ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: getProportionateScreenHeight(15.0)),
+                    Align(
+                      alignment: Alignment.center,
+                      child: AnimatedSmoothIndicator(
+                        activeIndex: _current,
+                        count: banner.banners!.length,
+                        onDotClicked: (entry) {
+                          _controller.animateToPage(entry);
+                        },
+                        effect: const WormEffect(
+                          dotHeight: 11.0,
+                          dotWidth: 11.0,
+                          activeDotColor: Colors.red,
+                          paintStyle: PaintingStyle.fill,
+                          type: WormType.normal,
                         ),
-                        // const Positioned(
-                        //   left: 10,
-                        //   right: 10,
-                        //   bottom: 10,
-                        //   child: Text(
-                        //     "Lorem Ipsum is simply dummy text ",
-                        //     textAlign: TextAlign.center,
-                        //   ),
-                        // ),
-                      ],
-                    );
-                  },
-                ),
+                      ),
+                    )
+                  ],
+                ],
               ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: [1, 2, 3, 4].asMap().entries.map((entry) {
-              //     return GestureDetector(
-              //       onTap: () => _controller.animateToPage(entry.key),
-              //       child: Container(
-              //         width: 12.0,
-              //         height: 12.0,
-              //         margin: EdgeInsets.symmetric(
-              //           vertical: 8.0,
-              //           horizontal: 4.0,
-              //         ),
-              //         decoration: BoxDecoration(
-              //             shape: BoxShape.circle,
-              //             color: (Theme.of(context).brightness ==
-              //                 Brightness.dark
-              //                 ? Colors.white
-              //                 : Colors.black)
-              //                 .withOpacity(
-              //                 _current == entry.key ? 0.9 : 0.4)),
-              //       ),
-              //     );
-              //   }).toList(),
-              // ),
-              SizedBox(height: getProportionateScreenHeight(15.0)),
-              Align(
-                alignment: Alignment.center,
-                child: AnimatedSmoothIndicator(
-                  activeIndex: _current,
-                  count: 3,
-                  onDotClicked: (entry) {
-                    _controller.animateToPage(entry);
-                  },
-                  effect: const WormEffect(
-                    dotHeight: 11.0,
-                    dotWidth: 11.0,
-                    activeDotColor: Colors.red,
-                    paintStyle: PaintingStyle.fill,
-                    type: WormType.normal,
-                  ),
-                ),
-              )
-            ],
-          ),
+            );
+          }).toList(),
         );
       },
     );

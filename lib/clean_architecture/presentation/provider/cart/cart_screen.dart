@@ -253,13 +253,18 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                   ),
                   SliverPadding(
-                    padding: const EdgeInsets.only(left: 10, right: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 11.0),
                     sliver: PagedSliverMasonryGrid(
                       crossAxisCount: 2,
-                      crossAxisSpacing: 2,
-                      mainAxisSpacing: 2,
+                      crossAxisSpacing: 5,
+                      mainAxisSpacing: 5,
                       pagingController: cartBloc.pagingController,
                       builderDelegate: PagedChildBuilderDelegate<Product>(
+                        firstPageErrorIndicatorBuilder: (context) {
+                          return const LottieAnimation(
+                            source: "assets/lottie/lonely-404.json",
+                          );
+                        },
                         itemBuilder: (context, item, index) {
                           return TrendingItemMain(
                             product: item,
@@ -275,14 +280,6 @@ class _CartScreenState extends State<CartScreen> {
                 ],
               ),
             ),
-
-            // : const Positioned.fill(
-            //     child: Center(
-            //       child: LottieAnimation(
-            //         source: "assets/lottie/paw.json",
-            //       ),
-            //     ),
-            //   ),
           ),
         ],
       ),

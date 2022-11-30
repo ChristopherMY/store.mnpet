@@ -16,66 +16,151 @@ String bannersToMap(List<Banners> data) =>
 class Banners {
   Banners({
     this.id,
-    this.showDescription,
+    this.isContainer,
+    this.visibility,
     this.name,
     this.color,
     this.description,
-    this.category,
-    this.images,
+    this.categories,
+    this.banners,
   });
 
   final String? id;
-  final bool? showDescription;
+  final bool? isContainer;
+  final Visibility? visibility;
   final String? name;
   final String? color;
   final String? description;
-  final MasterCategory? category;
-  final List<MainImage>? images;
+
+  final List<MasterCategory>? categories;
+  final List<Banner>? banners;
 
   Banners copyWith({
     String? id,
-    bool? showDescription,
+    bool? isContainer,
+    Visibility? visibility,
     String? name,
     String? color,
     String? description,
-    MasterCategory? category,
-    List<MainImage>? images,
+    List<MasterCategory>? categories,
+    List<Banner>? banners,
   }) =>
       Banners(
         id: id ?? this.id,
-        showDescription: showDescription ?? this.showDescription,
+        isContainer: isContainer ?? this.isContainer,
+        visibility: visibility ?? this.visibility,
         name: name ?? this.name,
         color: color ?? this.color,
         description: description ?? this.description,
-        category: category ?? this.category,
-        images: images ?? this.images,
+        categories: categories ?? this.categories,
+        banners: banners ?? this.banners,
       );
 
   factory Banners.fromMap(Map<String, dynamic> json) => Banners(
         id: json["_id"] == null ? null : json["_id"],
-        showDescription:
-            json["show_description"] == null ? null : json["show_description"],
+        isContainer: json["is_container"] == null ? null : json["is_container"],
+        visibility: json["visibility"] == null
+            ? null
+            : Visibility.fromMap(json["visibility"]),
         name: json["name"] == null ? null : json["name"],
         color: json["color"] == null ? null : json["color"],
         description: json["description"] == null ? null : json["description"],
-        category: json["category"] == null
+        categories: json["categories"] == null
             ? null
-            : MasterCategory.fromMap(json["category"]),
-        images: json["images"] == null
+            : List<MasterCategory>.from(
+                json["categories"].map((x) => MasterCategory.fromMap(x))),
+        banners: json["banners"] == null
             ? null
-            : List<MainImage>.from(
-                json["images"].map((x) => MainImage.fromMap(x))),
+            : List<Banner>.from(json["banners"].map((x) => Banner.fromMap(x))),
       );
 
   Map<String, dynamic> toMap() => {
         "_id": id == null ? null : id,
-        "show_description": showDescription == null ? null : showDescription,
+        "is_container": isContainer == null ? null : isContainer,
+        "visibility": visibility == null ? null : visibility!.toMap(),
         "name": name == null ? null : name,
         "color": color == null ? null : color,
         "description": description == null ? null : description,
-        "category": category == null ? null : category?.toMap(),
-        "images": images == null
+        "categories": categories == null
             ? null
-            : List<dynamic>.from(images!.map((x) => x.toMap())),
+            : List<dynamic>.from(categories!.map((x) => x.toMap())),
+        "banners": banners == null
+            ? null
+            : List<dynamic>.from(banners!.map((x) => x.toMap())),
+      };
+}
+
+class Banner {
+  Banner({
+    this.image,
+    this.categories,
+    this.order,
+  });
+
+  final MainImage? image;
+  final List<MasterCategory>? categories;
+  final int? order;
+
+  Banner copyWith({
+    MainImage? image,
+    List<MasterCategory>? categories,
+    int? order,
+  }) =>
+      Banner(
+        image: image ?? this.image,
+        categories: categories ?? this.categories,
+        order: order ?? this.order,
+      );
+
+  factory Banner.fromMap(Map<String, dynamic> json) => Banner(
+        image: json["image"] == null ? null : MainImage.fromMap(json["image"]),
+        categories: json["categories"] == null
+            ? null
+            : List<MasterCategory>.from(
+                json["categories"].map((x) => MasterCategory.fromMap(x))),
+        order: json["order"] == null ? null : json["order"],
+      );
+
+  Map<String, dynamic> toMap() => {
+        "image": image == null ? null : image!.toMap(),
+        "categories": categories == null
+            ? null
+            : List<dynamic>.from(categories!.map((x) => x.toMap())),
+        "order": order == null ? null : order,
+      };
+}
+
+class Visibility {
+  Visibility({
+    this.name,
+    this.color,
+    this.description,
+  });
+
+  final bool? name;
+  final bool? color;
+  final bool? description;
+
+  Visibility copyWith({
+    bool? name,
+    bool? color,
+    bool? description,
+  }) =>
+      Visibility(
+        name: name ?? this.name,
+        color: color ?? this.color,
+        description: description ?? this.description,
+      );
+
+  factory Visibility.fromMap(Map<String, dynamic> json) => Visibility(
+        name: json["name"] == null ? null : json["name"],
+        color: json["color"] == null ? null : json["color"],
+        description: json["description"] == null ? null : json["description"],
+      );
+
+  Map<String, dynamic> toMap() => {
+        "name": name == null ? null : name,
+        "color": color == null ? null : color,
+        "description": description == null ? null : description,
       };
 }

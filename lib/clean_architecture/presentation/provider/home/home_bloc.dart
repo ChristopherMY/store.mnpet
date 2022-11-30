@@ -36,8 +36,20 @@ class HomeBloc extends ChangeNotifier {
 
   @override
   void dispose() {
+    pagingController.removePageRequestListener(
+      (pageKey) async {
+        await fetchPage(pageKey);
+      },
+    );
+
     pagingController.dispose();
     super.dispose();
+  }
+
+  void init() async {
+    pagingController.addPageRequestListener((pageKey) async {
+      await fetchPage(pageKey);
+    });
   }
 
   Future<void> fetchPage(int pageKey) async {

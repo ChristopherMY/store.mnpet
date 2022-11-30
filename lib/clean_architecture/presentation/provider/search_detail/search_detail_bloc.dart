@@ -122,8 +122,7 @@ class SearchDetailBloc extends ChangeNotifier {
       pagingController.error = kNoLoadMoreItems;
     }
 
-    SearchProductDetails details =
-    SearchProductDetails.fromMap(responseApi.data);
+    SearchProductDetails details = SearchProductDetails.fromMap(responseApi.data);
     final isLastPage = details.docs!.length < _pageSize;
 
     if (isLastPage) {
