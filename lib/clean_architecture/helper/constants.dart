@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/user_information.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
@@ -157,6 +159,7 @@ MaterialColor? getStatusColor({required String status}) {
     "refunded": Colors.orange,
     "charged_back": Colors.orange,
   }[status];
-
-
 }
+
+double doubleInRange(Random source, num start, num end) =>
+    source.nextDouble() * (end - start) + start;

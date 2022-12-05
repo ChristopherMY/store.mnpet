@@ -24,13 +24,16 @@ class ProductPrice extends StatelessWidget {
         ValueListenableBuilder(
           valueListenable: productBloc.regularPrice,
           builder: (context, double value, widget) {
-            return Text(
-              "S/ ${parseDouble(value.toString())}",
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 11,
-                color: Colors.red,
-                decoration: TextDecoration.lineThrough,
+            return Material(
+              color: Colors.white,
+              child: Text(
+                "S/ ${parseDouble(value.toString())}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                  color: Colors.red,
+                  decoration: TextDecoration.lineThrough,
+                ),
               ),
             );
           },

@@ -20,7 +20,7 @@ class InfoAttributes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productBloc = context.watch<ProductBloc>();
-    if (productBloc.isLoadingPage.value) {
+    if (productBloc.isLoadingPage) {
       return const Placeholder();
     } else {
       final product = productBloc.product!;

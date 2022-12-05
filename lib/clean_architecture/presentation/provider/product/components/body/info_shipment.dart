@@ -25,10 +25,11 @@ class InfoShipment extends StatelessWidget {
               final mainBloc = context.read<MainBloc>();
 
               mainBloc.onSubmitShippingAddress(
-                _,
+                context,
                 slug: productBloc.product!.slug!,
                 quantity: productBloc.quantity.value,
               );
+
             },
           );
         },

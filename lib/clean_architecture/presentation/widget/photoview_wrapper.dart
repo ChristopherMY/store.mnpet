@@ -15,27 +15,31 @@ import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import '../../domain/usecase/page.dart';
 import '../provider/product/product_bloc.dart';
 
+const String _url = Environment.API_DAO;
+
 class GalleryPhotoViewWrapper extends StatefulWidget {
   const GalleryPhotoViewWrapper({
     Key? key,
-    //this.loadingBuilder,
+    // this.loadingBuilder,
     required this.managerTypePhotoViewer,
     required this.backgroundDecoration,
     required this.isAppBar,
     this.minScale,
     this.maxScale,
     this.scrollDirection = Axis.horizontal,
+    required this.code,
   }) : super(key: key);
 
   final ManagerTypePhotoViewer managerTypePhotoViewer;
   final bool isAppBar;
 
-  //final LoadingBuilder loadingBuilder;
+  // final LoadingBuilder loadingBuilder;
   final BoxDecoration backgroundDecoration;
   final dynamic minScale;
   final dynamic maxScale;
 
   final Axis scrollDirection;
+  final String code;
 
   @override
   State<GalleryPhotoViewWrapper> createState() =>
@@ -44,7 +48,6 @@ class GalleryPhotoViewWrapper extends StatefulWidget {
 
 class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
     with SingleTickerProviderStateMixin {
-  final _url = Environment.API_DAO;
   final toast = CustomToast();
   late PageController pageController;
   late AnimationController _controller;
@@ -82,6 +85,14 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
 
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.black,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        toolbarHeight: 0,
+        elevation: 0,
+      ),
       body: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) => Stack(
@@ -90,24 +101,27 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
               onTap: () {
                 if (_controller.isCompleted) {
                   _controller.reverse();
-                } else {
-                  _controller.forward();
+                  return;
                 }
+
+                _controller.forward();
               },
-              child: managerPhotoViewer(
+              child: _ManagerPhotoViewer(
                 gallery: gallery,
                 managerType: widget.managerTypePhotoViewer,
                 position: widget.isAppBar
                     ? productBloc.indexPhotoViewer
                     : productBloc.indexPhotoViewerDescription,
                 onPhotoPageChanged: (index) async {
-                  print("index pass: $index");
-
                   return await productBloc.onChangedPhotoPage(
                     index,
                     widget.isAppBar,
                   );
                 },
+                pageController: pageController,
+                scrollDirection: widget.scrollDirection,
+                backgroundDecoration: widget.backgroundDecoration,
+                code: widget.code,
               ),
             ),
             Positioned(
@@ -231,10 +245,10 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
         return;
       }
 
-      var fileName = await ImageDownloader.findName(imageId);
+      // var fileName = await ImageDownloader.findName(imageId);
       var path = await ImageDownloader.findPath(imageId);
-      var size = await ImageDownloader.findByteSize(imageId);
-      var mimeType = await ImageDownloader.findMimeType(imageId);
+      // var size = await ImageDownloader.findByteSize(imageId);
+      // var mimeType = await ImageDownloader.findMimeType(imageId);
 
       toast.showToast(
         context: context,
@@ -247,22 +261,43 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
       }
     }
   }
+}
 
-  Widget managerPhotoViewer({
-    required ManagerTypePhotoViewer managerType,
-    required List<MainImage> gallery,
-    required Function(int) onPhotoPageChanged,
-    required int position,
-  }) {
+class _ManagerPhotoViewer extends StatelessWidget {
+  const _ManagerPhotoViewer({
+    Key? key,
+    required this.managerType,
+    required this.gallery,
+    required this.onPhotoPageChanged,
+    required this.position,
+    required this.scrollDirection,
+    required this.pageController,
+    required this.backgroundDecoration,
+    required this.code,
+  }) : super(key: key);
+
+  final ManagerTypePhotoViewer managerType;
+  final List<MainImage> gallery;
+  final Function(int) onPhotoPageChanged;
+  final int position;
+  final Axis scrollDirection;
+  final PageController pageController;
+  final BoxDecoration backgroundDecoration;
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final productBloc = context.read<ProductBloc>();
+
     if (managerType == ManagerTypePhotoViewer.single) {
       return PhotoView(
         imageProvider:
             CachedNetworkImageProvider("$_url/${gallery[position].src}"),
-        backgroundDecoration: widget.backgroundDecoration,
+        backgroundDecoration: backgroundDecoration,
         minScale: PhotoViewComputedScale.contained * (0.5 + position / 10),
         maxScale: PhotoViewComputedScale.covered * 4.1,
         heroAttributes: PhotoViewHeroAttributes(
-          tag: "banner-${gallery[position].id!}",
+          tag: "image-${gallery[position].id!}-$code",
           transitionOnUserGestures: true,
         ),
       );
@@ -270,7 +305,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
 
     return PhotoViewGallery.builder(
       scrollPhysics: const BouncingScrollPhysics(),
-      builder: (BuildContext context, int index) {
+      builder: (BuildContext _, int index) {
         final item = gallery[index];
 
         return PhotoViewGalleryPageOptions(
@@ -279,7 +314,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
           minScale: PhotoViewComputedScale.contained * (0.5 + index / 10),
           maxScale: PhotoViewComputedScale.covered * 4.1,
           heroAttributes: PhotoViewHeroAttributes(
-            tag: item.id!,
+            tag: "image-${item.id!}-$code",
             transitionOnUserGestures: true,
           ),
         );
@@ -287,10 +322,10 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
       itemCount: gallery.length,
       //loadingBuilder: widget.loadingBuilder,
       // allowImplicitScrolling: true,
-      backgroundDecoration: widget.backgroundDecoration,
+      backgroundDecoration: backgroundDecoration,
       pageController: pageController,
       onPageChanged: onPhotoPageChanged,
-      scrollDirection: widget.scrollDirection,
+      scrollDirection: scrollDirection,
     );
   }
 }

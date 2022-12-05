@@ -24,9 +24,10 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/sea
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/splash/splash_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/categories_list.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/header.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_main_product.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
+
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
+
+import '../../widget/item_main_product.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen._({Key? key}) : super(key: key);
@@ -37,7 +38,7 @@ class HomeScreen extends StatefulWidget {
         homeRepositoryInterface: context.read<HomeRepositoryInterface>(),
         hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
       )..handleInitComponents(),
-      builder: (context, child) => const HomeScreen._(),
+      builder: (context, child) =>  const HomeScreen._(),
     );
   }
 
@@ -90,163 +91,171 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    print("RECARGO HOME SCREEN");
-    final homeBloc = context.watch<HomeBloc>();
+    final homeBloc = context.read<HomeBloc>();
 
-    return Stack(
-      children: <Widget>[
-        RefreshIndicator(
-          notificationPredicate: (ScrollNotification scrollNotification) =>
-              true,
-          triggerMode: RefreshIndicatorTriggerMode.onEdge,
-          onRefresh: () async {
-            homeBloc.reloadPagination = true;
-            homeBloc.pagingController.refresh();
-          },
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverAppBar(
-                pinned: true,
-                snap: false,
-                floating: false,
-                toolbarHeight: 56.0,
-                backgroundColor: kBackGroundColor,
-                systemOverlayStyle: const SystemUiOverlayStyle(
-                  statusBarColor: kPrimaryColor,
-                  statusBarIconBrightness: Brightness.light,
-                ),
-                expandedHeight: getProportionateScreenHeight(56.0),
-                titleSpacing: 0,
-                elevation: 0.0,
-                title: Header(
-                  showLogo: true,
-                  onSearch: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return SearchKeywordScreen.init(context);
-                        },
-                      ),
-                    );
-                  },
-                  onField: () {},
-                ),
-                actions: [
-                  IconButton(
-                    onPressed: () {
-                      final mainBloc = context.read<MainBloc>();
-                      mainBloc.onChangeIndexSelected(
-                        index: 1,
-                        context: context,
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.shopping_basket_outlined,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              SliverToBoxAdapter(
-                child: ValueListenableBuilder(
-                  valueListenable: homeBloc.categoriesList,
-                  builder: (context, List<MasterCategory> categories, child) {
-                    return Categories(
-                      categories: categories,
-                      status: LoadStatus.normal,
-                      backgroundColor: kBackGroundColor,
-                    );
-                  },
-                ),
-              ),
-              const SliverToBoxAdapter(
-                child: BannersSection(),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-              SliverPadding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: getProportionateScreenWidth(15.0),
-                  vertical: getProportionateScreenHeight(5.0),
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: Text(
-                    "Seguro te gusta",
-                    style: Theme.of(context).textTheme.subtitle2,
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-              SliverPadding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: getProportionateScreenWidth(11.0),
-                ),
-                sliver: PagedSliverMasonryGrid(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5,
-                  pagingController: homeBloc.pagingController,
-                  builderDelegate: PagedChildBuilderDelegate<Product>(
-                    firstPageErrorIndicatorBuilder: (context) {
-                      return const LottieAnimation(
-                        source: "assets/lottie/lonely-404.json",
-                      );
-                    },
-                    itemBuilder: (context, item, index) {
-                      return TrendingItemMain(
-                        product: item,
-                        showHero: true,
-                        gradientColors: const [
-                          Color(0xFFF28767),
-                          Color(0xFFFFA726),
-                        ],
-                      );
+    print("RECARGO HOME SCREEN");
+    return RefreshIndicator(
+      notificationPredicate: (ScrollNotification scrollNotification) =>
+      true,
+      triggerMode: RefreshIndicatorTriggerMode.onEdge,
+      onRefresh: () async {
+        homeBloc.reloadPagination = true;
+        homeBloc.pagingController.refresh();
+      },
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            pinned: true,
+            snap: false,
+            floating: false,
+            toolbarHeight: 56.0,
+            backgroundColor: kBackGroundColor,
+            systemOverlayStyle: const SystemUiOverlayStyle(
+              statusBarColor: kPrimaryColor,
+              statusBarIconBrightness: Brightness.light,
+            ),
+            expandedHeight: getProportionateScreenHeight(56.0),
+            titleSpacing: 0,
+            elevation: 0.0,
+            title: Header(
+              showLogo: true,
+              onSearch: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return SearchKeywordScreen.init(context);
                     },
                   ),
+                );
+              },
+              onField: () {},
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  final mainBloc = context.read<MainBloc>();
+                  mainBloc.onChangeIndexSelected(
+                    index: 1,
+                    context: context,
+                  );
+                },
+                icon: const Icon(
+                  Icons.shopping_basket_outlined,
+                  color: Colors.black,
                 ),
               ),
-              SliverToBoxAdapter(
-                  child: SizedBox(height: getProportionateScreenHeight(65.0))),
             ],
           ),
-        ),
+          SliverToBoxAdapter(
+            child: ValueListenableBuilder(
+              valueListenable: homeBloc.categoriesList,
+              builder: (context, List<MasterCategory> categories, child) {
+                return Categories(
+                  categories: categories,
+                  status: LoadStatus.normal,
+                  backgroundColor: kBackGroundColor,
+                );
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: BannersSection(),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: getProportionateScreenWidth(15.0),
+              vertical: getProportionateScreenHeight(5.0),
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Text(
+                "Seguro te gusta",
+                style: Theme.of(context).textTheme.subtitle2,
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
 
-        /*requestMail != null && requestMail != true
-                  ? Positioned(
-                bottom: 0,
-                child: AnimatedOpacity(
-                  opacity: _visible ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Container(
-                    alignment: Alignment.centerLeft,
-                    width: MediaQuery.of(context).size.width,
-                    padding: EdgeInsets.all(10),
-                    height: 50,
-                    color: Colors.grey.withOpacity(.25),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Recuerde verificar su cuenta, le enviamos un correo electrónico',
-                            style: TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          alignment: Alignment.centerRight,
-                          onPressed: () {
-                            _hiveStorage.save("mail", "mail_confirmed", true);
-                            setState(() => _visible = false);
-                          },
-                          icon: Icon(CupertinoIcons.clear, size: 18),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              )
-                  : SizedBox(),*/
-      ],
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: getProportionateScreenWidth(11.0),
+            ),
+            sliver: PagedSliverMasonryGrid(
+              crossAxisCount: 2,
+              crossAxisSpacing: 5,
+              mainAxisSpacing: 5,
+              pagingController: homeBloc.pagingController,
+              builderDelegate: PagedChildBuilderDelegate<Product>(
+                // firstPageErrorIndicatorBuilder: (context) {
+                //   return const LottieAnimation(
+                //     source: "assets/lottie/lonely-404.json",
+                //   );
+                // },
+                itemBuilder: (context, item, index) {
+                  return TrendingItemMain(
+                    product: item,
+                    gradientColors: const [
+                      Color(0xFFF28767),
+                      Color(0xFFFFA726),
+                    ],
+                  );
+                },
+                // noItemsFoundIndicatorBuilder: (context) {
+                //   return const LottieAnimation(
+                //     source: "assets/lottie/shake-a-empty-box.json",
+                //   );
+                // },
+              ),
+            ),
+          ),
+
+          // SliverPadding(
+          //     padding: EdgeInsets.symmetric(
+          //       horizontal: getProportionateScreenWidth(11.0),
+          //     ),
+          //   sliver: PagedSliverGrid(
+          //     pagingController: homeBloc.pagingController,
+          //     builderDelegate: PagedChildBuilderDelegate<Product>(
+          //       itemBuilder: (context, item, index) {
+          //         return TrendingItemMain(
+          //           product: item,
+          //           gradientColors: const [
+          //             Color(0xFFF28767),
+          //             Color(0xFFFFA726),
+          //           ],
+          //         );
+          //       },
+          //     ),
+          //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          //       crossAxisCount: 2,
+          //       childAspectRatio: 0.75,
+          //       //mainAxisExtent: 99,
+          //       crossAxisSpacing: 5,
+          //       mainAxisSpacing: 5,
+          //     ),
+          //   ),
+          // ),
+
+          // PagedSliverList<int, Product>(
+          //   pagingController: homeBloc.pagingController,
+          //   builderDelegate: PagedChildBuilderDelegate<Product>(
+          //
+          //     itemBuilder: (context, item, index) {
+          //       return TrendingItemMain(
+          //         product: item,
+          //         gradientColors: const [
+          //           Color(0xFFF28767),
+          //           Color(0xFFFFA726),
+          //         ],
+          //       );
+          //     },
+          //   ),
+          // ),
+          SliverToBoxAdapter(
+            child: SizedBox(height: getProportionateScreenHeight(65.0)),
+          ),
+        ],
+      ),
     );
   }
 }

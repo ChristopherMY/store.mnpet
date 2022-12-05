@@ -5,6 +5,7 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_screen.dart';
+import 'package:uuid/uuid.dart';
 
 const _url = Environment.CLOUD_FRONT;
 
@@ -13,20 +14,21 @@ class TrendingItemMainGrid extends StatelessWidget {
     Key? key,
     required this.product,
     required this.gradientColors,
-    this.showHero = false,
   }) : super(key: key);
 
   final Product product;
   final List<Color> gradientColors;
-  final bool showHero;
 
   @override
   Widget build(BuildContext context) {
+
+    const uuid = Uuid();
+    final String code = uuid.v1();
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ProductScreen.init(context, product, showHero),
+            builder: (context) => ProductScreen.init(context, product, code),
           ),
         );
       },

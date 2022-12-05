@@ -25,7 +25,8 @@ class SearchDetailBloc extends ChangeNotifier {
   ValueNotifier<List<Brand>> category = ValueNotifier(<Brand>[]);
   ValueNotifier<List<Brand>> productTypes = ValueNotifier(<Brand>[]);
   ValueNotifier<List<Brand>> brands = ValueNotifier(<Brand>[]);
-  ValueNotifier<List<ProductAttribute>> attributes = ValueNotifier(<ProductAttribute>[]);
+  ValueNotifier<List<ProductAttribute>> attributes = ValueNotifier(
+      <ProductAttribute>[]);
 
   late ProductAttribute attributeSelected;
   int indexProductAttribute = 0;
@@ -91,6 +92,9 @@ class SearchDetailBloc extends ChangeNotifier {
 
   @override
   void dispose() {
+    pagingController.removePageRequestListener((pageKey) async{
+      await searchProductDetails(pageKey);
+    });
     pagingController.dispose();
     searchEditingController.dispose();
     super.dispose();
@@ -122,7 +126,8 @@ class SearchDetailBloc extends ChangeNotifier {
       pagingController.error = kNoLoadMoreItems;
     }
 
-    SearchProductDetails details = SearchProductDetails.fromMap(responseApi.data);
+    SearchProductDetails details = SearchProductDetails.fromMap(
+        responseApi.data);
     final isLastPage = details.docs!.length < _pageSize;
 
     if (isLastPage) {

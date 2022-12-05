@@ -3,6 +3,9 @@
 //     final product = productFromMap(jsonString);
 
 import 'dart:convert';
+import 'dart:math';
+
+import 'package:uuid/uuid.dart';
 
 Product productFromMap(String str) => Product.fromMap(json.decode(str));
 
@@ -378,6 +381,10 @@ class Term {
   }
 }
 
+
+// final random = Random();
+
+
 class MainImage {
   MainImage({
     this.id,
@@ -400,11 +407,9 @@ class MainImage {
   final int? order;
 
   factory MainImage.fromMap(Map<String, dynamic> json) {
-    // Random random = Random();
-    // final number = random.nextInt(90) + 100;
 
     return MainImage(
-      id: json["_id"] == null ? null : json["_id"],
+      id: json["_id"] == null ? "" : json["_id"],
       src: json["src"] == null ? null : json["src"],
       dimensions: json["dimensions"] == null
           ? null

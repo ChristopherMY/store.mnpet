@@ -9,6 +9,7 @@ import 'package:store_mundo_negocio/clean_architecture/domain/repository/hive_re
 import 'package:store_mundo_negocio/clean_architecture/domain/repository/home_repository.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
+import 'package:store_mundo_negocio/main.dart';
 
 class HomeBloc extends ChangeNotifier {
   final HomeRepositoryInterface homeRepositoryInterface;
@@ -41,7 +42,6 @@ class HomeBloc extends ChangeNotifier {
         await fetchPage(pageKey);
       },
     );
-
     pagingController.dispose();
     super.dispose();
   }
@@ -76,12 +76,14 @@ class HomeBloc extends ChangeNotifier {
       _initialRange += 20;
       _finalRange += 20;
 
-      final isLastPage = data.length < _pageSize;
+      final compose = data.unique((x) => x.id!).unique((x) => x.mainImage!.id!);
+
+      final isLastPage = compose.length < _pageSize;
       if (isLastPage) {
-        pagingController.appendLastPage(data);
+        pagingController.appendLastPage(compose);
       } else {
-        final nextPageKey = pageKey + data.length;
-        pagingController.appendPage(data, nextPageKey);
+        final nextPageKey = pageKey + compose.length;
+        pagingController.appendPage(compose, nextPageKey);
       }
     }
 

@@ -73,9 +73,8 @@ class ProductBloc extends ChangeNotifier {
 
   List<Widget> headerContent = <Widget>[];
   List<Widget> attributesContent = <Widget>[];
-
   bool isExpanded = false;
-  ValueNotifier<bool> isLoadingPage = ValueNotifier(true);
+  bool isLoadingPage = true;
 
   final SwiperController swiperController = SwiperController();
 
@@ -129,8 +128,6 @@ class ProductBloc extends ChangeNotifier {
     } else {
       handleLoadSimpleComponents(product: product!);
     }
-
-    handleInitPagination();
     //  handleBuildHeaderContent(product: product!);
   }
 
@@ -158,6 +155,9 @@ class ProductBloc extends ChangeNotifier {
 
       _initialRange += 20;
       _finalRange += 20;
+
+      newItems.removeWhere((element) => element.id! == product!.id!);
+      //newItems.removeWhere((element) => element.mainImage!.id! == product!.mainImage!.id);
 
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
@@ -550,7 +550,8 @@ class ProductBloc extends ChangeNotifier {
     BuildContext context, {
     required Product product,
   }) async {
-    loadVimeoVideoConfig(context, galleryVideo: product.galleryVideo!);
+    // loadVimeoVideoConfig(context, galleryVideo: product.galleryVideo!);
+    handleInitPagination();
     await Future.wait(
       [
         handleLoadProductDetails(context, slug: product.slug!),
@@ -558,8 +559,10 @@ class ProductBloc extends ChangeNotifier {
       ],
     );
 
-    isLoadingPage.value = false;
+    isLoadingPage = false;
     notifierNavigationBottomBarVisible.value = true;
+
+    notifyListeners();
   }
 
   Future<void> loadVimeoVideoConfig(
@@ -633,47 +636,9 @@ class ProductBloc extends ChangeNotifier {
     required BuildContext context,
     required bool isAppBar,
     required ManagerTypePhotoViewer managerTypePhotoViewer,
+    required String code,
   }) async {
-    if (product!.galleryVideo!.isNotEmpty) {
-      final variavle = product!.galleryVideo!.length - 1;
-
-      if (variavle <= indexPhotoViewer) {
-      await  Navigator.of(context).push(
-          PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 600),
-            reverseTransitionDuration: const Duration(milliseconds: 600),
-            barrierDismissible: false,
-            opaque: true,
-            //barrierColor: Colors.white,
-            transitionsBuilder: (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-              Widget child,
-            ) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            pageBuilder: (_, __, ___) {
-              return ChangeNotifierProvider<ProductBloc>.value(
-                value: Provider.of<ProductBloc>(context),
-                child: GalleryPhotoViewWrapper(
-                  managerTypePhotoViewer: managerTypePhotoViewer,
-                  backgroundDecoration: const BoxDecoration(
-                    color: Colors.black,
-                  ),
-                  isAppBar: isAppBar,
-                  scrollDirection: Axis.horizontal,
-                ),
-              );
-            },
-          ),
-        );
-      }
-
-      return;
-    }
-
-   await Navigator.of(context).push(
+    await Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 600),
         reverseTransitionDuration: const Duration(milliseconds: 600),
@@ -693,6 +658,7 @@ class ProductBloc extends ChangeNotifier {
             value: Provider.of<ProductBloc>(context),
             child: GalleryPhotoViewWrapper(
               managerTypePhotoViewer: managerTypePhotoViewer,
+              code: code,
               backgroundDecoration: const BoxDecoration(
                 color: Colors.black,
               ),
@@ -703,6 +669,5 @@ class ProductBloc extends ChangeNotifier {
         },
       ),
     );
-
   }
 }

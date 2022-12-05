@@ -86,14 +86,15 @@ class Categories extends StatelessWidget {
                                     minHeight: 57.5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: kBackGroundColor,
-                                    // Color(int.parse("0xFF${element.hexa}")),
-                                    shape: BoxShape.rectangle,
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: _buildImage(
-                                    src: element.image!.src!,
-                                  ),
+                                      color: kBackGroundColor,
+                                      // Color(int.parse("0xFF${element.hexa}")),
+                                      shape: BoxShape.rectangle,
+                                      borderRadius: BorderRadius.circular(15.0),
+                                      image: DecorationImage(
+                                        image: CachedNetworkImageProvider(
+                                          element.image!.src!,
+                                        ),
+                                      )),
                                 ),
                                 const SizedBox(height: 5.0),
                                 Text(

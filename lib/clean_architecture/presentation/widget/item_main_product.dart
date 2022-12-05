@@ -7,19 +7,19 @@ import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/star_rating.dart';
+import 'package:uuid/uuid.dart';
 
 const _cloudFront = Environment.CLOUD_FRONT;
+const uuid = Uuid();
 
 class TrendingItemMain extends StatelessWidget {
   final Product product;
   final List<Color> gradientColors;
-  final bool showHero;
 
   const TrendingItemMain({
     Key? key,
     required this.product,
     this.gradientColors = const [],
-    this.showHero = false,
   }) : super(key: key);
 
   @override
@@ -27,9 +27,10 @@ class TrendingItemMain extends StatelessWidget {
     final aspectRatio =
         product.mainImage is MainImage ? product.mainImage!.aspectRatio! : 0.86;
 
-    print("Esta recargando: ${product.name}");
+    // final aspectRatio = doubleInRange(Random(), 0.88, 1.19);
+    //final codeDatetimeNow = DateTime.now().microsecondsSinceEpoch.toString();
 
-    //final aspectRatio = doubleInRange(Random(), 0.88, 1.19);
+    final String code = uuid.v1();
 
     return GestureDetector(
       onTap: () async {
@@ -40,12 +41,11 @@ class TrendingItemMain extends StatelessWidget {
         await Navigator.of(context).push(
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 300),
-            reverseTransitionDuration:
-                Duration(milliseconds: showHero ? 400 : 300),
+            reverseTransitionDuration: const Duration(milliseconds: 400),
             pageBuilder: (_, animation, secondaryAnimation) {
               return FadeTransition(
                 opacity: animation,
-                child: ProductScreen.init(context, product, showHero),
+                child: ProductScreen.init(context, product, code),
               );
             },
           ),
@@ -55,49 +55,40 @@ class TrendingItemMain extends StatelessWidget {
       },
       child: AspectRatio(
         aspectRatio: aspectRatio - aspectRatio * 0.24,
+
+        /// 24%
         child: Stack(
           children: <Widget>[
             Positioned.fill(
-              child: showHero
-                  ? Hero(
-                      tag: "background-${product.id!}",
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.0),
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-                  : Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Colors.white,
-                      ),
-                    ),
+              child: Hero(
+                tag: "background-${product.id!}-$code",
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
             Positioned(
               child: ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(8.0)),
                 child: AspectRatio(
                   aspectRatio: aspectRatio,
-                  child: showHero
-                      ? Hero(
-                          tag: product.mainImage!.id!,
-                          child: CachedNetworkImage(
-                            imageUrl: product.mainImage is MainImage
+                  child: Hero(
+                    tag: "image-${product.mainImage!.id!}-$code",
+                    child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: CachedNetworkImageProvider(
+                            product.mainImage is MainImage
                                 ? "$_cloudFront/${product.mainImage!.src!}"
                                 : "",
-                            errorWidget: (context, url, error) =>
-                                Image.asset("assets/no-image.png"),
                           ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: product.mainImage is MainImage
-                              ? "$_cloudFront/${product.mainImage!.src!}"
-                              : "",
-                          errorWidget: (context, url, error) =>
-                              Image.asset("assets/no-image.png"),
                         ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -113,9 +104,6 @@ class TrendingItemMain extends StatelessWidget {
       ),
     );
   }
-
-// double doubleInRange(Random source, num start, num end) =>
-//     source.nextDouble() * (end - start) + start;
 }
 
 class _ProductDetails extends StatelessWidget {

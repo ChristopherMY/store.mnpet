@@ -108,15 +108,7 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
                   statusBarColor: Colors.white,
                   statusBarIconBrightness: Brightness.dark,
                 ),
-                title:
-                    // Text(
-                    //   widget.typeFilter == TypeFilter.search
-                    //       ? widget.search!
-                    //       : (widget.typeFilter == TypeFilter.category
-                    //           ? widget.categories!.map((e) => e.name).join(",")
-                    //           : widget.keyword!.name!),
-                    // ),
-                    MarquesinasEffect(
+                title: MarquesinasEffect(
                   titles: widget.typeFilter == TypeFilter.search
                       ? [widget.search!]
                       : widget.typeFilter == TypeFilter.category
@@ -275,5 +267,3 @@ class _SearchDetailScreenState extends State<SearchDetailScreen> {
     );
   }
 }
-
-

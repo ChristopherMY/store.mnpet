@@ -38,7 +38,7 @@ void main() async {
   await SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp],
   );
-  runApp(constMyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
         Provider<CartRepositoryInterface>(
           create: (context) => CartService(),
         ),
-        cProvider<ProductRepositoryInterface>(
+        Provider<ProductRepositoryInterface>(
           create: (context) => ProductService(),
         ),
         Provider<LocalRepositoryInterface>(
