@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="store.mundo.pet.store_mundo_negocio">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -52,6 +53,9 @@
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
                  to determine the Window background behind the Flutter UI. -->
+            <tools:validation testUrl="https://clic.mundonegocio.com.pe/store/" />
+            <tools:validation testUrl="https://clic.mundonegocio.com.pe/store" />
+
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
@@ -61,19 +65,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <intent-filter android:autoVerify="true">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="clic.mundonegocio.com.pe"
-                    android:pathPrefix="/app/"
+                    android:host="storemundopet.page.link "
                     android:scheme="https" />
 
             </intent-filter>
-
 
         </activity>
 

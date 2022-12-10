@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "39757960943",
+    "project_id": "mundo-negocio",
+    "storage_bucket": "mundo-negocio.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:39757960943:android:1eb9d340266c8f5e3c6d1a",
+        "android_client_info": {
+          "package_name": "store.mundo.negocio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "39757960943-hrc1be085b6ts1u1s4el4a5tf4fcgb4p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhVJCDZqPan9by8KAl5MOQ7JfD_fIdIvc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "39757960943-hrc1be085b6ts1u1s4el4a5tf4fcgb4p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
