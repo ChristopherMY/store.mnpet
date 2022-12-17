@@ -1,4 +1,4 @@
-import 'package:extended_image/extended_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
@@ -21,14 +21,19 @@ class TrendingItemMainGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     const uuid = Uuid();
     final String code = uuid.v1();
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ProductScreen.init(context, product, code),
+            builder: (context) => ProductScreen.init(
+              context: context,
+              product: product,
+              code: code,
+              fullSource: false,
+              slug: ""
+            ),
           ),
         );
       },
@@ -45,22 +50,17 @@ class TrendingItemMainGrid extends StatelessWidget {
             Expanded(
               flex: 1,
               child: AspectRatio(
-                aspectRatio: product.mainImage!.aspectRatio!,
-                child: ExtendedImage(
-                  fit: BoxFit.cover,
-                  clearMemoryCacheIfFailed: true,
-                  enableMemoryCache: true,
-                  image: ExtendedResizeImage(
-                    ExtendedNetworkImageProvider(
-                      "$_url/${product.mainImage!.src!}",
-                      cache: true,
-                      timeLimit: const Duration(seconds: 3),
+                  aspectRatio: product.mainImage!.aspectRatio!,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: CachedNetworkImageProvider(
+                          "$_url/${product.mainImage!.src!}",
+                        ),
+                      ),
                     ),
-                    compressionRatio: 0.75,
-                    maxBytes: 50,
-                  ),
-                ),
-              ),
+                  )),
             ),
             _productDetails(context)
           ],

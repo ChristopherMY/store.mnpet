@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_negocio/clean_architecture/helper/authentication.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/account/account_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/cart/cart_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/home/home_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/custom_navigation_bottom_bar.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({
+    Key? key,
+    // required this.queryParametersAll,
+    // required this.hasQueryUri,
+  }) : super(key: key);
+
+  // final Map<String, List<String>> queryParametersAll;
+  // final bool hasQueryUri;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -23,13 +32,28 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  void initializationAuth() async{
+    await Authentication.initializeFirebase(context: context);
+  }
+
+  @override
+  void initState() {
+    /// Mandar a la categoria
+    /// Mandar a un producto
+
+
+    /// Aqui puede ir el Navigator Splash
+    initializationAuth();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final mainBloc = context.watch<MainBloc>();
     SizeConfig().init(context);
     return WillPopScope(
       onWillPop: () async {
-        if(mainBloc.indexSelected.value != 0){
+        if (mainBloc.indexSelected.value != 0) {
           mainBloc.indexSelected.value = 0;
           return false;
         }
@@ -40,7 +64,6 @@ class _MainScreenState extends State<MainScreen> {
         drawerEnableOpenDragGesture: false,
         backgroundColor: kBackGroundColor,
         body: Stack(
-          // crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Positioned.fill(
               child: ValueListenableBuilder(
@@ -68,31 +91,53 @@ class _MainScreenState extends State<MainScreen> {
               builder: (context, child) {
                 return AnimatedPositioned(
                   duration: const Duration(milliseconds: 300),
-                  bottom:
-                      mainBloc.bottomBarVisible.value ? 0.0 : -kToolbarHeight,
+                  bottom: mainBloc.bottomBarVisible.value
+                      ? getProportionateScreenHeight(15.0)
+                      : -(kToolbarHeight + getProportionateScreenHeight(15.0)),
                   height: kToolbarHeight,
-                  width: SizeConfig.screenWidth,
-                  child: BottomNavigationBar(
-                    currentIndex: mainBloc.indexSelected.value,
-                    backgroundColor: Colors.white,
-                    onTap: onChangeNavigator,
-                    fixedColor: kPrimaryColor,
-                    unselectedItemColor: Colors.black45,
-                    items: const <BottomNavigationBarItem>[
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.home_outlined),
-                        label: "Home",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.shopping_basket_outlined),
-                        backgroundColor: kPrimaryColor,
-                        label: "Carrito",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.person_outline),
-                        label: "Mi cuenta",
-                      ),
-                    ],
+                  left: getProportionateScreenWidth(25.0),
+                  right: getProportionateScreenWidth(25.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(27),
+                      boxShadow: const <BoxShadow>[
+                        BoxShadow(
+                          blurRadius: 4.1,
+                          color: Colors.black12,
+                          offset: Offset(0, 2.1),
+                          spreadRadius: 2.4,
+                        )
+                      ],
+                    ),
+                    child: CustomNavigationBottomBar(
+                      currentIndex: mainBloc.indexSelected.value,
+                      onTap: onChangeNavigator,
+
+                      items: [
+                        /// Home
+                        SalomonBottomBarItem(
+                          icon: const Icon(Icons.home_outlined),
+                          title: const Text("Home"),
+                          selectedColor: kPrimaryColor,
+                        ),
+
+                        /// Likes
+                        SalomonBottomBarItem(
+                          icon: const Icon(Icons.shopping_basket_outlined),
+                          title: const Text("Carrito"),
+                          selectedColor: kPrimaryColor,
+                        ),
+
+                        /// Search
+                        SalomonBottomBarItem(
+                          icon: const Icon(Icons.person_outline),
+                          title: const Text("Mi cuenta"),
+                          selectedColor: kPrimaryColor,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -126,7 +126,8 @@ class BodySearchDetailFilter extends StatelessWidget {
                         return Column(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -202,13 +203,15 @@ class BodySearchDetailFilter extends StatelessWidget {
                             defaultBackground: kBackGroundColor,
                             onTap: () {
                               searchDetailBloc.attributeSelected = attribute;
-                              searchDetailBloc.searchResults.value = attribute.terms!;
+                              searchDetailBloc.searchResults.value =
+                                  attribute.terms!;
                               searchDetailBloc.indexProductAttribute = index;
                               // Esto no deberia de trabajar de esa manera
 
                               Navigator.of(context).push(
                                 PageRouteBuilder(
-                                  transitionDuration: const Duration(milliseconds: 200),
+                                  transitionDuration:
+                                      const Duration(milliseconds: 200),
                                   transitionsBuilder: (
                                     BuildContext context,
                                     Animation<double> animation,
@@ -218,7 +221,8 @@ class BodySearchDetailFilter extends StatelessWidget {
                                     const begin = Offset(0.0, 1.0);
                                     const end = Offset.zero;
                                     final tween = Tween(begin: begin, end: end);
-                                    final offsetAnimation = animation.drive(tween);
+                                    final offsetAnimation =
+                                        animation.drive(tween);
                                     return SlideTransition(
                                       position: offsetAnimation,
                                       child: child,
@@ -256,7 +260,7 @@ class BodySearchDetailFilter extends StatelessWidget {
                     );
                   },
                 ),
-                 SizedBox(height: SizeConfig.screenHeight! * 0.03),
+                SizedBox(height: SizeConfig.screenHeight! * 0.03),
               ],
             );
           }
@@ -282,11 +286,13 @@ class DefaultButtonAction extends StatelessWidget {
     required this.title,
     required this.onPressed,
     this.color = Colors.white,
+    this.fontColor = Colors.white,
   }) : super(key: key);
 
   final VoidCallback onPressed;
   final String title;
   final Color color;
+  final Color fontColor;
 
   @override
   Widget build(BuildContext context) {
@@ -304,7 +310,11 @@ class DefaultButtonAction extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.bodyText2,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: fontColor,
+          fontSize: 16,
+        ),
       ),
     );
   }

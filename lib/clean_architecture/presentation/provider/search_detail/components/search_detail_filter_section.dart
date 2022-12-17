@@ -19,7 +19,7 @@ class SearchDetailFilterSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 15.0),
+      padding: const EdgeInsets.only(top: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -30,17 +30,19 @@ class SearchDetailFilterSection extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
-                hasOptionHeader!
-                    ? GestureDetector(
-                        onTap: onTap,
-                        child: const Icon(
-                          Icons.arrow_forward_ios_outlined,
-                          size: 18.0,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
+                if (hasOptionHeader!)
+                  GestureDetector(
+                    onTap: onTap,
+                    child: const Icon(
+                      Icons.arrow_forward_ios_outlined,
+                      size: 18.0,
+                    ),
+                  )
               ],
             ),
           ),

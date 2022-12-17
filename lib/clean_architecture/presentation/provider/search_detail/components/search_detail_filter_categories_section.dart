@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
-import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 
 class SearchDetailFilterCategoriesSection extends StatelessWidget {
   const SearchDetailFilterCategoriesSection({
@@ -23,26 +22,40 @@ class SearchDetailFilterCategoriesSection extends StatelessWidget {
           valueListenable: valueListenable,
           builder: (_, dynamic categories, __) {
             return Wrap(
-              runSpacing: 8.0,
-              spacing: 8.0,
+              runSpacing: 9.0,
+              spacing: 9.0,
               children: List.generate(
                 categories.length,
                 (index) {
                   final category = categories[index];
+                  final defaultColor = category.checked!
+                      ? kPrimaryColor.withOpacity(0.10)
+                      : kBackGroundColor;
+
+                  final defaultBorderColor =
+                      category.checked! ? kPrimaryColor :kBackGroundColor;
+
+                  final fontColor =
+                      category.checked! ? kPrimaryColor : Colors.black;
+
                   return Opacity(
                     opacity: category.checked! ? 1 : 0.45,
                     child: Material(
-                      color: category.checked!
-                          ? kPrimaryColor
-                          : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(15.0),
+                      color: defaultColor,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: defaultBorderColor, width: 1.5),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                       clipBehavior: Clip.hardEdge,
                       elevation: 0,
                       child: InkWell(
                         onTap: () => onTap(index),
                         child: Padding(
                           padding: const EdgeInsets.all(15.0),
-                          child: Text(category.name!),
+                          child: Text(
+                            category.name!,
+                            style: TextStyle(color: fontColor),
+                          ),
                         ),
                       ),
                     ),

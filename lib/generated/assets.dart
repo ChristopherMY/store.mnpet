@@ -17,10 +17,10 @@ class Assets {
   static const String banksDiscover = 'assets/banks/discover.png';
   static const String banksMastercard = 'assets/banks/mastercard.png';
   static const String banksVisa = 'assets/banks/visa.png';
-  static const String bannersCorousel1 = 'assets/banners/corousel-0.jpg';
-  static const String bannersCorousel2 = 'assets/banners/corousel-1.jpg';
-  static const String bannersCorousel3 = 'assets/banners/corousel-2.jpg';
-  static const String bannersCorousel4 = 'assets/banners/corousel-3.jpg';
+  static const String bannersCorousel0 = 'assets/banners/corousel-0.jpg';
+  static const String bannersCorousel1 = 'assets/banners/corousel-1.jpg';
+  static const String bannersCorousel2 = 'assets/banners/corousel-2.jpg';
+  static const String bannersCorousel3 = 'assets/banners/corousel-3.jpg';
   static const String fontArialBold = 'assets/font/Arial-Bold.ttf';
   static const String fontArialLight = 'assets/font/Arial-Light.ttf';
   static const String fontArialRegular = 'assets/font/Arial-Regular.ttf';

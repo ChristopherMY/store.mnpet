@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:provider/provider.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/credentials_auth.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/response_api.dart';
@@ -73,7 +76,7 @@ class ProductBloc extends ChangeNotifier {
 
   List<Widget> headerContent = <Widget>[];
   List<Widget> attributesContent = <Widget>[];
-  bool isExpanded = false;
+  ValueNotifier<bool> isExpanded = ValueNotifier(false);
   bool isLoadingPage = true;
 
   final SwiperController swiperController = SwiperController();
@@ -96,10 +99,11 @@ class ProductBloc extends ChangeNotifier {
 
     pagingController.removePageRequestListener(fetchPagination);
     pagingController.dispose();
+    swiperController.dispose();
     super.dispose();
   }
 
-  Future<void> handleLoadProductDetails(
+  Future<Product> handleLoadProductDetails(
     BuildContext context, {
     required String slug,
   }) async {
@@ -109,26 +113,27 @@ class ProductBloc extends ChangeNotifier {
     if (responseApi.data == null) {
       final statusCode = responseApi.error!.statusCode;
 
+      if (statusCode == -1) {
+        GlobalSnackBar.showWarningSnackBar(context, kNoInternet);
+        Navigator.of(context).pop();
+        throw Exception(kNoInternet);
+      }
+
       if (statusCode == 400) {
         final response = ResponseApi.fromMap(responseApi.error!.data);
         GlobalSnackBar.showWarningSnackBar(context, response.message);
-        return;
+        Navigator.of(context).pop();
+        throw Exception(response.message);
       }
 
+
+
       GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
-      return;
+      Navigator.of(context).pop();
+      throw Exception(kOtherProblem);
     }
 
-    product = Product.fromMap(responseApi.data);
-
-    if (product!.general != "simple_product") {
-      handleInitVariation(product: product!);
-      handleLoadVariableComponents(product: product!);
-      handleBuildVariationAttributesContent(product: product!);
-    } else {
-      handleLoadSimpleComponents(product: product!);
-    }
-    //  handleBuildHeaderContent(product: product!);
+    return Product.fromMap(responseApi.data);
   }
 
   Future<void> fetchRelatedProductsPagination({
@@ -198,30 +203,29 @@ class ProductBloc extends ChangeNotifier {
     regularPrice.value = double.parse(product.price!.regular!);
   }
 
-  // void handleBuildHeaderContent({required Product product}) {
-  //   const cloudFront = Environment.API_DAO;
-  //
-  //   if (product.galleryHeader!.isNotEmpty) {
-  //     headerContent.addAll(
-  //       product.galleryHeader!.map(
-  //         (image) => Hero(
-  //           tag: image.id!,
-  //           child: CachedNetworkImage(
-  //             fit: BoxFit.fill,
-  //             imageUrl: "$cloudFront/${image.src}",
-  //             imageBuilder: (context, imageProvider) => Image(image: imageProvider),
-  //             placeholder: (context, url) => const SizedBox.shrink(),
-  //             errorWidget: (context, url, error) =>
-  //                 Image.asset("assets/no-image.png"),
-  //           ),
-  //         ),
-  //       ),
-  //     );
-  //   }
-  //
-  //   galleryHeaderList.add(product.mainImage!);
-  //   galleryHeaderList.addAll(product.galleryHeader!);
-  // }
+  void handleBuildHeaderContent({required Product product}) {
+    const String cloudFront = Environment.API_DAO;
+
+    if (product.galleryHeader!.isNotEmpty) {
+      headerContent.addAll(
+        product.galleryHeader!.map(
+          (image) => Hero(
+            tag: "image-${image.id!}",
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: CachedNetworkImageProvider("$cloudFront/${image.src}"),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    galleryHeaderList.add(product.mainImage!);
+    galleryHeaderList.addAll(product.galleryHeader!);
+  }
 
   void handleBuildVariationAttributesContent({required Product product}) {
     for (var attr in variation.value.attributes!) {
@@ -373,9 +377,10 @@ class ProductBloc extends ChangeNotifier {
     shippingPrice.value = double.parse(price.replaceAll('"', ""));
   }
 
-  Future<void> refreshUbigeo(
+  Future<String> refreshUbigeo(
     BuildContext context, {
     required String slug,
+    required int quantity,
   }) async {
     informationLocal.value = UserInformationLocal.fromMap(
       await hiveRepositoryInterface.read(
@@ -392,18 +397,15 @@ class ProductBloc extends ChangeNotifier {
     final responseApi = await productRepositoryInterface.getShipmentPriceCost(
       slug: slug,
       districtId: informationLocal.value.districtId!,
-      quantity: quantity.value,
+      quantity: quantity,
     );
 
     if (responseApi.data == null) {
-      shippingPrice.value = 0.00;
-
       GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
+      return "0.0";
     }
 
-    final price = responseApi.data;
-
-    shippingPrice.value = double.parse(price.replaceAll('"', ""));
+    return responseApi.data;
   }
 
   void notify() {
@@ -415,19 +417,6 @@ class ProductBloc extends ChangeNotifier {
   }
 
   void onChangedIndex(index) {
-    if (product!.galleryVideo!.isNotEmpty) {
-      final length = product!.galleryVideo!.length;
-
-      showSwiperPagination.value = index >= length;
-
-      if (index > 0) {
-        indexPhotoViewer = index - 1;
-      }
-
-      return;
-    }
-
-    showSwiperPagination.value = true;
     indexPhotoViewer = index;
   }
 
@@ -548,15 +537,61 @@ class ProductBloc extends ChangeNotifier {
 
   void initProductState(
     BuildContext context, {
-    required Product product,
+    required String slug,
+    required bool showProduct,
   }) async {
-    // loadVimeoVideoConfig(context, galleryVideo: product.galleryVideo!);
-    handleInitPagination();
-    await Future.wait(
+    if (!showProduct) {
+      handleInitPagination();
+    }
+
+    final waits = await Future.wait(
       [
-        handleLoadProductDetails(context, slug: product.slug!),
-        refreshUbigeo(context, slug: product.slug!),
+        handleLoadProductDetails(context, slug: slug),
+        refreshUbigeo(
+          context,
+          slug: slug,
+          quantity: quantity.value,
+        ),
       ],
+    );
+
+    waits.forEachIndexed(
+      (index, element) {
+        switch (index) {
+          case 0:
+            {
+              final productJson = (element as Product);
+              product = productJson;
+              if (element.general != "simple_product") {
+                handleInitVariation(product: productJson);
+                handleLoadVariableComponents(product: productJson);
+                handleBuildVariationAttributesContent(product: productJson);
+              } else {
+                handleLoadSimpleComponents(product: productJson);
+              }
+
+              ///*********************
+              /// Considera el inicio de la app, si solicita mostrar un producto iniciara el trabajo en orden de peticiones
+              ///*********************
+
+              if (showProduct) {
+                print("fullsouce producto bloc");
+                handleBuildHeaderContent(product: product!);
+                loadVimeoVideoConfig(
+                  context,
+                  product: product!,
+                );
+                handleInitPagination();
+              }
+            }
+            break;
+          case 1:
+            {
+              final price = (element as String);
+              shippingPrice.value = double.parse(price.replaceAll('"', ""));
+            }
+        }
+      },
     );
 
     isLoadingPage = false;
@@ -567,15 +602,16 @@ class ProductBloc extends ChangeNotifier {
 
   Future<void> loadVimeoVideoConfig(
     BuildContext context, {
-    required List<GalleryVideo> galleryVideo,
+    required Product product,
   }) async {
-    List<Widget> copyGalleryVideo = List.from(headerContent);
+    List<Widget> copyGalleryVideo = List.from([]);
+    List<Widget> copyGalleryHeader = List.from(headerContent);
 
-    showSwiperPagination.value = !galleryVideo.isNotEmpty;
+    showSwiperPagination.value = !product.galleryVideo!.isNotEmpty;
 
-    if (galleryVideo.isNotEmpty) {
+    if (product.galleryVideo!.isNotEmpty) {
       await Future.forEach(
-        galleryVideo,
+        product.galleryVideo!,
         (GalleryVideo videoInformation) async {
           if (videoInformation.src is String &&
               videoInformation.src!.isNotEmpty) {
@@ -616,7 +652,8 @@ class ProductBloc extends ChangeNotifier {
               copyGalleryVideo.add(
                 VimeoVideoPlayer(
                   url: vimeoMp4Video,
-                  defaultImage: videoInformation.thumb!,
+                  //  defaultImage: videoInformation.thumb!,
+                  defaultImage: product.mainImage!.src!,
                 ),
               );
             }
@@ -624,11 +661,20 @@ class ProductBloc extends ChangeNotifier {
         },
       );
 
-      if (headerContent.isNotEmpty && copyGalleryVideo.isNotEmpty) {
-        headerContent = [...copyGalleryVideo, ...headerContent];
-      } else {
-        headerContent.addAll(copyGalleryVideo);
-      }
+      // if (headerContent.isNotEmpty && copyGalleryVideo.isNotEmpty) {
+      //   headerContent = [...copyGalleryVideo, ...headerContent];
+      // } else {
+      //   headerContent.clear();
+      //   headerContent.addAll(copyGalleryVideo);
+      // }
+      // headerContent.clear();
+      print("copyGalleryHeader: ${copyGalleryHeader.length}");
+      print("headerContent: ${headerContent.length}");
+      print("copyGalleryVideo: ${copyGalleryVideo.length}");
+
+      headerContent = [...copyGalleryVideo, ...copyGalleryHeader];
+      notifyListeners();
+      // swiperController.next(animation: true);
     }
   }
 

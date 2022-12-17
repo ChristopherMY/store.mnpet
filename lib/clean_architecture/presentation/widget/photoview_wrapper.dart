@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_downloader/image_downloader.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +10,8 @@ import 'package:store_mundo_negocio/clean_architecture/domain/api/environment.da
 import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/custom_toast.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
-
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/image_downloader.dart';
+import '../../helper/http.dart';
 import '../../domain/usecase/page.dart';
 import '../provider/product/product_bloc.dart';
 
@@ -240,13 +240,21 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper>
     required String fileUrl,
   }) async {
     try {
-      var imageId = await ImageDownloader.downloadImage(fileUrl);
-      if (imageId == null) {
+      var http = Http(logsEnabled: true);
+      var path = await http.download(fileUrl);
+      if (path.isEmpty) {
         return;
       }
 
+      // var imageId = await ImageDownloader.downloadImage(fileUrl);
+
+      // print("imageId: $imageId");
+      // if (imageId == null) {
+      //   return;
+      // }
+
       // var fileName = await ImageDownloader.findName(imageId);
-      var path = await ImageDownloader.findPath(imageId);
+      // var path = await ImageDownloader.findPath(imageId);
       // var size = await ImageDownloader.findByteSize(imageId);
       // var mimeType = await ImageDownloader.findMimeType(imageId);
 

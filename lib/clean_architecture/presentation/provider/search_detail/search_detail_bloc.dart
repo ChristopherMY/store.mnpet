@@ -17,7 +17,7 @@ class SearchDetailBloc extends ChangeNotifier {
   static const _pageSize = 16;
 
   final PagingController<int, Product> pagingController =
-  PagingController(firstPageKey: 0);
+      PagingController(firstPageKey: 0);
   ValueNotifier<LoadStatus> loadStatus = ValueNotifier(LoadStatus.loading);
 
   static const _limit = 16;
@@ -25,13 +25,15 @@ class SearchDetailBloc extends ChangeNotifier {
   ValueNotifier<List<Brand>> category = ValueNotifier(<Brand>[]);
   ValueNotifier<List<Brand>> productTypes = ValueNotifier(<Brand>[]);
   ValueNotifier<List<Brand>> brands = ValueNotifier(<Brand>[]);
-  ValueNotifier<List<ProductAttribute>> attributes = ValueNotifier(
-      <ProductAttribute>[]);
+  ValueNotifier<List<ProductAttribute>> attributes =
+      ValueNotifier(<ProductAttribute>[]);
 
   late ProductAttribute attributeSelected;
   int indexProductAttribute = 0;
 
   ValueNotifier<List<Term>> searchResults = ValueNotifier(<Term>[]);
+  ValueNotifier<double> bodyHeight = ValueNotifier(0.0);
+  ValueNotifier<bool> isDragUp = ValueNotifier(true);
 
   TextEditingController searchEditingController = TextEditingController();
   late final BuildContext context;
@@ -59,7 +61,7 @@ class SearchDetailBloc extends ChangeNotifier {
   late double rangeMax = 500.0;
 
   ValueNotifier<RangeValues> currentRangeValues =
-  ValueNotifier(const RangeValues(0, 100));
+      ValueNotifier(const RangeValues(0, 100));
 
   ValueNotifier<List<SortOption>> sort = ValueNotifier(
     <SortOption>[
@@ -92,7 +94,7 @@ class SearchDetailBloc extends ChangeNotifier {
 
   @override
   void dispose() {
-    pagingController.removePageRequestListener((pageKey) async{
+    pagingController.removePageRequestListener((pageKey) async {
       await searchProductDetails(pageKey);
     });
     pagingController.dispose();
@@ -118,7 +120,7 @@ class SearchDetailBloc extends ChangeNotifier {
     bindingSearch.page = page;
 
     final responseApi =
-    await productRepositoryInterface.getSearchProductDetails(
+        await productRepositoryInterface.getSearchProductDetails(
       bindings: bindingSearch.toMap(),
     );
 
@@ -126,8 +128,8 @@ class SearchDetailBloc extends ChangeNotifier {
       pagingController.error = kNoLoadMoreItems;
     }
 
-    SearchProductDetails details = SearchProductDetails.fromMap(
-        responseApi.data);
+    SearchProductDetails details =
+        SearchProductDetails.fromMap(responseApi.data);
     final isLastPage = details.docs!.length < _pageSize;
 
     if (isLastPage) {
@@ -146,7 +148,7 @@ class SearchDetailBloc extends ChangeNotifier {
     loadStatus.value = LoadStatus.loading;
 
     final responseApi =
-    await productRepositoryInterface.getFiltersProductDetails(
+        await productRepositoryInterface.getFiltersProductDetails(
       bindings: bindingSearchFilter.toMap(),
     );
 
@@ -221,7 +223,7 @@ class SearchDetailBloc extends ChangeNotifier {
       bindingSearch.attributesTerm = attributes.value
           .map(
             (e) => e.termsSelected!.map((e) => e.slug!).toList(),
-      )
+          )
           .toList()
           .cast()
           .first;
@@ -276,7 +278,14 @@ class SearchDetailBloc extends ChangeNotifier {
   }
 
   void handleChangeGrid() async {
-    isGridList = !isGridList;
+    if (pagingController.value.itemList!.isNotEmpty) {
+      isGridList = !isGridList;
+      notifyListeners();
+    }
+  }
+
+  void refresh(){
     notifyListeners();
   }
+
 }

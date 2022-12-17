@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:extended_image/extended_image.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -50,6 +50,7 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     final cartBloc = context.read<CartBloc>();
+
     cartBloc.initPage(context);
 
     super.initState();
@@ -389,12 +390,8 @@ class CardItem extends StatelessWidget {
               flex: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10.0), // Image border
-                child: ExtendedImage.network(
-                  "$url/${product.mainImage!.src!}",
-                  cache: true,
-                  timeLimit: const Duration(seconds: 10),
-                  enableMemoryCache: true,
-                  enableLoadState: false,
+                child: CachedNetworkImage(
+                  imageUrl: "$url/${product.mainImage!.src!}",
                 ),
               ),
             ),

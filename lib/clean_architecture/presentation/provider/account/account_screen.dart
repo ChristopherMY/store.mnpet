@@ -1,5 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -83,12 +83,14 @@ class _AccountScreenState extends State<AccountScreen> {
                       actions: [
                         if (account == Account.active)
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
                             child: GestureDetector(
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => SettingsScreen.init(context),
+                                    builder: (context) =>
+                                        SettingsScreen.init(context),
                                   ),
                                 );
                               },
@@ -308,13 +310,9 @@ class HeaderInformation extends StatelessWidget {
                   width: 70.0,
                   height: 70.0,
                   child: accountActive
-                      ? ExtendedImage.network(
-                          mainBloc.informationUser.image!.src!,
+                      ? CachedNetworkImage(
+                          imageUrl: mainBloc.informationUser.image!.src!,
                           fit: BoxFit.cover,
-                          cache: true,
-                          timeLimit: const Duration(seconds: 30),
-                          enableMemoryCache: true,
-                          enableLoadState: false,
                         )
                       // CachedNetworkImage(
                       //         imageUrl:

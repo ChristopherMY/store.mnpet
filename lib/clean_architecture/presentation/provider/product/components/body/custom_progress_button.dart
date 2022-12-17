@@ -25,13 +25,12 @@ class CustomProgressButton extends StatelessWidget {
           radius: 26.0,
           stateWidgets: {
             ButtonState.idle: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const <Widget>[
                 Icon(
                   CommunityMaterialIcons.cart_outline,
                   color: Colors.white,
                 ),
-                SizedBox(width: 10.0),
                 Text(
                   "Añadir al carrito",
                   style: TextStyle(color: Colors.white),
@@ -39,7 +38,7 @@ class CustomProgressButton extends StatelessWidget {
               ],
             ),
             ButtonState.loading: const Text(
-              "Añadiendo a tu carrito...",
+              "Añadiendo ...",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w400,
@@ -75,8 +74,8 @@ class CustomProgressButton extends StatelessWidget {
             }
           },
           state: value,
-          padding: const EdgeInsets.only(left: 15.0),
           progressIndicatorSize: 20.0,
+          progressIndicatorAlignment: MainAxisAlignment.spaceEvenly,
         );
       },
     );

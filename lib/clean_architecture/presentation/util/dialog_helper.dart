@@ -11,6 +11,7 @@ import 'package:store_mundo_negocio/clean_architecture/domain/model/product.dart
 import 'package:store_mundo_negocio/clean_architecture/domain/model/province.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/region.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/model/sort_option.dart';
+import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
@@ -18,11 +19,16 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/pho
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/custom_progress_button.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/components/body/info_attributes.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/product/product_bloc.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/components/search_detail_filter.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_categories_section.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_find_attributes.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/components/search_detail_filter_section.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/shipment/shipment_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/form_error.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/item_button.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/lottie_animation.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/sort_option.dart'
     as sort_option;
 
@@ -1769,7 +1775,7 @@ class DialogHelper {
                   padding: const EdgeInsets.all(15.0),
                   child: Container(
                     width: 60.0,
-                    height: 6.0,
+                    height: 4.0,
                     decoration: BoxDecoration(
                       color: const Color(0xFF979797),
                       borderRadius: BorderRadius.circular(8.0),
@@ -1804,6 +1810,362 @@ class DialogHelper {
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  static Future<void> showDetailsFilter(BuildContext context) async {
+    return await showModalBottomSheet<void>(
+      context: context,
+      // shape: const RoundedRectangleBorder(
+      //   borderRadius: BorderRadius.only(
+      //     topLeft: Radius.circular(34.0),
+      //     topRight: Radius.circular(34.0),
+      //   ),
+      // ),
+      backgroundColor: Colors.transparent,
+      enableDrag: false,
+      isScrollControlled: true,
+      builder: (_) {
+        return ChangeNotifierProvider<SearchDetailBloc>.value(
+          value: Provider.of<SearchDetailBloc>(context)..filterProductDetails(),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.91,
+            minChildSize: 0.2,
+            maxChildSize: 0.91,
+            builder: (__, controller) {
+              final searchDetailBloc = context.watch<SearchDetailBloc>();
+              print(
+                  "searchDetailBloc.loadStatus ${searchDetailBloc.loadStatus.value}");
+
+              return Container(
+                margin: EdgeInsets.only(top: getProportionateScreenHeight(60.0)),
+                color: Colors.transparent,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(18.0),
+                      topRight: Radius.circular(18.0),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(18.0),
+                      topRight: Radius.circular(18.0),
+                    ),
+                    child: Stack(
+                      children: [
+                        CustomScrollView(
+                          slivers: [
+                            SliverAppBar(
+                              pinned: true,
+                              centerTitle: true,
+                              backgroundColor: Colors.white,
+                              elevation: 0,
+                              title: const Text(
+                                "Todos los filtros",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              actions: [
+                                IconButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.black,
+                                  ),
+                                )
+                              ],
+                            ),
+                            SliverToBoxAdapter(
+                              child: ValueListenableBuilder(
+                                valueListenable: searchDetailBloc.loadStatus,
+                                builder: (context, LoadStatus loadStatus, child) {
+                                  if (loadStatus == LoadStatus.normal) {
+                                    return Column(
+                                      children: [
+                                        SearchDetailFilterSection(
+                                          title: "Rango de precio",
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 15.0,
+                                              bottom: 10.0,
+                                            ),
+                                            child: ValueListenableBuilder(
+                                              valueListenable: searchDetailBloc
+                                                  .currentRangeValues,
+                                              builder: (_,
+                                                  RangeValues currentRangeValues,
+                                                  __) {
+                                                return Column(
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 15.0),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            "S/ ${currentRangeValues.start.toStringAsFixed(0)}",
+                                                            style:
+                                                                Theme.of(context)
+                                                                    .textTheme
+                                                                    .bodyText1,
+                                                          ),
+                                                          Text(
+                                                            "S/ ${currentRangeValues.end.toStringAsFixed(0)}",
+                                                            style:
+                                                                Theme.of(context)
+                                                                    .textTheme
+                                                                    .bodyText1,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    RangeSlider(
+                                                      values: currentRangeValues,
+                                                      activeColor: kPrimaryColor,
+                                                      inactiveColor: Colors.grey,
+                                                      max: searchDetailBloc
+                                                          .rangeMax,
+                                                      // divisions: 9,
+                                                      labels: RangeLabels(
+                                                        currentRangeValues.start
+                                                            .round()
+                                                            .toString(),
+                                                        currentRangeValues.end
+                                                            .round()
+                                                            .toString(),
+                                                      ),
+                                                      onChanged:
+                                                          (RangeValues values) {
+                                                        searchDetailBloc
+                                                            .currentRangeValues
+                                                            .value = values;
+                                                      },
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        SearchDetailFilterSection(
+                                          title: "Categorias",
+                                          child:
+                                              SearchDetailFilterCategoriesSection(
+                                            valueListenable:
+                                                searchDetailBloc.category,
+                                            onTap: searchDetailBloc
+                                                .handleChangeCategories,
+                                          ),
+                                        ),
+                                        SearchDetailFilterSection(
+                                          title: "Tipo de producto",
+                                          child:
+                                              SearchDetailFilterCategoriesSection(
+                                            valueListenable:
+                                                searchDetailBloc.productTypes,
+                                            onTap: searchDetailBloc
+                                                .handleChangeProductTypes,
+                                          ),
+                                        ),
+                                        ValueListenableBuilder(
+                                          valueListenable:
+                                              searchDetailBloc.attributes,
+                                          builder: (_,
+                                              List<ProductAttribute> attributes,
+                                              __) {
+                                            return Column(
+                                              children: List.generate(
+                                                attributes.length,
+                                                (index) {
+                                                  final attribute =
+                                                      attributes[index];
+
+                                                  final termsString = attribute
+                                                      .termsSelected!
+                                                      .map((e) => e.label)
+                                                      .join(" - ");
+
+                                                  return SearchDetailFilterSection(
+                                                    title: attribute.name!,
+                                                    hasOptionHeader: true,
+                                                    defaultBackground:
+                                                        kBackGroundColor,
+                                                    onTap: () {
+                                                      searchDetailBloc
+                                                              .attributeSelected =
+                                                          attribute;
+                                                      searchDetailBloc
+                                                              .searchResults
+                                                              .value =
+                                                          attribute.terms!;
+                                                      searchDetailBloc
+                                                              .indexProductAttribute =
+                                                          index;
+                                                      // Esto no deberia de trabajar de esa manera
+
+                                                      Navigator.of(context).push(
+                                                        PageRouteBuilder(
+                                                          transitionDuration:
+                                                              const Duration(
+                                                                  milliseconds:
+                                                                      200),
+                                                          transitionsBuilder: (
+                                                            BuildContext context,
+                                                            Animation<double>
+                                                                animation,
+                                                            Animation<double>
+                                                                secondaryAnimation,
+                                                            Widget child,
+                                                          ) {
+                                                            const begin =
+                                                                Offset(0.0, 1.0);
+                                                            const end =
+                                                                Offset.zero;
+                                                            final tween = Tween(
+                                                                begin: begin,
+                                                                end: end);
+                                                            final offsetAnimation =
+                                                                animation
+                                                                    .drive(tween);
+                                                            return SlideTransition(
+                                                              position:
+                                                                  offsetAnimation,
+                                                              child: child,
+                                                            );
+                                                          },
+                                                          pageBuilder:
+                                                              (_, __, ___) {
+                                                            return SearchDetailFilterFindAttributes
+                                                                .init(context);
+                                                          },
+                                                        ),
+                                                      );
+                                                    },
+                                                    child: SizedBox(
+                                                      width: double.infinity,
+                                                      child: Padding(
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                          horizontal: 15.0,
+                                                        ),
+                                                        child: Row(
+                                                          children: [
+                                                            Flexible(
+                                                              child: Text(
+                                                                termsString
+                                                                        .isEmpty
+                                                                    ? "No tenemos seleccionado ningún ${attribute.name}"
+                                                                    : termsString,
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    return SizedBox(
+                                      height: SizeConfig.screenHeight! * 0.70,
+                                      width: SizeConfig.screenWidth!,
+                                      child: const Align(
+                                        alignment: Alignment.center,
+                                        child: LottieAnimation(
+                                          source: "assets/lottie/paw.json",
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                            const SliverToBoxAdapter(
+                              child: SizedBox(
+                                height: 65.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          left: 0,
+                          height: 65.0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 15.0,
+                              vertical: 7,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              border: Border(
+                                top: BorderSide(color: Colors.black12),
+                              ),
+                            ),
+                            child: ValueListenableBuilder(
+                              valueListenable: searchDetailBloc.loadStatus,
+                              builder: (context, LoadStatus loadStatus, child) {
+                                return Row(
+                                  children: [
+                                    Expanded(
+                                      child: AbsorbPointer(
+                                        absorbing:
+                                            loadStatus != LoadStatus.normal,
+                                        child: DefaultButtonAction(
+                                          title: "Restablecer",
+                                          color: kBackGroundColor,
+                                          fontColor: Colors.black,
+                                          onPressed:
+                                              searchDetailBloc.handleResetFilter,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        width: getProportionateScreenWidth(10.0)),
+                                    Expanded(
+                                      child: AbsorbPointer(
+                                        absorbing:
+                                            loadStatus != LoadStatus.normal,
+                                        child: DefaultButtonAction(
+                                          title: "Aplicar filtros",
+                                          color: kPrimaryColor,
+                                          onPressed:
+                                              searchDetailBloc.onApplyFilters,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         );
       },
     );

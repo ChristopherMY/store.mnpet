@@ -96,7 +96,7 @@ class MainBloc extends ChangeNotifier {
       }
 
       if (indexSelected.value == 1) {
-        //   handleShoppingCart(context);
+        // handleShoppingCart(context);
         return;
       }
 
@@ -128,7 +128,6 @@ class MainBloc extends ChangeNotifier {
     final responseApi = await localRepositoryInterface.getRegions();
 
     if (responseApi.data == null) {
-      print("No cargo las regiones");
       final statusCode = responseApi.error!.statusCode;
       if (statusCode == -1) {
         GlobalSnackBar.showWarningSnackBar(context, kNoInternet);
@@ -328,21 +327,17 @@ class MainBloc extends ChangeNotifier {
         value: userInformationLocal.toMap(),
       );
 
-      final responseApi = await productRepositoryInterface.getShipmentPriceCost(
+      final data = await productBloc.refreshUbigeo(
+        context,
         slug: slug,
-        districtId: districtId,
         quantity: quantity,
       );
 
-      if (responseApi.data == null) {
-        GlobalSnackBar.showWarningSnackBar(context, kOtherProblem);
-        return;
-      }
+      // print("information data");
+      // print(data);
 
-      final shippingPrice = double.parse(responseApi.data.replaceAll('"', ""));
-
+      final shippingPrice = double.parse(data.replaceAll('"', ""));
       productBloc.shippingPrice.value = shippingPrice;
-      productBloc.refreshUbigeo(context, slug: productBloc.product!.slug!);
 
       GlobalSnackBar.showInfoSnackBarIcon(
         context,
@@ -502,9 +497,9 @@ class MainBloc extends ChangeNotifier {
   Future<UserInformationLocal> loadStoreShipmentResidence() async {
     return UserInformationLocal.fromMap(
       await hiveRepositoryInterface.read(
-        containerName: "shipment",
-        key: "residence",
-      ) ??
+            containerName: "shipment",
+            key: "residence",
+          ) ??
           {
             "department": "Lima",
             "province": "Lima",
@@ -688,6 +683,7 @@ class MainBloc extends ChangeNotifier {
       return;
     }
 
+    print('Esta entrando');
     await getShoppingCartTemp(context: context);
   }
 

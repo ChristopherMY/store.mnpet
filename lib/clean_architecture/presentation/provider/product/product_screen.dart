@@ -2,8 +2,8 @@ import 'package:badges/badges.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
@@ -38,14 +38,24 @@ double heightSupport = 0;
 class ProductScreen extends StatefulWidget {
   const ProductScreen._({
     Key? key,
-    required this.product,
-    required this.code,
+    this.product,
+    this.code,
+    this.slug,
+    required this.fullSource,
   }) : super(key: key);
 
-  final Product product;
-  final String code;
+  final Product? product;
+  final String? code;
+  final String? slug;
+  final bool fullSource;
 
-  static Widget init(BuildContext context, Product product, String code) {
+  static Widget init({
+    required BuildContext context,
+    required bool fullSource,
+    Product? product,
+    String? slug,
+    String? code,
+  }) {
     return ChangeNotifierProvider<ProductBloc>(
       create: (context) {
         return ProductBloc(
@@ -56,7 +66,12 @@ class ProductScreen extends StatefulWidget {
           hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
         );
       },
-      child: ProductScreen._(product: product, code: code),
+      child: ProductScreen._(
+        product: product,
+        code: code,
+        fullSource: fullSource,
+        slug: slug,
+      ),
     );
   }
 
@@ -67,9 +82,49 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   @override
   void initState() {
+    final productBloc = context.read<ProductBloc>();
+    if (!widget.fullSource) {
+      List<MainImage> headerImageList = [
+        widget.product!.mainImage!,
+        ...widget.product!.galleryHeader!
+      ].unique((x) => x.id);
+      if (headerImageList.isNotEmpty) {
+        productBloc.headerContent.addAll(
+          headerImageList.map((image) {
+            return Hero(
+              tag: "image-${image.id!}-${widget.code}",
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image:
+                        CachedNetworkImageProvider("$cloudFront/${image.src}"),
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      }
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final productBloc = context.read<ProductBloc>();
-      productBloc.initProductState(product: widget.product, context);
+      // print("Cargo");
+      if (!widget.fullSource) {
+        print("fullsouce producto screen");
+        productBloc.loadVimeoVideoConfig(
+          context,
+          product: widget.product!,
+        );
+      }
+
+      print(
+          "SLUG V1: ${widget.fullSource ? widget.slug! : widget.product!.slug!}");
+
+      productBloc.initProductState(
+        slug: widget.fullSource ? widget.slug! : widget.product!.slug!,
+        context,
+        showProduct: widget.fullSource,
+      );
     });
 
     super.initState();
@@ -80,116 +135,144 @@ class _ProductScreenState extends State<ProductScreen> {
     final productBloc = context.watch<ProductBloc>();
     // if (productBloc.isLoadingPage) return const LoadingBagFullScreen();
     // print("Build Product Screen!!");
+
+    String heroBackgroundCode = "";
+    if (!widget.fullSource) {
+      heroBackgroundCode = "background-${widget.product!.id!}-${widget.code}";
+    } else {
+      heroBackgroundCode = "background-${widget.code}";
+    }
+
     return WillPopScope(
       onWillPop: () async {
         productBloc.notifierNavigationBottomBarVisible.value = false;
+        if (!productBloc.isLoadingPage) {
+          if (productBloc.product!.galleryVideo!.isNotEmpty) {
+            print("index: ${productBloc.swiperController.index}");
+            if (productBloc.indexPhotoViewer == 0) {
+              await productBloc.swiperController.next(animation: true);
+            }
+          }
+        }
+
         Navigator.of(context).pop();
         return false;
       },
-      child: Scaffold(
-        appBar: AppBar(
-          systemOverlayStyle: const SystemUiOverlayStyle(
-            statusBarColor: Colors.white,
-            statusBarIconBrightness: Brightness.dark,
-          ),
-          toolbarHeight: 0,
-          elevation: 0,
-        ),
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Hero(
-                  tag: "background-${widget.product.id!}-${widget.code}",
-                  child: Container(
-                    color: Colors.white,
-                  ),
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Hero(
+                tag: heroBackgroundCode,
+                child: Container(
+                  color: Colors.white,
                 ),
               ),
-              Material(
-                color: kBackGroundColor,
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
+            ),
+            Material(
+              color: kBackGroundColor,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  if (!widget.fullSource)
                     _BuildAppBar(
-                      product: widget.product,
-                      code: widget.code,
+                      product: widget.product!,
+                      code: widget.code!,
                     ),
-                    if (!productBloc.isLoadingPage) ...[
-                      _BuildInformation(
-                        product: widget.product,
+                  if (!productBloc.isLoadingPage) ...[
+                    if (widget.fullSource)
+                      _BuildAppBar(
+                        product: productBloc.product!,
+                        code: widget.code!,
                       ),
-                      _lineBreakSliver(),
-                      const BuildDescription(),
-                      if (productBloc.product!.galleryDescription!.isNotEmpty)
-                        BuildTechnicalBanners(code: widget.code),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Text(
-                            "Seguro que te gusta",
-                            style: Theme.of(context).textTheme.subtitle2,
-                            textAlign: TextAlign.start,
-                          ),
+                    _BuildInformation(
+                      product: !widget.fullSource
+                          ? widget.product!
+                          : productBloc.product!,
+                    ),
+                    _lineBreakSliver(),
+                    const BuildDescription(),
+                    _lineBreakSliver(),
+                    if (productBloc.product!.galleryDescription!.isNotEmpty)
+                      BuildTechnicalBanners(code: widget.code!),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Text(
+                          "Seguro que te gusta",
+                          style: Theme.of(context).textTheme.subtitle2,
+                          textAlign: TextAlign.start,
                         ),
                       ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0,
-                          vertical: 10.0,
-                        ),
-                        sliver: PagedSliverMasonryGrid(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 5,
-                          mainAxisSpacing: 5,
-                          pagingController: productBloc.pagingController,
-                          builderDelegate: PagedChildBuilderDelegate<Product>(
-                            // firstPageErrorIndicatorBuilder : (context) {
-                            //   return const LottieAnimation(
-                            //     source: "assets/lottie/lonely-404.json",
-                            //   );
-                            // },
-                            itemBuilder: (context, item, index) {
-                              return TrendingItemMain(
-                                product: item,
-                                gradientColors: const [
-                                  Color(0xFFF28767),
-                                  Color(0xFFFFA726),
-                                ],
-                              );
-                            },
-                          ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0,
+                        vertical: 10.0,
+                      ),
+                      sliver: PagedSliverMasonryGrid(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 5,
+                        mainAxisSpacing: 5,
+                        pagingController: productBloc.pagingController,
+                        builderDelegate: PagedChildBuilderDelegate<Product>(
+                          // firstPageErrorIndicatorBuilder : (context) {
+                          //   return const LottieAnimation(
+                          //     source: "assets/lottie/lonely-404.json",
+                          //   );
+                          // },
+                          itemBuilder: (context, item, index) {
+                            return TrendingItemMain(
+                              product: item,
+                              gradientColors: const [
+                                Color(0xFFF28767),
+                                Color(0xFFFFA726),
+                              ],
+                            );
+                          },
                         ),
                       ),
-                    ] else
+                    ),
+                    if (widget.fullSource)
                       const SliverToBoxAdapter(
-                        child: Material(
-                          color: Colors.white,
-                          child: LoadingBag(isFullScreen: false),
+                        child: SizedBox(height: kBottomNavigationBarHeight),
+                      ),
+                  ] else
+                    SliverToBoxAdapter(
+                      child: Material(
+                        color: Colors.white,
+                        child: SizedBox(
+                          height: !widget.fullSource
+                              ? SizeConfig.screenHeight! * 0.417
+                              : SizeConfig.screenHeight! * 0.92,
+                          child: const LoadingBag(isFullScreen: false),
                         ),
                       ),
+                    ),
+                  if (!productBloc.isLoadingPage && !widget.fullSource)
                     const SliverToBoxAdapter(
                       child: SizedBox(height: kBottomNavigationBarHeight),
                     ),
-                  ],
-                ),
+                ],
               ),
-              ValueListenableBuilder<bool>(
-                valueListenable: productBloc.notifierNavigationBottomBarVisible,
-                child: const CustomBottomNavigationBar(),
-                builder: (context, value, child) {
-                  return AnimatedPositioned(
-                    duration: const Duration(milliseconds: 400),
-                    left: 0,
-                    right: 0,
-                    bottom: value ? 0.0 : -kBottomNavigationBarHeight,
-                    height: kToolbarHeight,
-                    child: child!,
-                  );
-                },
-              ),
-            ],
-          ),
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: productBloc.notifierNavigationBottomBarVisible,
+              child: const CustomBottomNavigationBar(),
+              builder: (context, value, child) {
+                return AnimatedPositioned(
+                  duration: const Duration(milliseconds: 400),
+                  height: kToolbarHeight,
+                  left: getProportionateScreenWidth(25.0),
+                  right: getProportionateScreenWidth(25.0),
+                  bottom: value
+                      ? getProportionateScreenHeight(15.0)
+                      : -(kBottomNavigationBarHeight + getProportionateScreenHeight(15.0)),
+                  child: child!,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -218,26 +301,6 @@ class _BuildAppBar extends StatelessWidget {
     final productBloc = context.read<ProductBloc>();
     final mainBloc = context.read<MainBloc>();
 
-    List<Widget> headerWidget = [];
-    List<MainImage> headerImageList =
-        [product.mainImage!, ...product.galleryHeader!].unique((x) => x.id);
-    if (headerImageList.isNotEmpty) {
-      headerWidget.addAll(
-        headerImageList.map((image) {
-          return Hero(
-            tag: "image-${image.id!}-$code",
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: CachedNetworkImageProvider("$cloudFront/${image.src}"),
-                ),
-              ),
-            ),
-          );
-        }),
-      );
-    }
-    //
     // if (product.galleryVideo!.isNotEmpty) {
     //   // productBloc.loadVimeoVideoConfig(context,
     //   //     galleryVideo: product.galleryVideo!);
@@ -245,7 +308,15 @@ class _BuildAppBar extends StatelessWidget {
 
     return SliverAppBar(
       leading: GestureDetector(
-        onTap: () {
+        onTap: () async {
+          if (!productBloc.isLoadingPage) {
+            if (productBloc.product!.galleryVideo!.isNotEmpty) {
+              print("index: ${productBloc.swiperController.index}");
+              if (productBloc.indexPhotoViewer == 0) {
+                await productBloc.swiperController.next(animation: true);
+              }
+            }
+          }
           productBloc.notifierNavigationBottomBarVisible.value = false;
           Navigator.of(context).pop();
         },
@@ -268,7 +339,7 @@ class _BuildAppBar extends StatelessWidget {
         statusBarColor: Colors.white,
         statusBarIconBrightness: Brightness.dark,
       ),
-      expandedHeight: getProportionateScreenHeight(392.0),
+      expandedHeight: SizeConfig.screenWidth,
       floating: false,
       pinned: true,
       snap: false,
@@ -280,8 +351,8 @@ class _BuildAppBar extends StatelessWidget {
           child: Swiper(
             layout: SwiperLayout.DEFAULT,
             controller: productBloc.swiperController,
-            itemCount: headerWidget.length,
-            itemBuilder: (_, index) => headerWidget[index],
+            itemCount: productBloc.headerContent.length,
+            itemBuilder: (_, index) => productBloc.headerContent[index],
             autoplay: false,
             duration: 3,
             onIndexChanged: productBloc.onChangedIndex,
@@ -441,68 +512,95 @@ class BuildDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     final productBloc = context.read<ProductBloc>();
     return SliverToBoxAdapter(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 15.0, vertical: 11.0),
-            child: Text(
-              "Descripción del artículo",
-              style: Theme.of(context).textTheme.subtitle2,
-            ),
-          ),
-          if (productBloc.product!.largeDescription != "")
+      child: Material(
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(
-                left: 15.0,
-                right: 15.0,
-                bottom: 5.0,
-              ),
-              child: Column(
-                children: [
-                  AnimatedCrossFade(
-                    firstChild: Text(
-                      productBloc.product!.largeDescription!,
-                      maxLines: 2,
-                      textAlign: TextAlign.justify,
-                      style: const TextStyle(fontSize: 14.0),
-                    ),
-                    secondChild: Text(
-                      productBloc.product!.largeDescription!,
-                      //textAlign: TextAlign.justify,
-                      style: const TextStyle(fontSize: 14.0),
-                    ),
-                    crossFadeState: productBloc.isExpanded
-                        ? CrossFadeState.showSecond
-                        : CrossFadeState.showFirst,
-                    duration: kThemeAnimationDuration,
-                  ),
-                  const SizedBox(height: 8.0),
-                  if (productBloc.product!.largeDescription!.length > 108)
-                    Center(
-                      child: GestureDetector(
-                        onTap: () =>
-                            productBloc.isExpanded = !productBloc.isExpanded,
-                        child: Text(
-                          productBloc.isExpanded ? "Ver menos" : "Ver más",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 15),
-                  const Divider(
-                    color: kBackGroundColor,
-                    thickness: 1,
-                    height: 1,
-                  ),
-                ],
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 15.0, vertical: 11.0),
+              child: Text(
+                "Descripción del artículo",
+                style: Theme.of(context).textTheme.subtitle2,
               ),
             ),
-        ],
+            if (productBloc.product!.largeDescription!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 15.0,
+                  right: 15.0,
+                  bottom: 5.0,
+                ),
+                child: ValueListenableBuilder<bool>(
+                    valueListenable: productBloc.isExpanded,
+                    builder: (context, isExpanded, child) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AnimatedCrossFade(
+                            firstChild: Text(
+                              productBloc.product!.largeDescription!,
+                              maxLines: 2,
+                              // textAlign: TextAlign.justify,
+                            ),
+                            secondChild: Text(
+                              productBloc.product!.largeDescription!,
+                              // textAlign: TextAlign.justify,
+                            ),
+                            crossFadeState: isExpanded
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                            duration: kThemeAnimationDuration,
+                          ),
+                          const SizedBox(height: 8.0),
+                          if (productBloc.product!.largeDescription!.length >
+                              108) ...[
+                            GestureDetector(
+                              onTap: () =>
+                                  productBloc.isExpanded.value = !isExpanded,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // if (isExpanded)
+                                  //   SvgPicture.asset(
+                                  //     "assets/icons/eye_off_thin.svg",
+                                  //     color: Colors.black,
+                                  //     height:
+                                  //         getProportionateScreenHeight(20.0),
+                                  //   )
+                                  // else
+                                  //   SvgPicture.asset(
+                                  //     "assets/icons/eye_thin.svg",
+                                  //     color: Colors.black,
+                                  //     height:
+                                  //         getProportionateScreenHeight(20.0),
+                                  //   ),
+                                  // const SizedBox(width: 10.0),
+                                  Text(
+                                    isExpanded ? "Ver menos" : "Ver más",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                          ],
+                          // const Divider(
+                          //   color: kBackGroundColor,
+                          //   thickness: 1,
+                          //   height: 1,
+                          // ),
+                        ],
+                      );
+                    }),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -751,44 +849,5 @@ class _BuildWhatsapp extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class WidgetSize extends StatefulWidget {
-  final Widget child;
-  final Function onChange;
-
-  const WidgetSize({
-    Key? key,
-    required this.onChange,
-    required this.child,
-  }) : super(key: key);
-
-  @override
-  State<WidgetSize> createState() => _WidgetSizeState();
-}
-
-class _WidgetSizeState extends State<WidgetSize> {
-  @override
-  Widget build(BuildContext context) {
-    SchedulerBinding.instance.addPostFrameCallback(postFrameCallback);
-    return Container(
-      key: widgetKey,
-      child: widget.child,
-    );
-  }
-
-  var widgetKey = GlobalKey();
-  var oldSize;
-
-  void postFrameCallback(_) {
-    var context = widgetKey.currentContext;
-    if (context == null) return;
-
-    var newSize = context.size;
-    if (oldSize == newSize) return;
-
-    oldSize = newSize;
-    widget.onChange(newSize);
   }
 }

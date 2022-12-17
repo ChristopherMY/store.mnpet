@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/home/home_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/splash/splash_bloc.dart';
+import 'package:uni_links/uni_links.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen._({Key? key}) : super(key: key);
@@ -25,14 +27,49 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  late Timer timer;
 
-  void initEventDecrement() {
+  late Timer _timer;
+
+  // Future<void> _handleInitialUri() async {
+  //   final homeBloc = context.read<HomeBloc>();
+  //   if (!homeBloc.initialUriIsHandled) {
+  //     homeBloc.initialUriIsHandled = true;
+  //
+  //     try {
+  //       final uri = await getInitialUri();
+  //       if (uri == null) {
+  //         print('no initial uri');
+  //         homeBloc.queryParametersAll = {};
+  //         homeBloc.hasQueryUri = false;
+  //         return;
+  //       }
+  //
+  //       homeBloc.queryParametersAll = uri.queryParametersAll;
+  //       homeBloc.hasQueryUri = true;
+  //
+  //       print('got initial uri: $uri');
+  //       print('got initial uri: ${uri.query}');
+  //       print("Query: ${uri.queryParametersAll}");
+  //       print(
+  //           "Query: ${uri.queryParametersAll.values.map((e) => e).toString()}");
+  //
+  //       final queryParams = uri.queryParametersAll.entries.toList();
+  //       for (final item in queryParams)
+  //         print("Title: ${item.key}, Trailing: ${item.value.join(", ")}");
+  //     } on PlatformException {
+  //       // Platform messages may fail but we ignore the exception
+  //     } on FormatException catch (err) {
+  //       if (!mounted) return;
+  //     }
+  //   }
+  // }
+
+  void _initEventDecrement() {
     final splashBloc = context.read<SplashBloc>();
 
-    timer = Timer.periodic(
+    _timer = Timer.periodic(
       const Duration(seconds: 1),
-          (timer) {
+      (timer) async {
         final homeBloc = context.read<HomeBloc>();
         if (homeBloc.components == LoadStatus.normal) {
           timer.cancel();
@@ -54,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void dispose() {
     // TODO: implement dispose
-    timer.cancel();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -64,7 +101,8 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     //WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-       initEventDecrement();
+   // _handleInitialUri();
+    _initEventDecrement();
     //});
   }
 
@@ -84,7 +122,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage("assets/presentation/presentation_origin.png"),
+                      image: AssetImage(
+                          "assets/presentation/presentation_origin.png"),
                       fit: BoxFit.cover,
                     ),
                   ),

@@ -22,9 +22,9 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/mai
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/splash/splash_screen.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/util/firebase_dynamic_link.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/categories_list.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/header.dart';
-
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
 import '../../widget/item_main_product.dart';
@@ -38,7 +38,7 @@ class HomeScreen extends StatefulWidget {
         homeRepositoryInterface: context.read<HomeRepositoryInterface>(),
         hiveRepositoryInterface: context.read<HiveRepositoryInterface>(),
       )..handleInitComponents(),
-      builder: (context, child) =>  const HomeScreen._(),
+      builder: (context, child) => const HomeScreen._(),
     );
   }
 
@@ -49,7 +49,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with AfterLayoutMixin<HomeScreen> {
   Future<void> loadingScreen(BuildContext context) async {
-    Navigator.of(context).push(
+    // final homeBloc = context.read<HomeBloc>();
+    // final mainBloc = context.read<MainBloc>();
+
+    await Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: Duration.zero,
         reverseTransitionDuration: const Duration(milliseconds: 350),
@@ -75,6 +78,8 @@ class _HomeScreenState extends State<HomeScreen>
         pageBuilder: (_, animation1, animation2) => SplashScreen.init(context),
       ),
     );
+
+    DynamicLinksService.initDynamicLinks(context);
   }
 
   @override
@@ -95,8 +100,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     print("RECARGO HOME SCREEN");
     return RefreshIndicator(
-      notificationPredicate: (ScrollNotification scrollNotification) =>
-      true,
+      notificationPredicate: (ScrollNotification scrollNotification) => true,
       triggerMode: RefreshIndicatorTriggerMode.onEdge,
       onRefresh: () async {
         homeBloc.reloadPagination = true;
@@ -289,7 +293,6 @@ class _BannersSectionState extends State<BannersSection> {
     return ValueListenableBuilder<List<Banners>>(
       valueListenable: homeBloc.bannersList,
       builder: (context, banners, child) {
-        print("banners: ${banners.length}");
         if (banners.isEmpty) return const SizedBox.shrink();
 
         // double aspectRatio = banners
@@ -403,7 +406,6 @@ class _BannersSectionState extends State<BannersSection> {
                                                   ),
                                                 )
                                               : const SizedBox.shrink(),
-                                          //child: const SizedBox.shrink(),
                                         ),
                                       ),
                                     ),

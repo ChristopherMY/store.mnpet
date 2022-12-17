@@ -28,6 +28,10 @@ class HomeBloc extends ChangeNotifier {
   static int _finalRange = 20;
   static const _pageSize = 19;
   bool reloadPagination = false;
+  bool initialUriIsHandled = false;
+
+  Map<String, List<String>> queryParametersAll = {};
+  bool hasQueryUri = false;
 
   List<Product> products = <Product>[];
   LoadStatus components = LoadStatus.loading;
@@ -122,13 +126,6 @@ class HomeBloc extends ChangeNotifier {
       },
     );
   }
-
-  // void verifyExistsCartTemporal(BuildContext context) {
-  //   hiveRepositoryInterface.read(
-  //     containerName: containerName,
-  //     key: key,
-  //   );
-  // }
 
   void refresh() {
     notifyListeners();

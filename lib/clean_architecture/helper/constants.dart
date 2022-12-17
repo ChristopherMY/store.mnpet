@@ -25,7 +25,7 @@ final headingStyle = TextStyle(
   fontWeight: FontWeight.bold,
 );
 
-const versionCodePlayStore = "1.0.3";
+const versionCodePlayStore = "1.0.7";
 
 String splitNumberJoin(String number) {
   const int splitSize = 3;
