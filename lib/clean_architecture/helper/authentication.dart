@@ -7,11 +7,10 @@ import 'package:logger/logger.dart';
 import 'package:store_mundo_negocio/main.dart';
 
 class Authentication {
-  static Future<FirebaseApp> initializeFirebase({
+  static Future<User> initializeFirebase({
     required BuildContext context,
   }) async {
     FirebaseApp firebaseApp = await Firebase.initializeApp();
-
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
@@ -26,7 +25,7 @@ class Authentication {
       // );
     }
 
-    return firebaseApp;
+    return user!;
   }
 
   static Future<void> signOut({required BuildContext context}) async {

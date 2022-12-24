@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/authentication.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
@@ -8,6 +9,7 @@ import 'package:store_mundo_negocio/clean_architecture/presentation/provider/car
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/home/home_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/custom_navigation_bottom_bar.dart';
+import 'package:store_mundo_negocio/main.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({
@@ -32,18 +34,29 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void initializationAuth() async{
-    await Authentication.initializeFirebase(context: context);
+  void initializationAuth() async {
+    final mainBloc = context.read<MainBloc>();
+    mainBloc.userAuth.value = await Authentication.initializeFirebase(context: context);
   }
 
   @override
   void initState() {
     /// Mandar a la categoria
-    /// Mandar a un producto
-
+    /// Mandar a un producto.
 
     /// Aqui puede ir el Navigator Splash
     initializationAuth();
+
+    googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      final mainBloc = context.read<MainBloc>();
+      // mainBloc.userAuth.value = User;
+
+      print('RESULTADO GOOGLE');
+      print(account!.displayName.toString());
+
+    });
+
+    googleSignIn.signInSilently();
     super.initState();
   }
 
@@ -114,7 +127,6 @@ class _MainScreenState extends State<MainScreen> {
                     child: CustomNavigationBottomBar(
                       currentIndex: mainBloc.indexSelected.value,
                       onTap: onChangeNavigator,
-
                       items: [
                         /// Home
                         SalomonBottomBarItem(

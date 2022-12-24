@@ -18,12 +18,12 @@ import 'package:store_mundo_negocio/clean_architecture/domain/usecase/page.dart'
 import 'package:store_mundo_negocio/clean_architecture/helper/constants.dart';
 import 'package:store_mundo_negocio/clean_architecture/helper/size_config.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/home/home_bloc.dart';
-import 'package:store_mundo_negocio/clean_architecture/presentation/provider/main_bloc.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_detail/search_detail_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/search_keyword/search_keyword_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/provider/splash/splash_screen.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/util/firebase_dynamic_link.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/categories_list.dart';
+import 'package:store_mundo_negocio/clean_architecture/presentation/widget/default_button.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/header.dart';
 import 'package:store_mundo_negocio/clean_architecture/presentation/widget/paged_sliver_masonry_grid.dart';
 
@@ -136,11 +136,155 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             actions: [
               IconButton(
-                onPressed: () {
-                  final mainBloc = context.read<MainBloc>();
-                  mainBloc.onChangeIndexSelected(
-                    index: 1,
+                onPressed: () async {
+                  // final mainBloc = context.read<MainBloc>();
+                  // mainBloc.onChangeIndexSelected(
+                  //   index: 1,
+                  //   context: context,
+                  // );
+
+                  await showDialog<String>(
                     context: context,
+                    useSafeArea: true,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text(
+                        'Actualización de información',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15.0,
+                        vertical: 15.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      elevation: 3,
+                      scrollable: true,
+                      content: Form(
+                        //  key: "signUpBloc.formKey",
+                        child: Column(
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextFormField(
+                              // controller: signUpBloc.nameController,
+                              keyboardType: TextInputType.text,
+                              textInputAction: TextInputAction.next,
+                              // onChanged: signUpBloc.onChangeName,
+                              // validator: signUpBloc.onValidationName,
+                              style: Theme.of(context).textTheme.bodyText2,
+                              decoration: InputDecoration(
+                                labelText: "Nombre",
+                                hintText: "Ingresa tu nombre",
+                                labelStyle: const TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                hintStyle:
+                                    Theme.of(context).textTheme.bodyText2,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
+                                errorStyle: const TextStyle(height: 0.0),
+                              ),
+                            ),
+                            SizedBox(
+                                height: getProportionateScreenHeight(15.0)),
+                            TextFormField(
+                              // controller: signUpBloc.lastnameController,
+                              keyboardType: TextInputType.emailAddress,
+                              // onChanged: signUpBloc.onChangeLastName,
+                              // validator: signUpBloc.onValidationLastName,
+                              textInputAction: TextInputAction.next,
+                              style: Theme.of(context).textTheme.bodyText2,
+                              decoration: InputDecoration(
+                                labelText: "Apellidos",
+                                hintText: "Ingresa tus apellidos",
+                                labelStyle: const TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                hintStyle:
+                                    Theme.of(context).textTheme.bodyText2,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
+                                errorStyle: const TextStyle(height: 0),
+                              ),
+                            ),
+                            SizedBox(
+                                height: getProportionateScreenHeight(15.0)),
+                            TextFormField(
+                              // controller: signUpBloc.emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              // onChanged: signUpBloc.onChangeEmail,
+                              // validator: signUpBloc.onValidationEmail,
+                              enabled: false,
+                              style: Theme.of(context).textTheme.bodyText2,
+                              decoration: InputDecoration(
+                                labelText: "Correo",
+                                hintText: "Ingresa tu correo",
+                                labelStyle: const TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                hintStyle:
+                                    Theme.of(context).textTheme.bodyText2,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
+                                errorStyle: const TextStyle(height: 0.0),
+                              ),
+                            ),
+                            SizedBox(
+                                height: getProportionateScreenHeight(15.0)),
+                            TextFormField(
+                              // controller: signUpBloc.numDocController,
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.next,
+                              // onChanged: signUpBloc.onChangeNumberDoc,
+                              // validator: signUpBloc.onValidationNumberDoc,
+                              style: Theme.of(context).textTheme.bodyText2,
+                              decoration: InputDecoration(
+                                labelText: "D.N.I",
+                                hintText: "Ingresa tu número de documento",
+                                labelStyle: const TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                hintStyle:
+                                    Theme.of(context).textTheme.bodyText2,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
+                                errorStyle: const TextStyle(height: 0),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                     // actionsAlignment: MainAxisAlignment.center,
+                      actionsPadding: EdgeInsets.all(15),
+                      actions: <Widget>[
+                        // TextButton(
+                        //   onPressed: () => Navigator.pop(context, 'Cancel'),
+                        //   child: const Text('Continuar'),
+                        // ),
+                        SizedBox(
+                          child: DefaultButton(
+                            text: "Continuar",
+                            press: () {
+
+                            },
+                          ),
+                        ),
+                        // TextButton(
+                        //   onPressed: () => Navigator.pop(context, 'OK'),
+                        //   child: const Text('OK'),
+                        // ),
+                      ],
+                    ),
                   );
                 },
                 icon: const Icon(

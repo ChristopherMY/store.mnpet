@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -78,6 +79,7 @@ class MainBloc extends ChangeNotifier {
   dynamic informationUser;
   ValueNotifier<dynamic> informationCart = ValueNotifier(dynamic);
   dynamic credentials;
+  late ValueNotifier<User> userAuth;
 
   Map<String, String> headers = {
     "Content-type": "application/json",
